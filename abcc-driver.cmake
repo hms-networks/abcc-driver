@@ -63,7 +63,7 @@ add_library(abcc_driver EXCLUDE_FROM_ALL ${abcc_driver_SRCS} ${abcc_driver_INCS}
 source_group(TREE ${ABCC_DRIVER_DIR} PREFIX "abcc-abp" FILES ${abcc_driver_SRCS} ${abcc_driver_INCS})
 
 # Essentially a renaming.
-set(ABCC_ABP_INCLUDE_DIRS ABCC_DRIVER_INCLUDE_DIRS)
+set(ABCC_ABP_INCLUDE_DIRS ${ABCC_DRIVER_INCLUDE_DIRS})
 
 # The directory containing the Anybus CompactCom Driver repository.
 set(ABCC_ABP_DIR ${ABCC_DRIVER_DIR}/abcc-abp)
@@ -75,8 +75,8 @@ include(${ABCC_ABP_DIR}/abcc-abp.cmake)
 # externally accessible is appended to the list ABCC_DRIVER_INCLUDE_DIRS. Not using
 # append() command since the 'user unique' include (.h) files previously added is
 # included in ABCC_DRIVER_INCLUDE_DIRS from the previous "renaming" operation.
-set( ABCC_DRIVER_INCLUDE_DIRS
-   ABCC_ABP_INCLUDE_DIRS
+set(ABCC_DRIVER_INCLUDE_DIRS
+   ${ABCC_ABP_INCLUDE_DIRS}
    ${ABCC_DRIVER_DIR}/inc
    ${ABCC_DRIVER_DIR}/src
 )
