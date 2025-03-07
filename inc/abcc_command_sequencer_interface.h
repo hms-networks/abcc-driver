@@ -13,6 +13,7 @@
 #include "abcc_port.h"
 #include "abcc_types.h"
 #include "abp.h"
+#include "abcc_error_codes.h"
 
 /*
 ** Defines used to build the command sequence.
