@@ -60,7 +60,7 @@ add_library(abcc_driver EXCLUDE_FROM_ALL ${abcc_driver_SRCS} ${abcc_driver_INCS}
 
 # Keeping the file and directory tree structure of the Anybus CompactCom Driver when 
 # generating IDE projects.
-source_group(TREE ${ABCC_DRIVER_DIR} PREFIX "abcc-abp" FILES ${abcc_driver_SRCS} ${abcc_driver_INCS})
+source_group(TREE ${ABCC_DRIVER_DIR} PREFIX "abcc-driver" FILES ${abcc_driver_SRCS} ${abcc_driver_INCS})
 
 # Essentially a renaming.
 set(ABCC_ABP_INCLUDE_DIRS ${ABCC_DRIVER_INCLUDE_DIRS})
