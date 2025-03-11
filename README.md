@@ -1,7 +1,7 @@
 # abcc-driver
 The Anybus CompactCom Driver is the capable and flexible foundation for your CompactCom host application.
 
-*For a simpler API, see [abcc-api](https://github.com/hms-networks/abcc-api).*
+*For a simpler API, visit [abcc-driver-api](https://github.com/hms-networks/abcc-driver-api).*
 
 ## Add as submodule (instead of cloning)
 
