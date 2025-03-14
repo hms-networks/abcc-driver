@@ -1,5 +1,5 @@
 # The CMake command include_guard is compatible with CMake version 3.10 and greater.
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.10.0")
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
 # Preventing this file to be included more than once.
    include_guard(GLOBAL)
 endif()
@@ -26,7 +26,8 @@ set(abcc_driver_SRCS
    ${ABCC_DRIVER_DIR}/src/spi/abcc_spi_driver.c
 )
 
-# Complete list of source (.h) files inside the Anybus CompactCom Driver. 
+# Complete list of header (.h) files inside the Anybus CompactCom Driver. This is
+# only used to arrange the files correctly for display in IDEs.
 set(abcc_driver_INCS
    ${ABCC_DRIVER_DIR}/inc/abcc.h
    ${ABCC_DRIVER_DIR}/inc/abcc_application_data_interface.h
@@ -56,14 +57,18 @@ set(abcc_driver_INCS
 )
 
 # Creating a library target containing the Anybus CompactCom Driver.
-add_library(abcc_driver EXCLUDE_FROM_ALL ${abcc_driver_SRCS} ${abcc_driver_INCS})
+# The header files are added only to keep the file and directory tree structure.
+add_library(abcc_driver STATIC 
+   ${abcc_driver_SRCS}
+   ${abcc_driver_INCS}
+)
 
 # Keeping the file and directory tree structure of the Anybus CompactCom Driver when 
 # generating IDE projects.
-source_group(TREE ${ABCC_DRIVER_DIR} PREFIX "abcc-driver" FILES ${abcc_driver_SRCS} ${abcc_driver_INCS})
-
-# Essentially a renaming.
-set(ABCC_ABP_INCLUDE_DIRS ${ABCC_DRIVER_INCLUDE_DIRS})
+source_group(TREE ${ABCC_DRIVER_DIR} PREFIX "abcc-driver" FILES 
+   ${abcc_driver_SRCS}
+   ${abcc_driver_INCS}
+)
 
 # The directory containing the Anybus CompactCom Driver repository.
 set(ABCC_ABP_DIR ${ABCC_DRIVER_DIR}/abcc-abp)
@@ -71,19 +76,16 @@ set(ABCC_ABP_DIR ${ABCC_DRIVER_DIR}/abcc-abp)
 # Including the Anybus CompactCom Driver's CMake module file.
 include(${ABCC_ABP_DIR}/abcc-abp.cmake)
 
-# Directories inside the Anybus CompactCom Driver containing include (.h) files to be 
-# externally accessible is appended to the list ABCC_DRIVER_INCLUDE_DIRS. Not using
-# append() command since the 'user unique' include (.h) files previously added is
-# included in ABCC_DRIVER_INCLUDE_DIRS from the previous "renaming" operation.
-set(ABCC_DRIVER_INCLUDE_DIRS
+# Directories inside the Anybus CompactCom Driver containing header (.h) files to be 
+# externally accessible is appended to the list ABCC_DRIVER_INCLUDE_DIRS.
+list(APPEND ABCC_DRIVER_INCLUDE_DIRS
    ${ABCC_ABP_INCLUDE_DIRS}
    ${ABCC_DRIVER_DIR}/inc
-   ${ABCC_DRIVER_DIR}/src
 )
 
-# Adding all the Anybus CompactCom Driver related include (.h) files to the user host 
+# Adding all the Anybus CompactCom Driver related header (.h) directories to the
 # Anybus CompactCom Driver library target.
 target_include_directories(abcc_driver PRIVATE ${ABCC_DRIVER_INCLUDE_DIRS})
 
 # Link the Anybus CompactCom Driver library to the Anybus CompactCom API library.
-target_link_libraries(abcc_driver PRIVATE abcc_abp)
+target_link_libraries(abcc_driver abcc_abp)
