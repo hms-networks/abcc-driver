@@ -50,7 +50,7 @@ git submodule update --init --recursive
 
 The Anybus CompactCom Driver shall **always** be configured by a file called `abcc_driver_config.h`, created by you, custom to your project. The file shall contain macro definitions to enable, disable, and set values of different features and funtionalities.
 
-### CMake
+### Alternative 1: CMake
 
 This repository can be included as a library into a CMake target by adding a few sections to your CMakeLists.txt file.
 
@@ -86,3 +86,28 @@ target_include_directories(host_application_exec PRIVATE ${ABCC_DRIVER_INCLUDE_D
 ```
 target_link_libraries(<your_target> abcc_driver)
 ```
+### Alternative 2: Make
+
+This repository's Makefile, **abcc-driver.mk**, can be included into a Make target by adding a few sections to your higher level Makefile.
+
+1. Create `SRCS`, add your source files to it (optional), and create object files from the content of `SRCS`.
+```
+SRCS  = ./src/main.c
+SRCS += ./src/abcc_adaptation/abcc_hardware_abstraction.c
+...
+```
+2. Create `INCLUDES`, add your include paths to it (optional), and append the content as compiler flags when compiling. *Make sure to include the folder containing **abcc_driver_config.h** somehow, even if it's not in `INCLUDES` specifically.*.
+```
+INCLUDES = -I./src
+INCLUDES = -I./src/abcc_adaptation
+...
+```
+3. Create `ABCC_DRIVER_DIR` containing the path to the Anybus CompactCom Driver directory.
+```
+ABCC_DRIVER_DIR := ./path/to/abcc-driver
+```
+4. Include **abcc-driver.mk**.
+```
+include $(ABCC_DRIVER_DIR)/abcc-driver.mk
+```
+The CompactCom Driver should now compile together with your target!
