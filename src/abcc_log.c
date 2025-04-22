@@ -24,7 +24,7 @@
 ** ANSI color codes for prettier prints
 **------------------------------------------------------------------------------
 */
-#ifdef ABCC_CFG_LOG_COLORS_ENABLED
+#if ABCC_CFG_LOG_COLORS_ENABLED
    #define ABCC_LOG_ANSI_COLOR_BLACK   "\x1b[30m"
    #define ABCC_LOG_ANSI_COLOR_RED     "\x1b[31m"
    #define ABCC_LOG_ANSI_COLOR_GREEN   "\x1b[32m"
