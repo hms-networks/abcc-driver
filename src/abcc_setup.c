@@ -984,7 +984,7 @@ static void SetupDone( const ABCC_CmdSeqResultType eSeqResult, void* pxUserData 
 */
 static void HandleSetupRespone( ABP_MsgType* psMsg )
 {
-   if( pasSetupSeq[ bSetupSubState ].pnRespHandler( psMsg ) == ABCC_EXEC_NEXT_COMMAND )
+   if( pasSetupSeq[ bSetupSubState ].pnRespHandler( psMsg, NULL ) == ABCC_CMDSEQ_RESP_EXEC_NEXT )
    {
       bSetupSubState++;
    }
@@ -1014,7 +1014,7 @@ static void SendSetupCommand( ABP_MsgType* psMsg )
 {
    while( pasSetupSeq[ bSetupSubState ].pnCmdHandler != NULL )
    {
-      if( pasSetupSeq[ bSetupSubState ].pnCmdHandler( psMsg ) == ABCC_SKIP_COMMAND )
+      if( pasSetupSeq[ bSetupSubState ].pnCmdHandler( psMsg, NULL ) == ABCC_CMDSEQ_CMD_SKIP )
       {
          bSetupSubState++;
       }
