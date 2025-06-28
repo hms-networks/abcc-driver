@@ -301,162 +301,194 @@ ABCC_LOG_ERROR( ABCC_EC_MSG_BUFFER_OVERRUN,         \
 
 void ABCC_GetString( void* pxSrc, char* pcString, UINT16 iNumChar, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_GetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                   \
-   if( ( iOctetOffset + iNumChar ) > ABCC_GetMaxMessageSize() )                        \
-   {                                                                                   \
-      ABCC_LOG_OVERRUN( iOctetOffset + iNumChar );                                     \
-   }                                                                                   \
-   else                                                                                \
-   {                                                                                   \
-      ABCC_GetString( ABCC_GetMsgDataPtr( psMsg ), pcString, iNumChar, iOctetOffset ); \
+#define ABCC_GetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                    \
+   {                                                                                    \
+      UINT16 iTmpSize = iNumChar;                                                       \
+      UINT16 iTmpOffset = iOctetOffset;                                                 \
+      if( ( iTmpOffset + iTmpSize ) > ABCC_GetMaxMessageSize() )                        \
+      {                                                                                 \
+         ABCC_LOG_OVERRUN( iTmpOffset + iTmpSize );                                     \
+      }                                                                                 \
+      else                                                                              \
+      {                                                                                 \
+         ABCC_GetString( ABCC_GetMsgDataPtr( psMsg ), pcString, iTmpSize, iTmpOffset ); \
+      }                                                                                 \
    }
 #else
-#define ABCC_GetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                   \
+#define ABCC_GetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                    \
    ABCC_GetString( ABCC_GetMsgDataPtr( psMsg ), pcString, iNumChar, iOctetOffset )
 #endif
 
 void ABCC_SetString( void* pxDst, const char* pcString, UINT16 iNumChar, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_SetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                   \
-   if( ( iOctetOffset + iNumChar ) > ABCC_GetMaxMessageSize() )                        \
-   {                                                                                   \
-      ABCC_LOG_OVERRUN( iOctetOffset + iNumChar );                                     \
-   }                                                                                   \
-   else                                                                                \
-   {                                                                                   \
-      ABCC_SetString( ABCC_GetMsgDataPtr( psMsg ), pcString, iNumChar, iOctetOffset ); \
+#define ABCC_SetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                    \
+   {                                                                                    \
+      UINT16 iTmpSize = iNumChar;                                                       \
+      UINT16 iTmpOffset = iOctetOffset;                                                 \
+      if( ( iTmpOffset + iTmpSize ) > ABCC_GetMaxMessageSize() )                        \
+      {                                                                                 \
+         ABCC_LOG_OVERRUN( iTmpOffset + iTmpSize );                                     \
+      }                                                                                 \
+      else                                                                              \
+      {                                                                                 \
+         ABCC_SetString( ABCC_GetMsgDataPtr( psMsg ), pcString, iTmpSize, iTmpOffset ); \
+      }                                                                                 \
    }
 #else
-#define ABCC_SetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                   \
+#define ABCC_SetMsgString( psMsg, pcString, iNumChar, iOctetOffset )                    \
    ABCC_SetString( ABCC_GetMsgDataPtr( psMsg ), pcString, iNumChar, iOctetOffset )
 #endif
 
 void ABCC_GetData8( void* pxSrc, UINT8* pbData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_GetMsgData8( psMsg, pbData, iOctetOffset )                       \
-   if( ( iOctetOffset + ABP_UINT8_SIZEOF ) > ABCC_GetMaxMessageSize() )       \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT8_SIZEOF );                    \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_GetData8( ABCC_GetMsgDataPtr( psMsg ), pbData, iOctetOffset );     \
+#define ABCC_GetMsgData8( psMsg, pbData, iOctetOffset )                    \
+   {                                                                       \
+      UINT16 iTmpOffset = iOctetOffset;                                    \
+      if( ( iTmpOffset + ABP_UINT8_SIZEOF ) > ABCC_GetMaxMessageSize() )   \
+      {                                                                    \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT8_SIZEOF );                \
+      }                                                                    \
+      else                                                                 \
+      {                                                                    \
+         ABCC_GetData8( ABCC_GetMsgDataPtr( psMsg ), pbData, iTmpOffset ); \
+      }                                                                    \
    }
 #else
-#define ABCC_GetMsgData8( psMsg, pbData, iOctetOffset )                       \
+#define ABCC_GetMsgData8( psMsg, pbData, iOctetOffset )                    \
    ABCC_GetData8( ABCC_GetMsgDataPtr( psMsg ), pbData, iOctetOffset )
 #endif
 
 void ABCC_SetData8( void* pxDst, UINT8 bData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_SetMsgData8( psMsg, bData, iOctetOffset )                        \
-   if( ( iOctetOffset + ABP_UINT8_SIZEOF ) > ABCC_GetMaxMessageSize() )       \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT8_SIZEOF );                    \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_SetData8( ABCC_GetMsgDataPtr( psMsg ), bData, iOctetOffset );      \
+#define ABCC_SetMsgData8( psMsg, bData, iOctetOffset )                    \
+   {                                                                      \
+      UINT16 iTmpOffset = iOctetOffset;                                   \
+      if( ( iTmpOffset + ABP_UINT8_SIZEOF ) > ABCC_GetMaxMessageSize() )  \
+      {                                                                   \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT8_SIZEOF );               \
+      }                                                                   \
+      else                                                                \
+      {                                                                   \
+         ABCC_SetData8( ABCC_GetMsgDataPtr( psMsg ), bData, iTmpOffset ); \
+      }                                                                   \
    }
 #else
-#define ABCC_SetMsgData8( psMsg, bData, iOctetOffset )                        \
+#define ABCC_SetMsgData8( psMsg, bData, iOctetOffset )                    \
    ABCC_SetData8( ABCC_GetMsgDataPtr( psMsg ), bData, iOctetOffset )
 #endif
 
 void ABCC_GetData16( void* pxSrc, UINT16* piData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_GetMsgData16( psMsg, piData, iOctetOffset )                      \
-   if( ( iOctetOffset + ABP_UINT16_SIZEOF ) > ABCC_GetMaxMessageSize() )      \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT16_SIZEOF );                   \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_GetData16( ABCC_GetMsgDataPtr( psMsg ), piData, iOctetOffset );    \
+#define ABCC_GetMsgData16( psMsg, piData, iOctetOffset )                    \
+   {                                                                        \
+      UINT16 iTmpOffset = iOctetOffset;                                     \
+      if( ( iTmpOffset + ABP_UINT16_SIZEOF ) > ABCC_GetMaxMessageSize() )   \
+      {                                                                     \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT16_SIZEOF );                \
+      }                                                                     \
+      else                                                                  \
+      {                                                                     \
+         ABCC_GetData16( ABCC_GetMsgDataPtr( psMsg ), piData, iTmpOffset ); \
+      }                                                                     \
    }
 #else
-#define ABCC_GetMsgData16( psMsg, piData, iOctetOffset )                      \
+#define ABCC_GetMsgData16( psMsg, piData, iOctetOffset )                    \
    ABCC_GetData16( ABCC_GetMsgDataPtr( psMsg ), piData, iOctetOffset )
 #endif
 
 void ABCC_SetData16( void* pxDst, UINT16 iData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_SetMsgData16( psMsg, iData, iOctetOffset )                       \
-   if( ( iOctetOffset + ABP_UINT16_SIZEOF ) > ABCC_GetMaxMessageSize() )      \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT16_SIZEOF );                   \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_SetData16( ABCC_GetMsgDataPtr( psMsg ), iData, iOctetOffset );     \
+#define ABCC_SetMsgData16( psMsg, iData, iOctetOffset )                    \
+   {                                                                       \
+      UINT16 iTmpOffset = iOctetOffset;                                    \
+      if( ( iTmpOffset + ABP_UINT16_SIZEOF ) > ABCC_GetMaxMessageSize() )  \
+      {                                                                    \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT16_SIZEOF );               \
+      }                                                                    \
+      else                                                                 \
+      {                                                                    \
+         ABCC_SetData16( ABCC_GetMsgDataPtr( psMsg ), iData, iTmpOffset ); \
+      }                                                                    \
    }
 #else
-#define ABCC_SetMsgData16( psMsg, iData, iOctetOffset )                       \
+#define ABCC_SetMsgData16( psMsg, iData, iOctetOffset )                    \
    ABCC_SetData16( ABCC_GetMsgDataPtr( psMsg ), iData, iOctetOffset )
 #endif
 
 void ABCC_GetData32( void* pxSrc, UINT32* plData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_GetMsgData32( psMsg, plData, iOctetOffset )                      \
-   if( ( iOctetOffset + ABP_UINT32_SIZEOF ) > ABCC_GetMaxMessageSize() )      \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT32_SIZEOF );                   \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_GetData32( ABCC_GetMsgDataPtr( psMsg ), plData, iOctetOffset );    \
+#define ABCC_GetMsgData32( psMsg, plData, iOctetOffset )                    \
+   {                                                                        \
+      UINT16 iTmpOffset = iOctetOffset;                                     \
+      if( ( iTmpOffset + ABP_UINT32_SIZEOF ) > ABCC_GetMaxMessageSize() )   \
+      {                                                                     \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT32_SIZEOF );                \
+      }                                                                     \
+      else                                                                  \
+      {                                                                     \
+         ABCC_GetData32( ABCC_GetMsgDataPtr( psMsg ), plData, iTmpOffset ); \
+      }                                                                     \
    }
 #else
-#define ABCC_GetMsgData32( psMsg, plData, iOctetOffset )                      \
+#define ABCC_GetMsgData32( psMsg, plData, iOctetOffset )                    \
    ABCC_GetData32( ABCC_GetMsgDataPtr( psMsg ), plData, iOctetOffset )
 #endif
 
 void ABCC_SetData32( void* pxDst, UINT32 lData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_SetMsgData32( psMsg, lData, iOctetOffset )                       \
-   if( ( iOctetOffset + ABP_UINT32_SIZEOF ) > ABCC_GetMaxMessageSize() )      \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT32_SIZEOF );                   \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_SetData32( ABCC_GetMsgDataPtr( psMsg ), lData, iOctetOffset );     \
+#define ABCC_SetMsgData32( psMsg, lData, iOctetOffset )                    \
+   {                                                                       \
+      UINT16 iTmpOffset = iOctetOffset;                                    \
+      if( ( iTmpOffset + ABP_UINT32_SIZEOF ) > ABCC_GetMaxMessageSize() )  \
+      {                                                                    \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT32_SIZEOF );               \
+      }                                                                    \
+      else                                                                 \
+      {                                                                    \
+         ABCC_SetData32( ABCC_GetMsgDataPtr( psMsg ), lData, iTmpOffset ); \
+      }                                                                    \
    }
 #else
-#define ABCC_SetMsgData32( psMsg, lData, iOctetOffset )                       \
+#define ABCC_SetMsgData32( psMsg, lData, iOctetOffset )                    \
    ABCC_SetData32( ABCC_GetMsgDataPtr( psMsg ), lData, iOctetOffset )
 #endif
 
 #if ( ABCC_CFG_64BIT_ADI_SUPPORT_ENABLED || ABCC_CFG_DOUBLE_ADI_SUPPORT_ENABLED )
 void ABCC_GetData64( void* pxSrc, UINT64* plData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_GetMsgData64( psMsg, plData, iOctetOffset )                      \
-   if( ( iOctetOffset + ABP_UINT64_SIZEOF ) > ABCC_GetMaxMessageSize() )      \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT64_SIZEOF );                   \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_GetData64( ABCC_GetMsgDataPtr( psMsg ), plData, iOctetOffset );    \
+#define ABCC_GetMsgData64( psMsg, plData, iOctetOffset )                    \
+   {                                                                        \
+      UINT16 iTmpOffset = iOctetOffset;                                     \
+      if( ( iTmpOffset + ABP_UINT64_SIZEOF ) > ABCC_GetMaxMessageSize() )   \
+      {                                                                     \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT64_SIZEOF );                \
+      }                                                                     \
+      else                                                                  \
+      {                                                                     \
+         ABCC_GetData64( ABCC_GetMsgDataPtr( psMsg ), plData, iTmpOffset ); \
+      }                                                                     \
    }
 #else
-#define ABCC_GetMsgData64( psMsg, plData, iOctetOffset )                      \
+#define ABCC_GetMsgData64( psMsg, plData, iOctetOffset )                    \
    ABCC_GetData64( ABCC_GetMsgDataPtr( psMsg ), plData, iOctetOffset )
 #endif
 
 void ABCC_SetData64( void* pxDst, UINT64 lData, UINT16 iOctetOffset );
 #if ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
-#define ABCC_SetMsgData64( psMsg, lData, iOctetOffset )                       \
-   if( ( iOctetOffset + ABP_UINT64_SIZEOF ) > ABCC_GetMaxMessageSize() )      \
-   {                                                                          \
-      ABCC_LOG_OVERRUN( iOctetOffset + ABP_UINT64_SIZEOF );                   \
-   }                                                                          \
-   else                                                                       \
-   {                                                                          \
-      ABCC_SetData64( ABCC_GetMsgDataPtr( psMsg ), lData, iOctetOffset );     \
+#define ABCC_SetMsgData64( psMsg, lData, iOctetOffset )                    \
+   {                                                                       \
+      UINT16 iTmpOffset = iOctetOffset;                                    \
+      if( ( iTmpOffset + ABP_UINT64_SIZEOF ) > ABCC_GetMaxMessageSize() )  \
+      {                                                                    \
+         ABCC_LOG_OVERRUN( iTmpOffset + ABP_UINT64_SIZEOF );               \
+      }                                                                    \
+      else                                                                 \
+      {                                                                    \
+         ABCC_SetData64( ABCC_GetMsgDataPtr( psMsg ), lData, iTmpOffset ); \
+      }                                                                    \
    }
 #else
-#define ABCC_SetMsgData64( psMsg, lData, iOctetOffset )                       \
+#define ABCC_SetMsgData64( psMsg, lData, iOctetOffset )                    \
    ABCC_SetData64( ABCC_GetMsgDataPtr( psMsg ), lData, iOctetOffset )
 #endif
 #endif
