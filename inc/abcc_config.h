@@ -201,7 +201,7 @@
 #endif
 
 /*------------------------------------------------------------------------------
-** #define ABCC_CFG_SPI_MSG_FRAG_LEN                   ( 16 )
+** #define ABCC_CFG_SPI_MSG_FRAG_LEN                   ( 32 )
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
@@ -219,7 +219,7 @@
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_MSG_FRAG_LEN
-    #define ABCC_CFG_SPI_MSG_FRAG_LEN ( 16 )
+    #define ABCC_CFG_SPI_MSG_FRAG_LEN ( 32 )
 #endif
 
 /*------------------------------------------------------------------------------
