@@ -56,9 +56,15 @@ set(abcc_driver_INCS
    ${ABCC_DRIVER_DIR}/src/serial/abcc_driver_serial_interface.h
 )
 
+# Check if ABCC_LIB_TYPE is not already defined. ABCC_LIB_TYPE can be set in a
+# higher level CMake file to the desired library type of the Anybus CompactCom Driver.
+if(NOT DEFINED ABCC_LIB_TYPE)
+    set(ABCC_LIB_TYPE STATIC)
+endif()
+
 # Creating a library target containing the Anybus CompactCom Driver.
 # The header files are added only to keep the file and directory tree structure.
-add_library(abcc_driver STATIC 
+add_library(abcc_driver ${ABCC_LIB_TYPE}
    ${abcc_driver_SRCS}
    ${abcc_driver_INCS}
 )
