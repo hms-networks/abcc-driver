@@ -35,6 +35,13 @@ CmdSetupStateType;
 #if !ABCC_CFG_DRV_CMD_SEQ_ENABLED
 static void SendSetupCommand( ABP_MsgType* psMsg );
 #endif
+#if ABCC_CFG_DEBUG_GET_FLOG
+static ABCC_CmdSeqCmdStatusType GetFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData );
+static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUserData );
+#if ABCC_CFG_DEBUG_CLR_FLOG
+static ABCC_CmdSeqCmdStatusType ClearFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData );
+#endif
+#endif
 static ABCC_CmdSeqCmdStatusType DataFormatCmd( ABP_MsgType* psMsg, void* pxUserData );
 static ABCC_CmdSeqRespStatusType DataFormatResp( ABP_MsgType* psMsg, void* pxUserData );
 
@@ -73,6 +80,12 @@ static void SetupDone( const ABCC_CmdSeqResultType eSeqResult, void* pxUserData 
 */
 static const ABCC_CmdSeqType SetupSeqBeforeUserInit[] =
 {
+#if ABCC_CFG_DEBUG_GET_FLOG
+   ABCC_CMD_SEQ( GetFatalLogCmd,     GetFatalLogResp ),
+#if ABCC_CFG_DEBUG_CLR_FLOG
+   ABCC_CMD_SEQ( ClearFatalLogCmd,   NULL ),
+#endif
+#endif
    ABCC_CMD_SEQ( DataFormatCmd,      DataFormatResp ),
    ABCC_CMD_SEQ( ParamSupportCmd,    ParamSupportResp ),
    ABCC_CMD_SEQ( ModuleTypeCmd,      ModuleTypeResp ),
@@ -94,6 +107,10 @@ static const ABCC_CmdSeqType SetupSeqAfterUserInit[] =
    ABCC_CMD_SEQ_END()
 };
 
+
+#if ABCC_CFG_DEBUG_GET_FLOG && ABCC_CFG_DEBUG_CLR_FLOG
+static BOOL abcc_fClearFatalLog;
+#endif
 
 /*------------------------------------------------------------------------------
 ** abcc_iModuleType       - ABCC module type (read out during SETUP state)
@@ -286,6 +303,104 @@ void ABCC_SetupInit( void )
    abcc_iPdWriteBitSize  = 0;
    abcc_iPdReadBitSize   = 0;
 }
+
+#if ABCC_CFG_DEBUG_GET_FLOG
+/*------------------------------------------------------------------------------
+** Get fatal log command
+**
+** This function is a part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+**------------------------------------------------------------------------------
+*/
+static ABCC_CmdSeqCmdStatusType GetFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData )
+{
+   (void)pxUserData;
+
+   ABCC_GetAttribute( psMsg, ABP_OBJ_NUM_ANB, 1, ABP_ANB_IA_FATAL_EVENT,
+                      ABCC_GetNewSourceId() );
+   return( ABCC_CMDSEQ_CMD_SEND );
+}
+
+/*------------------------------------------------------------------------------
+** Get fatal log response.
+**
+** Part of a command sequence and implements function callback
+** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+**------------------------------------------------------------------------------
+*/
+static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUserData )
+{
+   UINT16 iSize;
+   UINT16 iIndex;
+   UINT8  bTemp;
+
+   (void)pxUserData;
+
+   if( ABCC_VerifyMessage( psMsg ) != ABCC_EC_NO_ERROR )
+   {
+      ABCC_LOG_WARNING( ABCC_EC_RESP_MSG_E_BIT_SET,
+         (UINT32)ABCC_GetErrorCode( psMsg ),
+         "Unexpected error response %" PRIu8 "\n",
+         ABCC_GetErrorCode( psMsg ) );
+      return( ABCC_CMDSEQ_RESP_ABORT );
+   }
+
+   ABCC_PORT_printf( "Fatal log: " );
+   iSize = ABCC_GetMsgDataSize( psMsg );
+   for( iIndex = 0; iIndex < iSize; iIndex++ )
+   {
+      ABCC_GetMsgData8( psMsg, &bTemp, iIndex );
+      ABCC_PORT_printf( "%02"PRIx8, bTemp );
+   }
+   ABCC_PORT_printf( "\n" );
+
+#if ABCC_CFG_DEBUG_CLR_FLOG
+   /*
+   ** Check the FW revision field to see if an event has been recorded, it
+   ** should be non-zero then.
+   **
+   ** NOTE: The format of the fatal log is platform-specific! The present
+   ** method works with the existing ABCC30 and ABCC40 modules, but may very
+   ** well have to be tweaked if ABCCs based on other platforms appears.
+   */
+   abcc_fClearFatalLog = FALSE;
+   ABCC_GetMsgData8( psMsg, &bTemp, 6 );
+   if( bTemp != 0 )
+   {
+      ABCC_GetMsgData8( psMsg, &bTemp, 7 );
+      if( bTemp != 0 )
+      {
+         abcc_fClearFatalLog = TRUE;
+      }
+   }
+#endif
+
+   return( ABCC_CMDSEQ_RESP_EXEC_NEXT );
+}
+
+#if ABCC_CFG_DEBUG_CLR_FLOG
+/*------------------------------------------------------------------------------
+** Clear fatal log command
+**
+** This function is a part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+**------------------------------------------------------------------------------
+*/
+static ABCC_CmdSeqCmdStatusType ClearFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData )
+{
+   (void)pxUserData;
+
+   if( abcc_fClearFatalLog )
+   {
+      ABCC_SetByteAttribute( psMsg, ABP_OBJ_NUM_ANB, 1, ABP_ANB_IA_FATAL_EVENT,
+                             0, ABCC_GetNewSourceId() );
+      return( ABCC_CMDSEQ_CMD_SEND );
+   }
+
+   return( ABCC_CMDSEQ_CMD_SKIP );
+}
+#endif
+#endif
 
 /*------------------------------------------------------------------------------
 ** Data format command
