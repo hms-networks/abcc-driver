@@ -64,12 +64,6 @@
 #define ABCC_LOG_INDENTATION ( ABCC_LOG_SEVERITY_LENGTH )
 #endif
 
-#ifdef ABCC_SYS_16_BIT_CHAR
-#define ABCC_GetMsgCmdField( psMsg )   ( ABCC_GetLowAddrOct( (psMsg)->sHeader.iCmdReserved ) )
-#else
-#define ABCC_GetMsgCmdField( psMsg )   ( (psMsg)->sHeader.bCmd )
-#endif
-
 void ABCC_LogHandler(
    ABCC_LogSeverityType eSeverity,
    ABCC_ErrorCodeType eErrorCode,
