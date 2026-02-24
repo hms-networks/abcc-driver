@@ -354,6 +354,17 @@ static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUs
    }
    ABCC_PORT_printf( "\n" );
 
+   if( ( ABCC_GetMsgDataSize( psMsg ) != 40 ) &&
+       ( ABCC_GetMsgDataSize( psMsg ) != 42 ) )
+   {
+      /*
+      ** A fatal log is supposed to be either 40 bytes (ABCC30) or 42 bytes
+      ** (ABCC40), so abort the startup procedure if the returned data has a
+      ** different size.
+      */
+      return( ABCC_CMDSEQ_RESP_ABORT );
+   }
+
 #if ABCC_CFG_DEBUG_CLR_FLOG
    /*
    ** Check the FW revision field to see if an event has been recorded, it
@@ -361,7 +372,7 @@ static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUs
    **
    ** NOTE: The format of the fatal log is platform-specific! The present
    ** method works with the existing ABCC30 and ABCC40 modules, but may very
-   ** well have to be tweaked if ABCCs based on other platforms appears.
+   ** well have to be tweaked if ABCCs based on other platforms appear.
    */
    abcc_fClearFatalLog = FALSE;
    ABCC_GetMsgData8( psMsg, &bTemp, 6 );
