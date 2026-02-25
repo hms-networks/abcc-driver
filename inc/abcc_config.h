@@ -750,13 +750,9 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 */
 #ifndef ABCC_CFG_DEBUG_GET_FLOG
    #define ABCC_CFG_DEBUG_GET_FLOG 0
-   #ifndef ABCC_CFG_DEBUG_CLR_FLOG
-      #define ABCC_CFG_DEBUG_CLR_FLOG 0
-   #endif
-#else
-   #ifndef ABCC_CFG_DEBUG_CLR_FLOG
-      #error ABCC_CFG_DEBUG_CLR_FLOG has not been set!
-   #endif
+#endif
+#ifndef ABCC_CFG_DEBUG_CLR_FLOG
+   #define ABCC_CFG_DEBUG_CLR_FLOG 0
 #endif
 
 /*------------------------------------------------------------------------------

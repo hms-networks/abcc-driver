@@ -354,8 +354,7 @@ static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUs
    }
    ABCC_PORT_printf( "\n" );
 
-   if( ( ABCC_GetMsgDataSize( psMsg ) != 40 ) &&
-       ( ABCC_GetMsgDataSize( psMsg ) != 42 ) )
+   if( ( iSize != 40 ) && ( iSize != 42 ) )
    {
       /*
       ** A fatal log is supposed to be either 40 bytes (ABCC30) or 42 bytes
