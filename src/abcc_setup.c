@@ -360,8 +360,9 @@ static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUs
       /*
       ** A fatal log is supposed to be either 40 bytes (ABCC30) or 42 bytes
       ** (ABCC40), so abort the startup procedure if the returned data has a
-      ** different size.
+      ** different size. Things are *not* right if this happens.
       */
+      ABCC_LOG_INFO( "Invalid Fatal log size!\n" );
       return( ABCC_CMDSEQ_RESP_ABORT );
    }
 

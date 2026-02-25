@@ -724,10 +724,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Enable fetching and clearing of the Fatal log.
 **
 ** This is a debugging aid in case the operating system inside the ABCC has
-** trapped a fatal fault. Data about the fault will then be saved to NVS and 
-** can be fetched after a restart by sending a GetAttribute for the Fatal log
-** instance attribute of the Anybus Object. The default is disabled in order to
-** not slow down the startup process.
+** trapped a fatal fault. Data about the fault will then be saved to NVS inside
+** the ABCC and can be fetched after a restart by sending a GetAttribute for
+** the Fatal log instance attribute of the Anybus Object. The default is
+** disabled in order to not slow down the startup process.
 **
 ** Default values can be overridden in abcc_driver_config.h
 **
@@ -741,7 +741,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Enable/disable automatic clearing of the Fatal log, if a log entry exists.
 ** The main purpose of this is to make multiple occurrences of the same fault
-** more visible.
+** easier to distinguish from each other.
 **
 ** WARNING:
 ** ABCC_CFG_DEBUG_CLR_FLOG should *NOT* be enabled unless the printouts from
@@ -752,6 +752,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
    #define ABCC_CFG_DEBUG_GET_FLOG 0
    #ifndef ABCC_CFG_DEBUG_CLR_FLOG
       #define ABCC_CFG_DEBUG_CLR_FLOG 0
+   #endif
+#else
+   #ifndef ABCC_CFG_DEBUG_CLR_FLOG
+      #error ABCC_CFG_DEBUG_CLR_FLOG has not been set!
    #endif
 #endif
 
