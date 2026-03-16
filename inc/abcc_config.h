@@ -378,12 +378,12 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Data size of largest message in bytes that will be used.
-** The total size of the message is this value + 12 bytes for the message 
+** The total size of the message is this value + 12 bytes for the message
 ** header.
 **
-** Note! ABCC40 supports 1524 byte of message data. ABCC_CFG_MAX_MSG_SIZE should
+** Note! ABCC40 supports 1524 bytes of message data. ABCC_CFG_MAX_MSG_SIZE should
 ** be set to largest size that will be sent or received. If this size is not
-** known it's recommended to set the maximum supported size.
+** known it is recommended to set the maximum supported size.
 **
 ** This code requires at least 16 bytes of message data to be supported. If a
 ** smaller size is configured the code will not compile.
