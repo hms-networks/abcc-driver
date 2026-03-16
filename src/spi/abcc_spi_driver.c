@@ -75,7 +75,7 @@ static const UINT16 iSpiStatusNewPd =     ABP_SPI_STATUS_NEW_PD << 8;
 #define SPI_FRAME_SIZE_EXCLUDING_DATA (7)
 
 #if ABCC_CFG_SPI_MSG_FRAG_LEN > ( ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF )
-#error  "SPI fragmentation length cannot exceed max msg size"
+#error  "ABCC_CFG_SPI_MSG_FRAG_LEN cannot exceed (ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF); larger values only waste SPI bandwidth"
 #endif
 #define MAX_PAYLOAD_WORD_LEN ( ( NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN ) ) + ( NUM_BYTES_2_WORDS( ABCC_CFG_MAX_PROCESS_DATA_SIZE ) ) + ( CRC_WORD_LEN_IN_WORDS ) )
 
