@@ -497,6 +497,21 @@ EXTFUNC ABCC_ErrorCodeType ABCC_ReturnMsgBuffer( ABP_MsgType** ppsBuffer );
 */
 EXTFUNC void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg );
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+/*------------------------------------------------------------------------------
+** ABCC_DrvNewMsgFragSize()
+** Sets the new message frament size (used for SPI, only).
+**------------------------------------------------------------------------------
+** Arguments:
+**       iReqMsgFragSize:   requested Size of message fragment (bytes)
+**
+** Returns:
+**       ABCC_ErrorCodeType
+**------------------------------------------------------------------------------
+*/
+EXTFUNC ABCC_ErrorCodeType ABCC_NewMsgFragSize(const UINT16 iReqMsgFragSize);
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+
 /*------------------------------------------------------------------------------
 ** Reads the module ID.
 **------------------------------------------------------------------------------
