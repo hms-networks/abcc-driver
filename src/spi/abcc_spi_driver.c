@@ -74,10 +74,14 @@ static const UINT16 iSpiStatusNewPd =     ABP_SPI_STATUS_NEW_PD << 8;
 #define CRC_WORD_LEN_IN_WORDS 2
 #define SPI_FRAME_SIZE_EXCLUDING_DATA (7)
 
-#if ABCC_CFG_SPI_MSG_FRAG_LEN > ( ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF )
-#error  "To prevent wasting SPI bandwidth, ABCC_CFG_SPI_MSG_FRAG_LEN cannot exceed (ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF)"
+#if !(ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN)
+   #if ABCC_CFG_SPI_MSG_FRAG_LEN > ( ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF )
+   #error  "To prevent wasting SPI bandwidth, ABCC_CFG_SPI_MSG_FRAG_LEN cannot exceed (ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF)"
+   #endif
+   #define MAX_PAYLOAD_WORD_LEN ( ( NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN ) ) + ( NUM_BYTES_2_WORDS( ABCC_CFG_MAX_PROCESS_DATA_SIZE ) ) + ( CRC_WORD_LEN_IN_WORDS ) )
+#else
+   #define MAX_PAYLOAD_WORD_LEN ( ( NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MAX_MSG_FRAG_LEN ) ) + ( NUM_BYTES_2_WORDS( ABCC_CFG_MAX_PROCESS_DATA_SIZE ) ) + ( CRC_WORD_LEN_IN_WORDS ) )   
 #endif
-#define MAX_PAYLOAD_WORD_LEN ( ( NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN ) ) + ( NUM_BYTES_2_WORDS( ABCC_CFG_MAX_PROCESS_DATA_SIZE ) ) + ( CRC_WORD_LEN_IN_WORDS ) )
 
 #define INSERT_SPI_CTRL_CMDCNT( ctrl, cmdcnt ) ctrl = ( ( ctrl ) & ~iSpiCtrlCmdCnt ) | ( ( cmdcnt ) << iSpiCtrlCmdCntShift )
 #define EXTRACT_SPI_STATUS_CMDCNT( status ) ( ( ( status ) & iSpiStatusCmdCnt ) >> iSpiStatusCmdCntShift )
@@ -129,6 +133,18 @@ typedef struct
   UINT16*            puCurrPtr;           /* Pointer to the current position in receive buffer. */
   UINT16             iNumWordsReceived;   /* Number of words received. */
 } drv_SpiReadMsgFragInfoType;
+
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+/*------------------------------------------------------------------------------
+** Info for dynamic SPI Message Fragment Size handling
+**------------------------------------------------------------------------------
+*/
+typedef struct
+{
+   BOOL     fUpdated;
+   UINT16   iMsgFragSizeReq;
+} drv_SpiMsgFragSizeInfoType;
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 /*------------------------------------------------------------------------------
 ** Internal SPI states.
@@ -185,6 +201,14 @@ static BOOL                         fWdTmo;                       /* Current wd 
 
 static UINT16                       spi_drv_iMsgLen;              /* Message length ( in words ) */
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+static drv_SpiMsgFragSizeInfoType   spi_drv_sSpiMsgFragSizeInfo =
+                                    {
+                                    FALSE,                     //BOOL     fUpdated;
+                                    ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE,// UINT16   iMsgFragSizeReq;
+                                    };
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+
 static UINT16                       drv_iCrcErrorCount;           /* CRC error counter */
 
 static void spi_drv_DataReceived( void );
@@ -207,6 +231,9 @@ static void DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
 */
 void ABCC_DrvSpiRunDriverTx( void )
 {
+   #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+   INT16 i;
+   #endif
    UINT32 lCrc;
    BOOL   fHandleWriteMsg = FALSE;
    UINT16 iRdyForCmd;
@@ -215,6 +242,46 @@ void ABCC_DrvSpiRunDriverTx( void )
 
    if( spi_drv_eState ==  SM_SPI_RDY_TO_SEND_MOSI )
    {
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+      if (spi_drv_sSpiMsgFragSizeInfo.fUpdated)
+      {
+         if ( spi_drv_iPdSize > 0 )
+         {
+            // shift process data to new offset in frame according to new
+            // message fragment size
+            if (spi_drv_iPdOffset < NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq))
+            {
+               // move process data towards the end of the frame
+               // => start copy at last word to avoid overwriting data in source
+               // location before it has been copied
+               i = spi_drv_iPdSize;
+               do(
+                  i--;
+                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq) + i ] =
+                     spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
+               )
+               while (i > 0);
+            }
+            else
+            {
+               // move process data towards the beginning of the frame
+               // => start copy at first word to avoid overwriting data in
+               // source location before it has been copied
+               for (i = 0; i < spi_drv_iPdSize; i++)
+               {
+                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq) + i ] =
+                     spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
+               }
+            }
+         }
+         spi_drv_iPdOffset = NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq);
+         spi_drv_iCrcOffset = NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq) + spi_drv_iPdSize;
+         spi_drv_iMsgLen = NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq);
+         spi_drv_sMosiFrame.iMsgLen = iTOiLe(spi_drv_iMsgLen);
+         spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
+      }
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+
       spi_drv_eState = SM_SPI_WAITING_FOR_MISO;
 
       if( !spi_drv_fRetransmit )
@@ -595,13 +662,22 @@ void ABCC_DrvSpiInit( UINT8 bOpmode )
    spi_drv_iPdSize = SPI_DEFAULT_PD_LEN;
    spi_drv_iWritePdSize = SPI_DEFAULT_PD_LEN;
    spi_drv_iReadPdSize = SPI_DEFAULT_PD_LEN;
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+   spi_drv_iPdOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE );
+   spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE ) + SPI_DEFAULT_PD_LEN;
+#else
    spi_drv_iPdOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN );
    spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN ) + SPI_DEFAULT_PD_LEN;
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
    spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
    spi_drv_fRetransmit = FALSE;
    spi_drv_iMsgLen = 0;
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+   spi_drv_iMsgLen = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE );
+#else
    spi_drv_iMsgLen = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN );
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
    spi_drv_sMosiFrame.iMsgLen = iTOiLe( spi_drv_iMsgLen );
 
    spi_drv_sMosiFrame.iPdLen = iTOiLe( spi_drv_iPdSize );
@@ -736,6 +812,31 @@ void ABCC_DrvSpiSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
          (UINT32)spi_drv_eState, "Set PD size operation not allowed in this state (state: %d)\n", spi_drv_eState );
    }
 }
+
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize(const UINT16 iReqMsgFragSize)
+{
+   ABCC_ErrorCodeType eReturn = ABCC_EC_NO_ERROR;
+   if (iReqMsgFragSize < ABCC_CFG_SPI_MIN_MSG_FRAG_LEN )
+   {
+      eReturn = ABCC_EC_PARAMETER_NOT_VALID;
+   }
+   else if (iReqMsgFragSize > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN)
+   {
+      eReturn = ABCC_EC_PARAMETER_NOT_VALID;
+   }
+   else if (NUM_BYTES_2_WORDS(iReqMsgFragSize) == spi_drv_iPdOffset)
+   {
+      //message fragment length did not change
+      eReturn = ABCC_EC_PARAMETER_NOT_VALID;
+   }
+   {
+      spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq = iReqMsgFragSize;
+      spi_drv_sSpiMsgFragSizeInfo.fUpdated = TRUE;
+   }
+   return(eReturn);
+}
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 static void DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg )
 {
