@@ -77,6 +77,22 @@ EXTVAR UINT16 ABCC_iInterruptEnableMask;
 EXTFUNC void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
 
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+/*------------------------------------------------------------------------------
+** ABCC_DrvNewMsgFragSize()
+** Sets the new message frament size (used for SPI, only).
+**------------------------------------------------------------------------------
+** Arguments:
+**       iReqMsgFragSize:   requested Size of message fragment (bytes)
+**
+** Returns:
+**       ABCC_ErrorCodeType
+**------------------------------------------------------------------------------
+*/
+EXTFUNC ABCC_ErrorCodeType ABCC_DrvNewMsgFragSize(const UINT16 iReqMsgFragSize);
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+
+
 /*------------------------------------------------------------------------------
 ** The anybus is ready for communication. This function shall be called either
 ** due to power up interrupt or initial handshake timeout
