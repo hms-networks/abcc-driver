@@ -88,6 +88,9 @@ BOOL ( *pnABCC_DrvISReadyForCmd )( void );
 void ( *pnABCC_DrvSetNbrOfCmds )( UINT8 bNbrOfCmds );
 void ( *pnABCC_DrvSetAppStatus )( ABP_AppStatusType eAppStatus );
 void ( *pnABCC_DrvSetPdSize )( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+ABCC_ErrorCodeType(*pnABCC_DrvNewMsgFragSize)(const UINT16 iReqMsgFragSize);
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 void ( *pnABCC_DrvSetIntMask )( const UINT16 iIntMask );
 void* ( *pnABCC_DrvGetWrPdBuffer )( void );
 UINT16 ( *pnABCC_DrvGetModCap )( void );
@@ -352,6 +355,13 @@ ABCC_ErrorCodeType ABCC_HwInit( void )
    return( ABCC_EC_NO_ERROR );
 }
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+ABCC_ErrorCodeType ABCC_DoNothing( const UINT16 FOO)
+{
+   (void) FOO;
+   return(ABCC_EC_NO_ERROR);
+}
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 ABCC_ErrorCodeType ABCC_StartDriver( UINT32 lMaxStartupTimeMs )
 {
@@ -405,6 +415,9 @@ ABCC_ErrorCodeType ABCC_StartDriver( UINT32 lMaxStartupTimeMs )
       pnABCC_DrvSetNbrOfCmds       = &ABCC_DrvSerSetNbrOfCmds;
       pnABCC_DrvSetAppStatus       = &ABCC_DrvSerSetAppStatus;
       pnABCC_DrvSetPdSize          = &ABCC_DrvSerSetPdSize;
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+      pnABCC_DrvNewMsgFragSize     = &ABCC_DoNothing;
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
       pnABCC_DrvSetIntMask         = &ABCC_DrvSerSetIntMask;
       pnABCC_DrvGetWrPdBuffer      = &ABCC_DrvSerGetWrPdBuffer;
       pnABCC_DrvGetModCap          = &ABCC_DrvSerGetModCap;
@@ -441,6 +454,9 @@ ABCC_ErrorCodeType ABCC_StartDriver( UINT32 lMaxStartupTimeMs )
       pnABCC_DrvSetNbrOfCmds       = &ABCC_DrvSpiSetNbrOfCmds;
       pnABCC_DrvSetAppStatus       = &ABCC_DrvSpiSetAppStatus;
       pnABCC_DrvSetPdSize          = &ABCC_DrvSpiSetPdSize;
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+      pnABCC_DrvNewMsgFragSize     = &ABCC_DrvSpiNewMsgFragSize;
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
       pnABCC_DrvSetIntMask         = &ABCC_DrvSpiSetIntMask;
       pnABCC_DrvGetWrPdBuffer      = &ABCC_DrvSpiGetWrPdBuffer;
       pnABCC_DrvGetModCap          = &ABCC_DrvSpiGetModCap;
@@ -478,6 +494,9 @@ ABCC_ErrorCodeType ABCC_StartDriver( UINT32 lMaxStartupTimeMs )
       pnABCC_DrvSetNbrOfCmds       = &ABCC_DrvParSetNbrOfCmds;
       pnABCC_DrvSetAppStatus       = &ABCC_DrvParSetAppStatus;
       pnABCC_DrvSetPdSize          = &ABCC_DrvParSetPdSize;
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+      pnABCC_DrvNewMsgFragSize     = &ABCC_DoNothing;
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
       pnABCC_DrvSetIntMask         = &ABCC_DrvParSetIntMask;
       pnABCC_DrvGetWrPdBuffer      = &ABCC_DrvParGetWrPdBuffer;
       pnABCC_DrvGetModCap          = &ABCC_DrvParGetModCap;
@@ -844,11 +863,26 @@ void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg )
    ABCC_MemSetBufferStatus( psMsg, ABCC_MEM_BUFSTAT_OWNED );
 }
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+ABCC_ErrorCodeType ABCC_NewMsgFragSize(const UINT16 iReqMsgFragSize)
+{
+   return( ABCC_DrvNewMsgFragSize(iReqMsgFragSize) );
+}
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+
 void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize )
 {
    ABCC_LOG_INFO( "New process data sizes RdPd %" PRIu16 " WrPd %" PRIu16 "\n", iReadPdSize, iWritePdSize );
    pnABCC_DrvSetPdSize( iReadPdSize, iWritePdSize );
 }
+
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+ABCC_ErrorCodeType ABCC_DrvNewMsgFragSize(const UINT16 iReqMsgFragSize)
+{
+   ABCC_LOG_INFO( "New message fragment size %" PRIu16 "\n", iReqMsgFragSize );
+   pnABCC_DrvNewMsgFragSize(iReqMsgFragSize);
+}
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 ABCC_ErrorCodeType ABCC_RunDriver( void )
 {
