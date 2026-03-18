@@ -204,8 +204,8 @@ static UINT16                       spi_drv_iMsgLen;              /* Message len
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 static drv_SpiMsgFragSizeInfoType   spi_drv_sSpiMsgFragSizeInfo =
                                     {
-                                    FALSE,                     //BOOL     fUpdated;
-                                    ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE,// UINT16   iMsgFragSizeReq;
+                                    FALSE,                        /* BOOL fUpdated */
+                                    ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN, /* UINT16 iMsgFragSizeReq */
                                     };
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
@@ -663,8 +663,8 @@ void ABCC_DrvSpiInit( UINT8 bOpmode )
    spi_drv_iWritePdSize = SPI_DEFAULT_PD_LEN;
    spi_drv_iReadPdSize = SPI_DEFAULT_PD_LEN;
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-   spi_drv_iPdOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE );
-   spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE ) + SPI_DEFAULT_PD_LEN;
+   spi_drv_iPdOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN );
+   spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN ) + SPI_DEFAULT_PD_LEN;
 #else
    spi_drv_iPdOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN );
    spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN ) + SPI_DEFAULT_PD_LEN;
@@ -674,7 +674,7 @@ void ABCC_DrvSpiInit( UINT8 bOpmode )
    spi_drv_iMsgLen = 0;
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-   spi_drv_iMsgLen = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_SIZE );
+   spi_drv_iMsgLen = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN );
 #else
    spi_drv_iMsgLen = NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MSG_FRAG_LEN );
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
