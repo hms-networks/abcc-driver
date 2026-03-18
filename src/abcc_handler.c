@@ -89,7 +89,7 @@ void ( *pnABCC_DrvSetNbrOfCmds )( UINT8 bNbrOfCmds );
 void ( *pnABCC_DrvSetAppStatus )( ABP_AppStatusType eAppStatus );
 void ( *pnABCC_DrvSetPdSize )( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType(*pnABCC_DrvNewMsgFragSize)(const UINT16 iReqMsgFragSize);
+ABCC_ErrorCodeType( *pnABCC_DrvNewMsgFragSize )( const UINT16 iReqMsgFragSize );
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 void ( *pnABCC_DrvSetIntMask )( const UINT16 iIntMask );
 void* ( *pnABCC_DrvGetWrPdBuffer )( void );
@@ -356,10 +356,10 @@ ABCC_ErrorCodeType ABCC_HwInit( void )
 }
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_DoNothing( const UINT16 FOO)
+ABCC_ErrorCodeType ABCC_DoNothing( const UINT16 FOO )
 {
    (void) FOO;
-   return(ABCC_EC_NO_ERROR);
+   return( ABCC_EC_NO_ERROR );
 }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
@@ -864,9 +864,9 @@ void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg )
 }
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_NewMsgFragSize(const UINT16 iReqMsgFragSize)
+ABCC_ErrorCodeType ABCC_NewMsgFragSize( const UINT16 iReqMsgFragSize )
 {
-   return( ABCC_DrvNewMsgFragSize(iReqMsgFragSize) );
+   return( ABCC_DrvNewMsgFragSize( iReqMsgFragSize ) );
 }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
@@ -877,10 +877,10 @@ void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize )
 }
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_DrvNewMsgFragSize(const UINT16 iReqMsgFragSize)
+ABCC_ErrorCodeType ABCC_DrvNewMsgFragSize( const UINT16 iReqMsgFragSize )
 {
    ABCC_LOG_INFO( "New message fragment size %" PRIu16 "\n", iReqMsgFragSize );
-   pnABCC_DrvNewMsgFragSize(iReqMsgFragSize);
+   pnABCC_DrvNewMsgFragSize( iReqMsgFragSize );
 }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 

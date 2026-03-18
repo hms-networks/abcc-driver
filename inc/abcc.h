@@ -509,7 +509,7 @@ EXTFUNC void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg );
 **       ABCC_ErrorCodeType
 **------------------------------------------------------------------------------
 */
-EXTFUNC ABCC_ErrorCodeType ABCC_NewMsgFragSize(const UINT16 iReqMsgFragSize);
+EXTFUNC ABCC_ErrorCodeType ABCC_NewMsgFragSize( const UINT16 iReqMsgFragSize );
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 /*------------------------------------------------------------------------------

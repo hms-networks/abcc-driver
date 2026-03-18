@@ -247,7 +247,7 @@
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-    #define ABCC_CFG_SPI_MSG_FRAG_LEN 0
+    #define ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN 0
 #endif
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
@@ -285,7 +285,7 @@
 #endif
 
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN < 8
-   #warning "Even an error response message will need more than two SPI cycles, as ABCC_CFG_SPI_MIN_MSG_FRAG_LEN is less than 8."
+   #pragma message("Warning: Even an error response message will need more than two SPI cycles, as ABCC_CFG_SPI_MIN_MSG_FRAG_LEN is less than 8.")  
 #endif
 
 /*------------------------------------------------------------------------------
@@ -302,15 +302,21 @@
    #define ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN ABCC_CFG_SPI_MSG_FRAG_LEN
 #endif
 
-#if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
-   #error "ABCC_CFG_SPI_MIN_MSG_FRAG_LEN must be smaller than or equal to ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
+#if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN == ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
+   #error "Disable ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN for applications with static message frament size to reduce code size."
 #endif
+#if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
+   #error "ABCC_CFG_SPI_MIN_MSG_FRAG_LEN must be smaller than ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
+#endif
+
 #if ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN < ABCC_CFG_SPI_MIN_MSG_FRAG_LEN
    #error "ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN must be greater than or equal to ABCC_CFG_SPI_MIN_MSG_FRAG_LEN."
 #endif
+
 #if ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
    #error "ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN must be smaller than or equal to ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
 #endif
+
 #endif //#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 /*------------------------------------------------------------------------------

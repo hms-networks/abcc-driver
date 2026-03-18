@@ -367,7 +367,7 @@ EXTFUNC void ( *pnABCC_DrvSetPdSize )( const UINT16 iReadPdSize,
 **       ABCC_ErrorCodeType
 **------------------------------------------------------------------------------
 */
-EXTFUNC ABCC_ErrorCodeType ( *pnABCC_DrvNewMsgFragSize )( const UINT16 iReqMsgFragSize );
+EXTFUNC ABCC_ErrorCodeType( *pnABCC_DrvNewMsgFragSize )( const UINT16 iReqMsgFragSize );
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 /*------------------------------------------------------------------------------

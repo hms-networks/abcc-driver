@@ -243,41 +243,42 @@ void ABCC_DrvSpiRunDriverTx( void )
    if( spi_drv_eState ==  SM_SPI_RDY_TO_SEND_MOSI )
    {
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-      if (spi_drv_sSpiMsgFragSizeInfo.fUpdated)
+      if( spi_drv_sSpiMsgFragSizeInfo.fUpdated )
       {
-         if ( spi_drv_iPdSize > 0 )
+         if( spi_drv_iPdSize > 0 )
          {
             // shift process data to new offset in frame according to new
             // message fragment size
-            if (spi_drv_iPdOffset < NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq))
+            if( spi_drv_iPdOffset < NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) )
             {
                // move process data towards the end of the frame
                // => start copy at last word to avoid overwriting data in source
                // location before it has been copied
                i = spi_drv_iPdSize;
-               do(
+               do
+               {
                   i--;
-                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq) + i ] =
+                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
                      spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
-               )
-               while (i > 0);
+               }
+               while( i > 0 );
             }
             else
             {
                // move process data towards the beginning of the frame
                // => start copy at first word to avoid overwriting data in
                // source location before it has been copied
-               for (i = 0; i < spi_drv_iPdSize; i++)
+               for( i = 0; i < spi_drv_iPdSize; i++ )
                {
-                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq) + i ] =
+                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
                      spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
                }
             }
          }
-         spi_drv_iPdOffset = NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq);
-         spi_drv_iCrcOffset = NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq) + spi_drv_iPdSize;
-         spi_drv_iMsgLen = NUM_BYTES_2_WORDS(spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq);
-         spi_drv_sMosiFrame.iMsgLen = iTOiLe(spi_drv_iMsgLen);
+         spi_drv_iPdOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
+         spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + spi_drv_iPdSize;
+         spi_drv_iMsgLen = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
+         spi_drv_sMosiFrame.iMsgLen = iTOiLe( spi_drv_iMsgLen );
          spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
       }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
@@ -814,27 +815,30 @@ void ABCC_DrvSpiSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
 }
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize(const UINT16 iReqMsgFragSize)
+ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize( const UINT16 iReqMsgFragSize )
 {
    ABCC_ErrorCodeType eReturn = ABCC_EC_NO_ERROR;
-   if (iReqMsgFragSize < ABCC_CFG_SPI_MIN_MSG_FRAG_LEN )
+   if( iReqMsgFragSize < ABCC_CFG_SPI_MIN_MSG_FRAG_LEN )
    {
       eReturn = ABCC_EC_PARAMETER_NOT_VALID;
    }
-   else if (iReqMsgFragSize > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN)
+   else if( iReqMsgFragSize > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN )
    {
       eReturn = ABCC_EC_PARAMETER_NOT_VALID;
    }
-   else if (NUM_BYTES_2_WORDS(iReqMsgFragSize) == spi_drv_iPdOffset)
+   else if( NUM_BYTES_2_WORDS( iReqMsgFragSize ) == spi_drv_iPdOffset )
    {
-      //message fragment length did not change
-      eReturn = ABCC_EC_PARAMETER_NOT_VALID;
+      // requested message fragment length is OK, but did not change
+      // => no need to update fragmentation info or frame offsets
+      spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq = iReqMsgFragSize;
+      spi_drv_sSpiMsgFragSizeInfo.fUpdated = FALSE;
    }
+   else
    {
       spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq = iReqMsgFragSize;
       spi_drv_sSpiMsgFragSizeInfo.fUpdated = TRUE;
    }
-   return(eReturn);
+   return( eReturn );
 }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
