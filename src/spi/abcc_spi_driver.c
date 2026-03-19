@@ -242,47 +242,6 @@ void ABCC_DrvSpiRunDriverTx( void )
 
    if( spi_drv_eState ==  SM_SPI_RDY_TO_SEND_MOSI )
    {
-#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-      if( spi_drv_sSpiMsgFragSizeInfo.fUpdated )
-      {
-         if( spi_drv_iPdSize > 0 )
-         {
-            // shift process data to new offset in frame according to new
-            // message fragment size
-            if( spi_drv_iPdOffset < NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) )
-            {
-               // move process data towards the end of the frame
-               // => start copy at last word to avoid overwriting data in source
-               // location before it has been copied
-               i = spi_drv_iPdSize;
-               do
-               {
-                  i--;
-                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
-                     spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
-               }
-               while( i > 0 );
-            }
-            else
-            {
-               // move process data towards the beginning of the frame
-               // => start copy at first word to avoid overwriting data in
-               // source location before it has been copied
-               for( i = 0; i < spi_drv_iPdSize; i++ )
-               {
-                  spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
-                     spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
-               }
-            }
-         }
-         spi_drv_iPdOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
-         spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + spi_drv_iPdSize;
-         spi_drv_iMsgLen = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
-         spi_drv_sMosiFrame.iMsgLen = iTOiLe( spi_drv_iMsgLen );
-         spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
-      }
-#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-
       spi_drv_eState = SM_SPI_WAITING_FOR_MISO;
 
       if( !spi_drv_fRetransmit )
@@ -291,6 +250,57 @@ void ABCC_DrvSpiRunDriverTx( void )
          ** Everything is OK. Reset retransmission and toggle the T bit.
          */
          spi_drv_sMosiFrame.iSpiControl ^= iSpiCtrl_T;
+
+         #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+         if( spi_drv_sSpiMsgFragSizeInfo.fUpdated )
+         {
+            /*
+            ** The message fragment size has been updated since last 
+            ** transmission, update the frame layout accordingly.
+            */
+            if( spi_drv_iPdSize > 0 )
+            {
+               /*
+               ** shift process data to new offset in frame according to new
+               ** message fragment size
+               */
+               if( spi_drv_iPdOffset < NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) )
+               {
+                  /*
+                  ** move process data towards the end of the frame
+                  ** => start copy at last word to avoid overwriting data in 
+                  **    source location before it has been copied
+                  */
+                  i = spi_drv_iPdSize;
+                  do
+                  {
+                     i--;
+                     spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
+                        spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
+                  }
+                  while( i > 0 );
+               }
+               else
+               {
+                  /*
+                  ** move process data towards the beginning of the frame
+                  ** => start copy at first word to avoid overwriting data in
+                  **    source location before it has been copied
+                  */
+                  for( i = 0; i < spi_drv_iPdSize; i++ )
+                  {
+                     spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
+                        spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
+                  }
+               }
+            }
+            spi_drv_iPdOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
+            spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + spi_drv_iPdSize;
+            spi_drv_iMsgLen = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
+            spi_drv_sMosiFrame.iMsgLen = iTOiLe( spi_drv_iMsgLen );
+            spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
+         }
+         #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
       }
 
       spi_drv_fRetransmit = FALSE;
