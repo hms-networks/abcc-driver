@@ -880,7 +880,7 @@ void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize )
 ABCC_ErrorCodeType ABCC_DrvNewMsgFragSize( const UINT16 iReqMsgFragSize )
 {
    ABCC_LOG_INFO( "New message fragment size %" PRIu16 "\n", iReqMsgFragSize );
-   pnABCC_DrvNewMsgFragSize( iReqMsgFragSize );
+   return( pnABCC_DrvNewMsgFragSize( iReqMsgFragSize ) );
 }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
