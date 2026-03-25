@@ -299,6 +299,8 @@ void ABCC_DrvSpiRunDriverTx( void )
             spi_drv_iMsgLen = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
             spi_drv_sMosiFrame.iMsgLen = iTOiLe( spi_drv_iMsgLen );
             spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
+
+            spi_drv_sSpiMsgFragSizeInfo.fUpdated = FALSE;
          }
          #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
       }
