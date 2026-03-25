@@ -181,7 +181,7 @@ EXTFUNC void ABCC_DrvSpiSetPdSize( const UINT16 iReadPdSize, const UINT16 iWrite
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 /*------------------------------------------------------------------------------
-** Sets the new message frament size for the SPI frame.
+** Sets the new message fragment size for the SPI frame.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       iReqMsgFragSize:   requested Size of message fragment (bytes)

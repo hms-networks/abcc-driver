@@ -400,21 +400,21 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** By default, the length of the message fragment within a SPI frame is fixed.
-** Increasing the message fragment length reduces the need for fragmetnation and
+** Increasing the message fragment length reduces the need for fragmentation and
 ** increases the throughput of the message interface.
 ** However, it also increases the size of the SPI frame and thus the time it
-** takes to send the fraame and therefore limits the performance for cyclic
+** takes to send the frame and therefore limits the performance for cyclic
 ** process data.
 ** Smaller message fragment lengths will reduce the SPI frame size and thus the
 ** time it takes to send the frame and therefore increase the performance for
 ** cyclic process data, but may increase the need for message fragmentation and
 ** reduce the throughput of the message interface.
-** For Applications where message speed is not critical and cyclic process data
-** performance is important and specific use cases (like firmware updates)
+** For applications where message speed is not critical and cyclic process data
+** performance is important but specific use cases (like firmware updates)
 ** require support for large messages, this define can be used to enable dynamic
 ** message fragment length.
 ** When dynamic message fragment length is enabled, the application can change
-** the used message frament size at runtime.
+** the used message fragment size at runtime.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
