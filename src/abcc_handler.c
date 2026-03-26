@@ -359,7 +359,7 @@ ABCC_ErrorCodeType ABCC_HwInit( void )
 }
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_DoNothing( const UINT16 iDroppedValue )
+static ABCC_ErrorCodeType ABCC_DoNothing( const UINT16 iDroppedValue )
 {
    (void) iDroppedValue;
    return( ABCC_EC_NO_ERROR );

@@ -423,7 +423,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 /*------------------------------------------------------------------------------
-** #define ABCC_CFG_SPI_MAX_MSG_FRAG_LEN ( ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF )
+** #define ABCC_CFG_SPI_MAX_MSG_FRAG_LEN ( ABCC_CFG_MAX_MSG_SIZE + 12 )
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
@@ -450,9 +450,14 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** When dynamic message fragment length is enabled, this define sets the minimum
 ** message fragment length that can be used at runtime.
 ** It is not recommended to use message fragment lengths that are too small.
-** The message header contains 12 octets. therefore 16 octets support
-** transmission of small messages without fragmentation. Therefore, this value
-** is used as default.
+** The message header contains 12 octets. Therefore, 16 octets support
+** transmission of small messages without fragmentation and this value is used
+** as default.
+** Values below 8 will generate an (override-able) error since even an error
+** response message will need more than two SPI cycles, with smaller fragment
+** sizes.
+** Values below 2 are not allowed since without message fragment within an SPI
+** frame, no message transmission is possible at runtime.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_MIN_MSG_FRAG_LEN
@@ -460,7 +465,12 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 #endif
 
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN < 8
-#pragma message("Warning: Even an error response message will need more than two SPI cycles, as ABCC_CFG_SPI_MIN_MSG_FRAG_LEN is less than 8.")  
+#ifndef ABCC_CFG_SPI_OVERRIDE_MIN_MSG_FRAG_LEN_ERROR
+#error "Warning: Even an error response message will need more than two SPI cycles, as ABCC_CFG_SPI_MIN_MSG_FRAG_LEN is less than 8. Override is possible by defining ABCC_CFG_SPI_OVERRIDE_MIN_MSG_FRAG_LEN_ERROR."
+#endif
+#endif
+#if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN < 2
+#error "Without message fragment within an SPI frame, no message transmission is possible at runtime. This is not allowed. ABCC_CFG_SPI_MIN_MSG_FRAG_LEN has to be 2 at least."
 #endif
 
 /*------------------------------------------------------------------------------
