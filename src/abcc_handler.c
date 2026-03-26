@@ -167,6 +167,9 @@ static void TriggerWrPdUpdateNow( void )
       ** The data format of the process data is network specific.
       ** The application converts the data accordingly.
       */
+   #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+      abcc_pbWrPdBuffer = pnABCC_DrvGetWrPdBuffer();
+   #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
       if( ABCC_CbfUpdateWriteProcessData( abcc_pbWrPdBuffer ) )
       {
@@ -356,9 +359,9 @@ ABCC_ErrorCodeType ABCC_HwInit( void )
 }
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_DoNothing( const UINT16 FOO )
+ABCC_ErrorCodeType ABCC_DoNothing( const UINT16 iDroppedValue )
 {
-   (void) FOO;
+   (void) iDroppedValue;
    return( ABCC_EC_NO_ERROR );
 }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
@@ -866,6 +869,7 @@ void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg )
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 ABCC_ErrorCodeType ABCC_NewMsgFragSize( const UINT16 iReqMsgFragSize )
 {
+   ABCC_LOG_INFO( "New message fragment size %" PRIu16 "\n", iReqMsgFragSize );
    return( pnABCC_DrvNewMsgFragSize( iReqMsgFragSize ) );
 }
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
@@ -875,14 +879,6 @@ void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize )
    ABCC_LOG_INFO( "New process data sizes RdPd %" PRIu16 " WrPd %" PRIu16 "\n", iReadPdSize, iWritePdSize );
    pnABCC_DrvSetPdSize( iReadPdSize, iWritePdSize );
 }
-
-#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_DrvNewMsgFragSize( const UINT16 iReqMsgFragSize )
-{
-   ABCC_LOG_INFO( "New message fragment size %" PRIu16 "\n", iReqMsgFragSize );
-   return( pnABCC_DrvNewMsgFragSize( iReqMsgFragSize ) );
-}
-#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 ABCC_ErrorCodeType ABCC_RunDriver( void )
 {
