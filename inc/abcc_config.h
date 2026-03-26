@@ -439,7 +439,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 #endif
 
 #if ABCC_CFG_SPI_MAX_MSG_FRAG_LEN > ( ABCC_CFG_MAX_MSG_SIZE + 12 )
-#error "ABCC_CFG_SPI_MAX_MSG_FRAG_LEN must not be bigger than the largest supported message size."
+#error "ABCC_CFG_SPI_MAX_MSG_FRAG_LEN must not be bigger than ABCC_CFG_MAX_MSG_SIZE + 12 (configured maximum message size including header)."
 #endif
 
 /*------------------------------------------------------------------------------
