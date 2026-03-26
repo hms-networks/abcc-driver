@@ -478,7 +478,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 #endif
 
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN == ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
-#error "Disable ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN for applications with static message frament size to reduce code size."
+#error "Disable ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN for applications with static message fragment size to reduce code size."
 #endif
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
 #error "ABCC_CFG_SPI_MIN_MSG_FRAG_LEN must be smaller than ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
