@@ -35,10 +35,10 @@ CmdSetupStateType;
 #if !ABCC_CFG_DRV_CMD_SEQ_ENABLED
 static void SendSetupCommand( ABP_MsgType* psMsg );
 #endif
-#if ABCC_CFG_DEBUG_GET_FLOG
+#if ABCC_CFG_DEBUG_GET_FATAL_LOG
 static ABCC_CmdSeqCmdStatusType GetFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData );
 static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUserData );
-#if ABCC_CFG_DEBUG_CLR_FLOG
+#if ABCC_CFG_DEBUG_CLR_FATAL_LOG
 static ABCC_CmdSeqCmdStatusType ClearFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData );
 #endif
 #endif
@@ -80,9 +80,9 @@ static void SetupDone( const ABCC_CmdSeqResultType eSeqResult, void* pxUserData 
 */
 static const ABCC_CmdSeqType SetupSeqBeforeUserInit[] =
 {
-#if ABCC_CFG_DEBUG_GET_FLOG
+#if ABCC_CFG_DEBUG_GET_FATAL_LOG
    ABCC_CMD_SEQ( GetFatalLogCmd,     GetFatalLogResp ),
-#if ABCC_CFG_DEBUG_CLR_FLOG
+#if ABCC_CFG_DEBUG_CLR_FATAL_LOG
    ABCC_CMD_SEQ( ClearFatalLogCmd,   NULL ),
 #endif
 #endif
@@ -108,7 +108,7 @@ static const ABCC_CmdSeqType SetupSeqAfterUserInit[] =
 };
 
 
-#if ABCC_CFG_DEBUG_GET_FLOG && ABCC_CFG_DEBUG_CLR_FLOG
+#if ABCC_CFG_DEBUG_GET_FATAL_LOG && ABCC_CFG_DEBUG_CLR_FATAL_LOG
 static BOOL abcc_fClearFatalLog;
 #endif
 
@@ -304,7 +304,7 @@ void ABCC_SetupInit( void )
    abcc_iPdReadBitSize   = 0;
 }
 
-#if ABCC_CFG_DEBUG_GET_FLOG
+#if ABCC_CFG_DEBUG_GET_FATAL_LOG
 /*------------------------------------------------------------------------------
 ** Get fatal log command
 **
@@ -365,7 +365,7 @@ static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUs
       return( ABCC_CMDSEQ_RESP_ABORT );
    }
 
-#if ABCC_CFG_DEBUG_CLR_FLOG
+#if ABCC_CFG_DEBUG_CLR_FATAL_LOG
    /*
    ** Check the FW revision field to see if an event has been recorded, it
    ** should be non-zero then.
@@ -389,7 +389,7 @@ static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUs
    return( ABCC_CMDSEQ_RESP_EXEC_NEXT );
 }
 
-#if ABCC_CFG_DEBUG_CLR_FLOG
+#if ABCC_CFG_DEBUG_CLR_FATAL_LOG
 /*------------------------------------------------------------------------------
 ** Clear fatal log command
 **
