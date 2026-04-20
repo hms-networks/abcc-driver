@@ -736,28 +736,36 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Default values can be overridden in abcc_driver_config.h
 **
-** #define ABCC_CFG_DEBUG_GET_FLOG        1 - Enable / 0 - Disable
+** #define ABCC_CFG_DEBUG_GET_FATAL_LOG        1 - Enable / 0 - Disable
 **
 ** Enable/disable the inclusion of the extra GetAttribute command during the
 ** SETUP state, the data in the log is printed to the output terminal using
 ** the ABCC_PORT_printf() macro.
 **
-** #define ABCC_CFG_DEBUG_CLR_FLOG        1 - Enable / 0 - Disable
+** #define ABCC_CFG_DEBUG_CLR_FATAL_LOG        1 - Enable / 0 - Disable
 **
 ** Enable/disable automatic clearing of the Fatal log, if a log entry exists.
 ** The main purpose of this is to make multiple occurrences of the same fault
 ** easier to distinguish from each other.
 **
+** Note:
+** ABCC_CFG_DEBUG_CLR_FATAL_LOG has no effect unless ABCC_CFG_DEBUG_GET_FATAL_LOG
+** is also enabled.
+**
 ** WARNING:
-** ABCC_CFG_DEBUG_CLR_FLOG should *NOT* be enabled unless the printouts from
+** ABCC_CFG_DEBUG_CLR_FATAL_LOG should *NOT* be enabled unless the printouts from
 ** the driver are being logged and saved!
 **------------------------------------------------------------------------------
 */
-#ifndef ABCC_CFG_DEBUG_GET_FLOG
-   #define ABCC_CFG_DEBUG_GET_FLOG 0
+#ifndef ABCC_CFG_DEBUG_GET_FATAL_LOG
+   #define ABCC_CFG_DEBUG_GET_FATAL_LOG 0
 #endif
-#ifndef ABCC_CFG_DEBUG_CLR_FLOG
-   #define ABCC_CFG_DEBUG_CLR_FLOG 0
+#ifndef ABCC_CFG_DEBUG_CLR_FATAL_LOG
+   #define ABCC_CFG_DEBUG_CLR_FATAL_LOG 0
+#endif
+
+#if ABCC_CFG_DEBUG_CLR_FATAL_LOG && !ABCC_CFG_DEBUG_GET_FATAL_LOG
+    #error "ABCC_CFG_DEBUG_CLR_FATAL_LOG requires ABCC_CFG_DEBUG_GET_FATAL_LOG to be enabled."
 #endif
 
 /*------------------------------------------------------------------------------
