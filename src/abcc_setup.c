@@ -308,8 +308,8 @@ void ABCC_SetupInit( void )
 /*------------------------------------------------------------------------------
 ** Get fatal log command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType GetFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -325,7 +325,7 @@ static ABCC_CmdSeqCmdStatusType GetFatalLogCmd( ABP_MsgType* psMsg, void* pxUser
 ** Get fatal log response.
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -393,8 +393,8 @@ static ABCC_CmdSeqRespStatusType GetFatalLogResp( ABP_MsgType* psMsg, void* pxUs
 /*------------------------------------------------------------------------------
 ** Clear fatal log command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType ClearFatalLogCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -416,8 +416,8 @@ static ABCC_CmdSeqCmdStatusType ClearFatalLogCmd( ABP_MsgType* psMsg, void* pxUs
 /*------------------------------------------------------------------------------
 ** Data format command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType DataFormatCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -438,7 +438,7 @@ BOOL ABCC_IsFirstCommandPending( void )
 ** Data format response
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType DataFormatResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -481,8 +481,8 @@ static ABCC_CmdSeqRespStatusType DataFormatResp( ABP_MsgType* psMsg, void* pxUse
 /*------------------------------------------------------------------------------
 ** Parameter support command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType ParamSupportCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -498,7 +498,7 @@ static ABCC_CmdSeqCmdStatusType ParamSupportCmd( ABP_MsgType* psMsg, void* pxUse
 ** Parameter support response
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType ParamSupportResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -531,8 +531,8 @@ static ABCC_CmdSeqRespStatusType ParamSupportResp( ABP_MsgType* psMsg, void* pxU
 /*------------------------------------------------------------------------------
 ** Module type command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType ModuleTypeCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -548,7 +548,7 @@ static ABCC_CmdSeqCmdStatusType ModuleTypeCmd( ABP_MsgType* psMsg, void* pxUserD
 ** Module type response.
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType ModuleTypeResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -572,8 +572,8 @@ static ABCC_CmdSeqRespStatusType ModuleTypeResp( ABP_MsgType* psMsg, void* pxUse
 /*------------------------------------------------------------------------------
 ** Network type command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType NetworkTypeCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -589,7 +589,7 @@ static ABCC_CmdSeqCmdStatusType NetworkTypeCmd( ABP_MsgType* psMsg, void* pxUser
 ** Network type response.
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType NetworkTypeResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -613,8 +613,8 @@ static ABCC_CmdSeqRespStatusType NetworkTypeResp( ABP_MsgType* psMsg, void* pxUs
 /*------------------------------------------------------------------------------
 ** Firmware version command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType FirmwareVersionCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -630,7 +630,7 @@ static ABCC_CmdSeqCmdStatusType FirmwareVersionCmd( ABP_MsgType* psMsg, void* px
 ** Firmware version response.
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType FirmwareVersionResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -658,8 +658,9 @@ static ABCC_CmdSeqRespStatusType FirmwareVersionResp( ABP_MsgType* psMsg, void* 
 
 /*------------------------------------------------------------------------------
 ** Actions required before mapping.
-** Part of a command sequence and implements function callback.
-** ABCC_CmdRespCmdHandler (abcc.h)
+**
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType PreparePdMapping( ABP_MsgType* psMsg, void* pxUserData )
@@ -677,8 +678,8 @@ static ABCC_CmdSeqCmdStatusType PreparePdMapping( ABP_MsgType* psMsg, void* pxUs
 /*------------------------------------------------------------------------------
 ** Read write mapping command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType ReadWriteMapCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -817,7 +818,7 @@ static ABCC_CmdSeqCmdStatusType ReadWriteMapCmd( ABP_MsgType* psMsg, void* pxUse
 ** Read write mapping response
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType ReadWriteMapResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -851,8 +852,9 @@ static ABCC_CmdSeqRespStatusType ReadWriteMapResp( ABP_MsgType* psMsg, void* pxU
 
 /*------------------------------------------------------------------------------
 ** Trigger user init when mapping is done.
+**
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqDoneHandler (abcc.h)
+** ABCC_CmdSeqDoneHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static void TriggerUserInit( const ABCC_CmdSeqResultType eSeqResult, void* pxUserData )
@@ -889,8 +891,8 @@ static void TriggerUserInit( const ABCC_CmdSeqResultType eSeqResult, void* pxUse
 /*------------------------------------------------------------------------------
 ** Read map size command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType RdPdSizeCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -906,7 +908,7 @@ static ABCC_CmdSeqCmdStatusType RdPdSizeCmd( ABP_MsgType* psMsg, void* pxUserDat
 ** Read map size response
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType RdPdSizeResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -956,8 +958,8 @@ static ABCC_CmdSeqRespStatusType RdPdSizeResp( ABP_MsgType* psMsg, void* pxUserD
 /*------------------------------------------------------------------------------
 ** Write map size command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType WrPdSizeCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -973,7 +975,7 @@ static ABCC_CmdSeqCmdStatusType WrPdSizeCmd( ABP_MsgType* psMsg, void* pxUserDat
 ** Write map size response
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType WrPdSizeResp( ABP_MsgType* psMsg, void* pxUserData )
@@ -1021,8 +1023,8 @@ static ABCC_CmdSeqRespStatusType WrPdSizeResp( ABP_MsgType* psMsg, void* pxUserD
 /*------------------------------------------------------------------------------
 ** Setup complete command
 **
-** This function is a part of a command sequence. See description of
-** ABCC_CmdSeqCmdHandler type in cmd_seq_if.h
+** This function is part of a command sequence. See description of
+** ABCC_CmdSeqCmdHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqCmdStatusType SetupCompleteCmd( ABP_MsgType* psMsg, void* pxUserData )
@@ -1039,7 +1041,7 @@ static ABCC_CmdSeqCmdStatusType SetupCompleteCmd( ABP_MsgType* psMsg, void* pxUs
 ** Setup complete response
 **
 ** Part of a command sequence and implements function callback
-** ABCC_CmdSeqRespHandler type in cmd_seq_if.h
+** ABCC_CmdSeqRespHandler type in abcc_command_sequencer_interface.h
 **------------------------------------------------------------------------------
 */
 static ABCC_CmdSeqRespStatusType SetupCompleteResp( ABP_MsgType* psMsg, void* pxUserData )
