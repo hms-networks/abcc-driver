@@ -123,7 +123,7 @@ static BOOL abcc_fClearFatalLog;
 ** abcc_psAdiEntry        - Pointer to list of ADIs
 ** abcc_psDefaultMap      - Pointer to list of default mapped ADIs
 ** abcc_iNumAdi           - Number of ADIs in abcc_psAdiEntry list
-** abcc_MappingIndex      - Index of next ADI to map from abcc_psDefaultMap
+** abcc_iMappingIndex     - Index of next ADI to map from abcc_psDefaultMap
 ** abcc_iPdReadSize       - Read process data size in octets
 ** abcc_iPdWriteSize      - Write process data size in octets
 ** abcc_iPdWriteBitSize   - Write process data size in bits
