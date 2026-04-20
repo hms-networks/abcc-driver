@@ -143,7 +143,7 @@ static ABCC_ParameterSupportType abcc_eParameterSupport;
 static BOOL abcc_fFirstCommandPending = FALSE;
 
 /*
-** Help varibales for ADI mapping servcie
+** Help variables for ADI mapping service
 */
 static AD_AdiEntryType*     abcc_psAdiEntry    = NULL;
 static AD_MapType*          abcc_psDefaultMap  = NULL;
@@ -157,12 +157,12 @@ static UINT16               abcc_iPdReadSize   = 0;
 static UINT16               abcc_iPdWriteSize  = 0;
 
 /*
-** Current wrpd sizes divided in octets and bits
+** Current write process data (WRPD) sizes divided in octets and bits
 */
 static UINT16   abcc_iPdWriteBitSize = 0;
 
 /*
-** Current rdpd sizes divided in octets and bits
+** Current read process data (RDPD) sizes divided in octets and bits
 */
 static UINT16   abcc_iPdReadBitSize = 0;
 
