@@ -233,6 +233,7 @@ void ABCC_DrvSpiRunDriverTx( void )
 {
    #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
    INT16 i;
+   UINT16 iMsgFragSizeReqBuffer;
    #endif
    UINT32 lCrc;
    BOOL   fHandleWriteMsg = FALSE;
@@ -252,8 +253,11 @@ void ABCC_DrvSpiRunDriverTx( void )
          spi_drv_sMosiFrame.iSpiControl ^= iSpiCtrl_T;
 
          #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+         ABCC_PORT_EnterCritical();
          if( spi_drv_sSpiMsgFragSizeInfo.fUpdated )
          {
+            iMsgFragSizeReqBuffer = spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq;
+            ABCC_PORT_ExitCritical();
             /*
             ** The message fragment size has been updated since last 
             ** transmission, update the frame layout accordingly.
@@ -264,7 +268,7 @@ void ABCC_DrvSpiRunDriverTx( void )
                ** shift process data to new offset in frame according to new
                ** message fragment size
                */
-               if( spi_drv_iPdOffset < NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) )
+               if( spi_drv_iPdOffset < NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer ) )
                {
                   /*
                   ** move process data towards the end of the frame
@@ -275,7 +279,7 @@ void ABCC_DrvSpiRunDriverTx( void )
                   do
                   {
                      i--;
-                     spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
+                     spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer ) + i ] =
                         spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
                   }
                   while( i > 0 );
@@ -289,19 +293,33 @@ void ABCC_DrvSpiRunDriverTx( void )
                   */
                   for( i = 0; i < spi_drv_iPdSize; i++ )
                   {
-                     spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + i ] =
+                     spi_drv_sMosiFrame.iData[ NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer ) + i ] =
                         spi_drv_sMosiFrame.iData[ spi_drv_iPdOffset + i ];
                   }
                }
             }
-            spi_drv_iPdOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
-            spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq ) + spi_drv_iPdSize;
-            spi_drv_iMsgLen = NUM_BYTES_2_WORDS( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq );
+            spi_drv_iPdOffset = NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer );
+            spi_drv_iCrcOffset = NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer ) + spi_drv_iPdSize;
+            spi_drv_iMsgLen = NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer );
             spi_drv_sMosiFrame.iMsgLen = iTOiLe( spi_drv_iMsgLen );
             spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
 
-            spi_drv_sSpiMsgFragSizeInfo.fUpdated = FALSE;
+            ABCC_PORT_EnterCritical();
+            if( spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq == iMsgFragSizeReqBuffer )
+            {
+               spi_drv_sSpiMsgFragSizeInfo.fUpdated = FALSE;
+            }
+            else
+            {
+               /*
+               ** The message fragment size has been updated again since we
+               ** began to change it.
+               ** => repeat the update process on next driver call.
+               */
+               spi_drv_sSpiMsgFragSizeInfo.fUpdated = TRUE;
+            }
          }
+         ABCC_PORT_ExitCritical();
          #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
       }
 
