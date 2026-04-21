@@ -502,7 +502,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 #error "ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN must be smaller than or equal to ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
 #endif
 
-#endif //#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 /*------------------------------------------------------------------------------
 ** #define ABCC_CFG_MAX_PROCESS_DATA_SIZE              ( 512 )
