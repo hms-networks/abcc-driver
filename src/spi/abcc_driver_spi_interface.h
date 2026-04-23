@@ -179,6 +179,20 @@ EXTFUNC void ABCC_DrvSpiSetAppStatus( ABP_AppStatusType eAppStatus );
 */
 EXTFUNC void ABCC_DrvSpiSetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+/*------------------------------------------------------------------------------
+** Sets the new message fragment size for the SPI frame.
+**------------------------------------------------------------------------------
+** Arguments:
+**       iReqMsgFragSize:   Requested size of message fragment (bytes)
+**
+** Returns:
+**       ABCC_ErrorCodeType
+**------------------------------------------------------------------------------
+*/
+EXTFUNC ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize( const UINT16 iReqMsgFragSize );
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+
 /*------------------------------------------------------------------------------
 ** Sets the receiver buffer, to be used for the next read message.
 **------------------------------------------------------------------------------

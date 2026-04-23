@@ -76,7 +76,6 @@ EXTVAR UINT16 ABCC_iInterruptEnableMask;
 */
 EXTFUNC void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
 
-
 /*------------------------------------------------------------------------------
 ** The anybus is ready for communication. This function shall be called either
 ** due to power up interrupt or initial handshake timeout

@@ -356,6 +356,20 @@ EXTFUNC void ( *pnABCC_DrvSetAppStatus )( ABP_AppStatusType eAppStatus );
 EXTFUNC void ( *pnABCC_DrvSetPdSize )( const UINT16 iReadPdSize,
                                        const UINT16 iWritePdSize );
 
+#if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+/*------------------------------------------------------------------------------
+** Sets the new message fragment size (used for SPI, only).
+**------------------------------------------------------------------------------
+** Arguments:
+**       iReqMsgFragSize:   Requested size of message fragment (bytes)
+**
+** Returns:
+**       ABCC_ErrorCodeType
+**------------------------------------------------------------------------------
+*/
+EXTFUNC ABCC_ErrorCodeType( *pnABCC_DrvNewMsgFragSize )( const UINT16 iReqMsgFragSize );
+#endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
+
 /*------------------------------------------------------------------------------
 ** Sets Interrupt mask according to h_aci.h.
 **------------------------------------------------------------------------------
