@@ -136,7 +136,7 @@ typedef struct
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 /*------------------------------------------------------------------------------
-** Info for dynamic SPI Message Fragment Size handling
+** Info for dynamic SPI message fragment size handling
 **------------------------------------------------------------------------------
 */
 typedef struct
@@ -203,10 +203,10 @@ static UINT16                       spi_drv_iMsgLen;              /* Message len
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 static drv_SpiMsgFragSizeInfoType   spi_drv_sSpiMsgFragSizeInfo =
-                                    {
-                                    FALSE,                        /* BOOL fUpdated */
-                                    ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN, /* UINT16 iMsgFragSizeReq */
-                                    };
+   {
+      FALSE,                                                      /* BOOL fUpdated */
+      ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN,                          /* UINT16 iMsgFragSizeReq */
+   };
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 static UINT16                       drv_iCrcErrorCount;           /* CRC error counter */
@@ -265,15 +265,17 @@ void ABCC_DrvSpiRunDriverTx( void )
             if( spi_drv_iPdSize > 0 )
             {
                /*
-               ** shift process data to new offset in frame according to new
+               ** Shift process data to new offset in frame according to new
                ** message fragment size
                */
                if( spi_drv_iPdOffset < NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer ) )
                {
                   /*
-                  ** move process data towards the end of the frame
-                  ** => start copy at last word to avoid overwriting data in 
-                  **    source location before it has been copied
+                  ** Move process data towards the end of the frame
+                  **
+                  ** Since source and destination can overlap within the same
+                  ** buffer, copy backwards from the last word to prevent
+                  ** overwriting source data before it is read.
                   */
                   i = spi_drv_iPdSize;
                   do
@@ -287,9 +289,12 @@ void ABCC_DrvSpiRunDriverTx( void )
                else
                {
                   /*
-                  ** move process data towards the beginning of the frame
-                  ** => start copy at first word to avoid overwriting data in
-                  **    source location before it has been copied
+                  ** Move process data towards the beginning of the frame
+                  **
+                  ** Since source and destination can overlap within the same
+                  ** buffer, copy forwards from the first word. This is safe
+                  ** because destination offset > source offset, so forward
+                  ** iteration will not overwrite unread source data.
                   */
                   for( i = 0; i < spi_drv_iPdSize; i++ )
                   {
@@ -312,9 +317,11 @@ void ABCC_DrvSpiRunDriverTx( void )
             else
             {
                /*
-               ** The message fragment size has been updated again since we
-               ** began to change it.
-               ** => repeat the update process on next driver call.
+               ** The requested message fragment size was modified while the
+               ** update process was in progress.
+               **
+               ** To ensure consistency, mark the update as pending and retry on
+               ** the next driver call.
                */
                spi_drv_sSpiMsgFragSizeInfo.fUpdated = TRUE;
             }
@@ -858,8 +865,12 @@ ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize( const UINT16 iReqMsgFragSize )
    }
    else if( NUM_BYTES_2_WORDS( iReqMsgFragSize ) == spi_drv_iPdOffset )
    {
-      // requested message fragment length is OK, but did not change
-      // => no need to update fragmentation info or frame offsets
+      /*
+      ** Requested message fragment size matches current configuration (no
+      ** change).
+      ** Store the value, but skip update of fragmentation info and frame
+      ** offsets.
+      */
       spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq = iReqMsgFragSize;
       spi_drv_sSpiMsgFragSizeInfo.fUpdated = FALSE;
    }

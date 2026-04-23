@@ -213,7 +213,7 @@
 ** If messages are important the fragment length should be set to the largest
 ** message to avoid fragmentation. If IO data are important the message fragment
 ** length should be set to a smaller value to speed up the SPI transaction.
-** For high message performance a fragment length up to 1536 octets
+** For high message performance a fragment length of up to 1536 octets
 ** (ABP_MAX_MSG_DATA_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF) is supported. The
 ** message header is 12 octets, so 16 or 32 octets will be enough to support
 ** small messages without fragmentation.
@@ -409,16 +409,15 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** time it takes to send the frame and therefore increase the performance for
 ** cyclic process data, but may increase the need for message fragmentation and
 ** reduce the throughput of the message interface.
-** For applications where message speed is not critical and cyclic process data
-** performance is important but specific use cases (like firmware updates)
-** require support for large messages, this define can be used to enable dynamic
-** message fragment length.
+** Enable dynamic message fragment length for applications where cyclic process
+** data performance is prioritized over message speed, but large messages (e.g.,
+** firmware updates) must still be supported with high performance.
 ** When dynamic message fragment length is enabled, the application can change
 ** the used message fragment size at runtime.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-#define ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN 0
+    #define ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN 0
 #endif
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
@@ -435,11 +434,11 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
-#define ABCC_CFG_SPI_MAX_MSG_FRAG_LEN ( ABCC_CFG_MAX_MSG_SIZE + 12 )
+    #define ABCC_CFG_SPI_MAX_MSG_FRAG_LEN ( ABCC_CFG_MAX_MSG_SIZE + 12 )
 #endif
 
 #if ABCC_CFG_SPI_MAX_MSG_FRAG_LEN > ( ABCC_CFG_MAX_MSG_SIZE + 12 )
-#error "ABCC_CFG_SPI_MAX_MSG_FRAG_LEN must not be bigger than ABCC_CFG_MAX_MSG_SIZE + 12 (configured maximum message size including header)."
+    #error "ABCC_CFG_SPI_MAX_MSG_FRAG_LEN must not be bigger than ABCC_CFG_MAX_MSG_SIZE + 12 (configured maximum message size including header)."
 #endif
 
 /*------------------------------------------------------------------------------
@@ -447,30 +446,31 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
-** When dynamic message fragment length is enabled, this define sets the minimum
-** message fragment length that can be used at runtime.
-** It is not recommended to use message fragment lengths that are too small.
-** The message header contains 12 octets. Therefore, 16 octets support
-** transmission of small messages without fragmentation and this value is used
-** as default.
-** Values below 8 will generate an (override-able) error since even an error
-** response message will need more than two SPI cycles, with smaller fragment
-** sizes.
-** Values below 2 are not allowed since without message fragment within an SPI
-** frame, no message transmission is possible at runtime.
+** Sets the minimum message fragment length allowed at runtime when dynamic
+** fragmentation is enabled.
+**
+** Note: Extremely small fragment lengths are discouraged. The message header
+** occupies 12 octets; therefore, a default of 16 octets allows small messages
+** to transmit without fragmentation.
+**
+** Constraints:
+** - Values < 8 trigger an override-able error, as even error responses would
+**   require more than two SPI cycles.
+** - Values < 2 are invalid, as a fragment must contain at least some payload
+**   data to be transmitted within an SPI frame.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_MIN_MSG_FRAG_LEN
-#define ABCC_CFG_SPI_MIN_MSG_FRAG_LEN 16
+    #define ABCC_CFG_SPI_MIN_MSG_FRAG_LEN 16
 #endif
 
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN < 8
-#ifndef ABCC_CFG_SPI_OVERRIDE_MIN_MSG_FRAG_LEN_ERROR
-#error "Warning: Even an error response message will need more than two SPI cycles, as ABCC_CFG_SPI_MIN_MSG_FRAG_LEN is less than 8. Override is possible by defining ABCC_CFG_SPI_OVERRIDE_MIN_MSG_FRAG_LEN_ERROR."
-#endif
+    #ifndef ABCC_CFG_SPI_OVERRIDE_MIN_MSG_FRAG_LEN_ERROR
+        #error "Warning: Even an error response message will need more than two SPI cycles, as ABCC_CFG_SPI_MIN_MSG_FRAG_LEN is less than 8. Override is possible by defining ABCC_CFG_SPI_OVERRIDE_MIN_MSG_FRAG_LEN_ERROR."
+    #endif
 #endif
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN < 2
-#error "Without message fragment within an SPI frame, no message transmission is possible at runtime. This is not allowed. ABCC_CFG_SPI_MIN_MSG_FRAG_LEN has to be 2 at least."
+    #error "Without message fragment within an SPI frame, no message transmission is possible at runtime. This is not allowed. ABCC_CFG_SPI_MIN_MSG_FRAG_LEN has to be 2 at least."
 #endif
 
 /*------------------------------------------------------------------------------
@@ -484,22 +484,22 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN
-#define ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN ABCC_CFG_SPI_MSG_FRAG_LEN
+    #define ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN ABCC_CFG_SPI_MSG_FRAG_LEN
 #endif
 
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN == ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
-#error "Disable ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN for applications with static message fragment size to reduce code size."
+    #error "Disable ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN for applications with static message fragment size to reduce code size."
 #endif
 #if ABCC_CFG_SPI_MIN_MSG_FRAG_LEN > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
-#error "ABCC_CFG_SPI_MIN_MSG_FRAG_LEN must be smaller than ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
+    #error "ABCC_CFG_SPI_MIN_MSG_FRAG_LEN must be smaller than ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
 #endif
 
 #if ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN < ABCC_CFG_SPI_MIN_MSG_FRAG_LEN
-#error "ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN must be greater than or equal to ABCC_CFG_SPI_MIN_MSG_FRAG_LEN."
+    #error "ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN must be greater than or equal to ABCC_CFG_SPI_MIN_MSG_FRAG_LEN."
 #endif
 
 #if ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN > ABCC_CFG_SPI_MAX_MSG_FRAG_LEN
-#error "ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN must be smaller than or equal to ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
+    #error "ABCC_CFG_SPI_DEFAULT_MSG_FRAG_LEN must be smaller than or equal to ABCC_CFG_SPI_MAX_MSG_FRAG_LEN."
 #endif
 
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
