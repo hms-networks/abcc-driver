@@ -499,7 +499,7 @@ EXTFUNC void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg );
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 /*------------------------------------------------------------------------------
-** ABCC_NewMsgFragSize()
+** ABCC_SetMsgFragSize()
 ** Sets the new message fragment size (used for SPI, only).
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -509,7 +509,7 @@ EXTFUNC void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg );
 **       ABCC_ErrorCodeType
 **------------------------------------------------------------------------------
 */
-EXTFUNC ABCC_ErrorCodeType ABCC_NewMsgFragSize( const UINT16 iReqMsgFragSize );
+EXTFUNC ABCC_ErrorCodeType ABCC_SetMsgFragSize( const UINT16 iReqMsgFragSize );
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 /*------------------------------------------------------------------------------

@@ -867,7 +867,7 @@ void ABCC_TakeMsgBufferOwnership( ABP_MsgType* psMsg )
 }
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
-ABCC_ErrorCodeType ABCC_NewMsgFragSize( const UINT16 iReqMsgFragSize )
+ABCC_ErrorCodeType ABCC_SetMsgFragSize( const UINT16 iReqMsgFragSize )
 {
    ABCC_LOG_INFO( "New message fragment size %" PRIu16 "\n", iReqMsgFragSize );
    return( pnABCC_DrvNewMsgFragSize( iReqMsgFragSize ) );
