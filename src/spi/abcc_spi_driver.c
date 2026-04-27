@@ -29,28 +29,28 @@
 #define ABCC_MSG_HEADER_TYPE_SIZEOF 12
 
  /*------------------------------------------------------------------------------
- ** Endian adaptation for ABCC SPI Control and Status registers.
- **
- ** The ABCC SPI interface defines its internal SPI control and status
- ** registers using a fixed little-endian byte order. However, the host
- ** controller accessing these registers may be either little-endian or
- ** big-endian
- **
- ** This block adjusts the bitfield masks and shifts to ensure correct access
- ** regardless of the host architecture:
- **
- ** On LITTLE ENDIAN host controllers, the native byte order matches the
- ** ABCC interface. MOSI (Control) fields map directly (no shift required).
- ** MISO (Status) fields (ANB_STAT and SPI_STAT) are received in big-endian
- ** order by the host logic, requiring byte-swapping or mask adjustment to
- ** align with the expected little-endian register layout.
- **
- ** Conversely, on BIG ENDIAN host controllers, the host's byte order is inverted
- ** relative to the ABCC interface. Consequently, fields defined in the lower
- ** byte of the 16-bit word must be shifted left by 8 bits (<< 8) to align with
- ** the hardware's little-endian expectation.
- **------------------------------------------------------------------------------
- */
+** Endian adaptation for ABCC SPI Control and Status registers.
+**
+** The ABCC SPI interface defines its internal SPI control and status
+** registers using a fixed little-endian byte order. However, the host
+** controller accessing these registers may be either little-endian or
+** big-endian.
+**
+** This block adjusts the bitfield masks and shifts to ensure correct access
+** regardless of the host architecture:
+**
+** On LITTLE ENDIAN host controllers, the native byte order matches the
+** ABCC interface. MOSI (Control) fields map directly (no shift required).
+** MISO (Status) fields (ANB_STAT and SPI_STAT) are received in big-endian
+** order by the host logic, requiring byte-swapping or mask adjustment to
+** align with the expected little-endian register layout.
+**
+** Conversely, on BIG ENDIAN host controllers, the host's byte order is inverted
+** relative to the ABCC interface. Consequently, fields defined in the lower
+** byte of the 16-bit word must be shifted left by 8 bits (<< 8) to align with
+** the hardware's little-endian expectation.
+**------------------------------------------------------------------------------
+*/
 #ifdef ABCC_SYS_BIG_ENDIAN
 static const UINT16 iSpiCtrlWrPdValid =   ABP_SPI_CTRL_WRPD_VALID << 8;
 static const UINT16 iSpiCtrlCmdCntShift  =  9;
@@ -680,7 +680,7 @@ static void spi_drv_ResetWriteFragInfo( void )
 }
 
 /*------------------------------------------------------------------------------
-** Watchdog timeouthandler.
+** Watchdog timeout handler.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
