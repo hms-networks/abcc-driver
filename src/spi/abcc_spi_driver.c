@@ -28,7 +28,7 @@
 
 #define ABCC_MSG_HEADER_TYPE_SIZEOF 12
 
- /*------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
 ** Endian adaptation for ABCC SPI Control and Status registers.
 **
 ** The ABCC SPI interface defines its internal SPI control and status
