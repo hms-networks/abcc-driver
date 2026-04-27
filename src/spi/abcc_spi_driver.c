@@ -29,21 +29,21 @@
 #define ABCC_MSG_HEADER_TYPE_SIZEOF 12
 
 /*------------------------------------------------------------------------------
-** Endian adaptation for ABCC SPI Control and Status registers.
+** Endian adaptation for ABCC SPI Control and Status Words.
 **
-** The ABCC SPI interface defines its internal SPI control and status
-** registers using a fixed little-endian byte order. However, the host
-** controller accessing these registers may be either little-endian or
-** big-endian.
+** The ABCC SPI interface defines its internal SPI Control and Status Words
+** using a fixed little-endian byte order. However, the host controller
+** accessing these registers may be either little-endian or big-endian.
 **
 ** This block adjusts the bitfield masks and shifts to ensure correct access
 ** regardless of the host architecture:
 **
-** On LITTLE ENDIAN host controllers, the native byte order matches the
-** ABCC interface. MOSI (Control) fields map directly (no shift required).
-** MISO (Status) fields (ANB_STAT and SPI_STAT) are received in big-endian
-** order by the host logic, requiring byte-swapping or mask adjustment to
-** align with the expected little-endian register layout.
+** On LITTLE ENDIAN host controllers, the native byte order matches the ABCC
+** interface for the MOSI Control Word directly (no shift required).
+** The MISO Status Word (containing ANB_STAT and SPI_STAT 8 bit fields) is
+** transmitted by the hardware in big-endian order. This requires a byte-swap
+** or mask adjustment to align the data with the expected little-endian register
+** layout.
 **
 ** Conversely, on BIG ENDIAN host controllers, the host's byte order is inverted
 ** relative to the ABCC interface. Consequently, fields defined in the lower
