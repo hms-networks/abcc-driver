@@ -28,13 +28,31 @@
 
 #define ABCC_MSG_HEADER_TYPE_SIZEOF 12
 
-/*------------------------------------------------------------------------------
-** Since the masking of control registers are endian dependent since
-** we operating on the mosi and misu structures that are little endian
-**------------------------------------------------------------------------------
-*/
+ /*------------------------------------------------------------------------------
+ ** Endian adaptation for ABCC SPI Control and Status registers.
+ **
+ ** The ABCC SPI interface defines its internal SPI control and status
+ ** registers using a fixed little-endian byte order. However, the host
+ ** controller accessing these registers may be either little-endian or
+ ** big-endian
+ **
+ ** This block adjusts the bitfield masks and shifts to ensure correct access
+ ** regardless of the host architecture:
+ **
+ ** On LITTLE ENDIAN host controllers, the native byte order matches the
+ ** ABCC interface. MOSI (Control) fields map directly (no shift required).
+ ** MISO (Status) fields (ANB_STAT and SPI_STAT) are received in big-endian
+ ** order by the host logic, requiring byte-swapping or mask adjustment to
+ ** align with the expected little-endian register layout.
+ **
+ ** Conversely, on BIG ENDIAN host controllers, the host's byte order is inverted
+ ** relative to the ABCC interface. Consequently, fields defined in the lower
+ ** byte of the 16-bit word must be shifted left by 8 bits (<< 8) to align with
+ ** the hardware's little-endian expectation.
+ **------------------------------------------------------------------------------
+ */
 #ifdef ABCC_SYS_BIG_ENDIAN
-static const UINT16 iSpiCtrlWrPdWalid =   ABP_SPI_CTRL_WRPD_VALID << 8;
+static const UINT16 iSpiCtrlWrPdValid =   ABP_SPI_CTRL_WRPD_VALID << 8;
 static const UINT16 iSpiCtrlCmdCntShift  =  9;
 static const UINT16 iSpiCtrlCmdCnt  =     ABP_SPI_CTRL_CMDCNT << 8;
 static const UINT16 iSpiCtrl_M =          ABP_SPI_CTRL_M << 8;
@@ -48,7 +66,7 @@ static const UINT16 iSpiStatus_M =        ABP_SPI_STATUS_M;
 static const UINT16 iSpiStatusLastFrag =  ABP_SPI_STATUS_LAST_FRAG;
 static const UINT16 iSpiStatusNewPd =     ABP_SPI_STATUS_NEW_PD;
 #else
-static const UINT16 iSpiCtrlWrPdWalid =   ABP_SPI_CTRL_WRPD_VALID;
+static const UINT16 iSpiCtrlWrPdValid =   ABP_SPI_CTRL_WRPD_VALID;
 static const UINT16 iSpiCtrlCmdCntShift  =  1;
 static const UINT16 iSpiCtrlCmdCnt  =     ABP_SPI_CTRL_CMDCNT;
 static const UINT16 iSpiCtrl_M =          ABP_SPI_CTRL_M;
@@ -88,7 +106,7 @@ static const UINT16 iSpiStatusNewPd =     ABP_SPI_STATUS_NEW_PD << 8;
 #define SPI_BASE_FRAME_WORD_LEN  5 /* Frame length excluding MSG and PD data */
 
 /*------------------------------------------------------------------------------
-** SPI MOSI structure (7044 - ABCC40).
+** SPI MOSI structure.
 **------------------------------------------------------------------------------
 */
 
@@ -103,7 +121,7 @@ typedef struct drv_SpiMosiFrameType
 } drv_SpiMosiFrameType;
 
 /*------------------------------------------------------------------------------
-** SPI MISO structure
+** SPI MISO structure.
 **------------------------------------------------------------------------------
 */
 typedef struct
@@ -136,7 +154,7 @@ typedef struct
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 /*------------------------------------------------------------------------------
-** Info for dynamic SPI message fragment size handling
+** Info for dynamic SPI message fragment size handling.
 **------------------------------------------------------------------------------
 */
 typedef struct
@@ -437,7 +455,7 @@ void ABCC_DrvSpiRunDriverTx( void )
 */
 ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
 {
-   UINT32 lRecievedCrc;
+   UINT32 lReceivedCrc;
    UINT32 lCalculatedCrc;
    ABP_MsgType* psWriteMsg = NULL;
 
@@ -460,11 +478,11 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       lCalculatedCrc = CRC_Crc32( (UINT8*)&spi_drv_sMisoFrame, spi_drv_iSpiFrameSize*2 - 4 );
       lCalculatedCrc = lTOlBe( lCalculatedCrc );
 
-      ABCC_PORT_MemCpy( &lRecievedCrc,
+      ABCC_PORT_MemCpy( &lReceivedCrc,
                         &spi_drv_sMisoFrame.iData[ spi_drv_iCrcOffset ],
                         ABP_UINT32_SIZEOF );
 
-      if( lCalculatedCrc != lRecievedCrc )
+      if( lCalculatedCrc != lReceivedCrc )
       {
          /*
          ** We will request a retransmit if the data is corrupt.
@@ -541,7 +559,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       }
 
       /*---------------------------------------------------------------------------
-      ** Read message handling
+      ** Read message handling.
       ** --------------------------------------------------------------------------
       */
       if( spi_drv_sMisoFrame.iSpiStatusAnbStatus & iSpiStatus_M )
@@ -595,7 +613,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       /*
       ** Clear the valid pd for the next frame.
       */
-      spi_drv_sMosiFrame.iSpiControl &= ~iSpiCtrlWrPdWalid;
+      spi_drv_sMosiFrame.iSpiControl &= ~iSpiCtrlWrPdValid;
       spi_drv_eState = SM_SPI_RDY_TO_SEND_MOSI;
    }
    else if( spi_drv_eState == SM_SPI_INIT )
@@ -662,7 +680,7 @@ static void spi_drv_ResetWriteFragInfo( void )
 }
 
 /*------------------------------------------------------------------------------
-** Watchdog timeouthandler
+** Watchdog timeouthandler.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -783,7 +801,7 @@ void ABCC_DrvSpiWriteProcessData( void* pxProcessData )
    (void)pxProcessData;
    if( spi_drv_eState == SM_SPI_RDY_TO_SEND_MOSI )
    {
-      spi_drv_sMosiFrame.iSpiControl |= iSpiCtrlWrPdWalid;
+      spi_drv_sMosiFrame.iSpiControl |= iSpiCtrlWrPdValid;
    }
    else
    {
@@ -985,7 +1003,7 @@ BOOL ABCC_DrvSpiIsReadyForWrPd( void )
 BOOL ABCC_DrvSpiIsSupervised( void )
 {
    /*
-   ** The Anybus supervision bis is stored in bit 3
+   ** The Anybus supervision bit is stored in bit 3
    */
    return( ( spi_drv_bAnbStatus  >> 3 ) & 1 );
 }
