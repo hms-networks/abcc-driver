@@ -13,21 +13,6 @@
 #include "abcc_config.h"
 #include "abp.h"
 
-/*
-** Set default interrupt mask if not defined in abcc_driver_config.h
-*/
-#if ABCC_CFG_DRV_PARALLEL_ENABLED
-#ifndef ABCC_CFG_INT_ENABLE_MASK_PAR
-#define ABCC_CFG_INT_ENABLE_MASK_PAR          ( 0 )
-#endif
-#endif
-
-#if ABCC_CFG_DRV_SPI_ENABLED
-#ifndef ABCC_CFG_INT_ENABLE_MASK_SPI
-#define ABCC_CFG_INT_ENABLE_MASK_SPI          ( 0 )
-#endif
-#endif
-
 typedef union
 {
    ABP_MsgType*    psMsg;
