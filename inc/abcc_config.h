@@ -21,7 +21,7 @@
 **
 ** Defined in abcc_types.h.
 **
-** Define if an big endian system is used as host. If not defined little endian
+** Define if a big endian system is used as host. If not defined, little endian
 ** is assumed.
 **------------------------------------------------------------------------------
 */
@@ -31,7 +31,7 @@
 **
 ** Defined in abcc_types.h.
 **
-** Define if a 16 bit char system is used as host. If not defined 8 bit char
+** Define if a 16 bit char system is used as host. If not defined, 8 bit char
 ** system is assumed.
 **------------------------------------------------------------------------------
 */
@@ -39,7 +39,7 @@
 /*------------------------------------------------------------------------------
 ** #define ABCC_CFG_PAR_EXT_BUS_ENDIAN_DIFF   1 - Enable / 0 - Disable
 **
-** Defined in abcc_types.h.
+** Default value below can be overridden in abcc_types.h.
 **
 ** Define as 1 if the internal and external memory bus of the host application
 ** processor have different endianess. The default behavior is 'no endian swap'.
@@ -59,16 +59,16 @@
 ** These identifiers enables/disables the inclusion of the corresponding
 ** low-level application interface driver and handshaking code.
 **
-** These are related to, but are not the same as, the Operating Mode setting.
+** These are related to, but are not the same as the Operating Mode setting.
 **
 ** It is possible to include support for multiple low-level drivers. Each
 ** enabled driver increases ROM and RAM consumption.
 **
 ** Depending on the value of the Module Identification pins in the application
-** connector different operating modes can be selected automatically at startup.
-** See ABCC_CFG_ABCC_OP_MODE configuration further down.
+** connector, different operating modes can be selected automatically at
+** startup. See ABCC_CFG_ABCC_OP_MODE configuration further down.
 **------------------------------------------------------------------------------
-** Summary of the capabilities of the individual drivers, and the associated
+** Summary of the capabilities of the individual drivers and the associated
 ** Operating Modes:
 **
 ** "ABCC_CFG_DRV_SPI_ENABLED"
@@ -158,10 +158,11 @@
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Enable/disable driver to retrieve the operating mode from external hardware.
-** If 1 the ABCC_HAL_GetOpmode() function must be implemented in the hardware
+** If 1, the ABCC_HAL_GetOpmode() function must be implemented in the hardware
 ** abstraction layer.
 **
-** If this is not 1 ABCC_CFG_ABCC_OP_MODE_X described above must be defined.
+** If this is not 1, ABCC_CFG_ABCC_OP_MODE must be defined with one of the 
+** operation modes ABP_OP_MODE_* described above (see below).
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_OP_MODE_GETTABLE
@@ -176,7 +177,7 @@
 ** Enable/disable driver to control the operating mode set to the ABCC host
 ** connector. Else it is assumed the operating mode signals of the host
 ** connector is fixed or controlled by external hardware.
-** If 1 the ABCC_HAL_SetOpmode() function must be implemented in the hardware
+** If 1, the ABCC_HAL_SetOpmode() function must be implemented in the hardware
 ** abstraction layer.
 **------------------------------------------------------------------------------
 */
@@ -206,17 +207,19 @@
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Length of SPI message fragment in bytes per SPI transaction.
-** If the message fragment length is shorter than the largest message to be
-** transmitted the sending or receiving of a message may be fragmented and
-** take several SPI transactions to be completed. Each SPI transaction will have
-** a message field of this length regardless if a message is present or not.
-** If messages are important the fragment length should be set to the largest
-** message to avoid fragmentation. If IO data are important the message fragment
-** length should be set to a smaller value to speed up the SPI transaction.
-** For high message performance a fragment length of up to 1536 octets
-** (ABP_MAX_MSG_DATA_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF) is supported. The
-** message header is 12 octets, so 16 or 32 octets will be enough to support
-** small messages without fragmentation.
+**
+** If the fragment length is smaller than the largest message being transmitted,
+** messages are split across multiple SPI transactions.
+**
+** Every SPI transaction always includes a message field of the configured fragment
+** length, regardless if a message is present or not.
+**
+** To prioritize messages, set the fragment length to the largest message to avoid
+** fragmentation. To prioritize I/O data, use a smaller fragment length to speed up
+** the SPI transaction.
+**
+** By defining ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN, the application can change
+** the message fragment size at runtime, see below for details.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SPI_MSG_FRAG_LEN
@@ -245,8 +248,9 @@
 **
 ** Enable/disable driver support for memory mapped ABCC interface. If memory
 ** direct access is chosen the user will have access directly to the ABCC
-** process data memory i.e. no internal copy is required.
-** If 0 the following functions must be implemented in the hardware abstraction
+** process data memory, i.e. no internal copy is required.
+**
+** If 0, the following functions must be implemented in the hardware abstraction
 ** layer:
 **    ABCC_HAL_ParallelRead()
 **    ABCC_HAL_ParallelRead16()
@@ -324,9 +328,9 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Enable/disable driver to retrieve the module identification from external
-** hardware. If 1 the ABCC_HAL_ReadModuleId() function must be implemented
-** in the hardware abstraction layer. If 0 module identification
-** ABP_MODULE_ID_ACTIVE_ABCC40 is be assumed.
+** hardware. If 1, the ABCC_HAL_ReadModuleId() function must be implemented
+** in the hardware abstraction layer. If 0, module identification
+** ABP_MODULE_ID_ACTIVE_ABCC40 is assumed.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_MODULE_ID_PINS_CONN
@@ -338,9 +342,9 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
-** Set to 1 if the module detect pins on the ABCC host connector are
-** in use. If 1 the ABCC_HAL_ModuleDetect() function in the hardware abstraction
-** layer must be implemented.
+** Set to 1, if the module detect pins on the ABCC host connector are
+** in use. If 1, the ABCC_HAL_ModuleDetect() function in the hardware
+** abstraction layer must be implemented.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_MOD_DETECT_PINS_CONN
@@ -522,7 +526,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Enable/disable driver support for sync.
-** If 1 the ABCC_CbfSyncIsr() must be implemented by the application.
+** If 1, the ABCC_CbfSyncIsr() must be implemented by the application.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SYNC_ENABLED
@@ -536,10 +540,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Enable/disable driver support to enable and disable sync interrupt using
 ** the sync signal from the ABCC.
-** If 1 ABCC_HAL_SyncInterruptEnable() and ABCC_HAL_SyncInterruptDisable()
+** If 1, ABCC_HAL_SyncInterruptEnable() and ABCC_HAL_SyncInterruptDisable()
 ** must be implemented by the application and ABCC_CbfSyncIsr() must be called
 ** from the sync interrupt handler.
-** If 0 the ABCC interrupt sync event will be used as sync source and
+** If 0, the ABCC interrupt sync event will be used as sync source and
 ** ABCC_CbfSyncIsr() will be called by the driver.
 ** The define is only valid if ABCC_CFG_SYNC_ENABLED is 1.
 **------------------------------------------------------------------------------
@@ -559,7 +563,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** (ABCC_CFG_INT_ENABLED = 0). Presently this is used only to detect the
 ** startup interrupt.
 **
-** If 1 the user must implement the ABCC_HAL_IsAbccInterruptActive() function
+** If 1, the user must implement the ABCC_HAL_IsAbccInterruptActive() function
 ** in the hardware abstraction layer.
 **------------------------------------------------------------------------------
 */
@@ -573,7 +577,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Enable/disable driver support for ABCC interrupt (IRQ_N pin in the host
-** connector). If 1 the user must implement the following functions in the
+** connector). If 1, the user must implement the following functions in the
 ** hardware abstraction layer:
 **
 **    ABCC_HAL_AbccInterruptEnable()
@@ -615,6 +619,9 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** driven SPI based on ABCC events.
 **------------------------------------------------------------------------------
 */
+#ifndef ABCC_CFG_INT_ENABLE_MASK_SPI
+    #define ABCC_CFG_INT_ENABLE_MASK_SPI ( 0 )
+#endif
 
 /*------------------------------------------------------------------------------
 ** #define ABCC_CFG_HANDLE_INT_IN_ISR_MASK  ( ABP_INTMASK_RDPDIEN )
@@ -656,7 +663,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Enable/disable driver and AD object support for the re-map command.
-** If 1 the ABCC_CbfRemapDone() needs to be implemented by the application.
+** If 1, the ABCC_CbfRemapDone() needs to be implemented by the application.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_REMAP_SUPPORT_ENABLED
@@ -884,9 +891,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
-** If 1 a size validation is done in ABCC_SeMsgt* and ABCC_GetMsg* macros where
-** data is copied to/from message buffers. If the attempted set/get would result
-** in a buffer overflow or read out of bounds a fatal event will be logged.
+** If 1, a size validation is done in ABCC_SetMsg* and ABCC_GetMsg* macros
+** (see abcc_message.h) where data is copied to/from message buffers. If the
+** attempted set/get would result in a buffer overflow or read out of bounds,
+** a fatal event will be logged.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_MESSAGE_SIZE_CHECK_ENABLED
@@ -901,18 +909,18 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Sets the startup timeout / delay time.
 **
 ** If the driver has been configured to poll the ABCC interrupt pin
-** (ABCC_CFG_POLL_ABCC_IRQ_PIN_ENABLED) this value will be used as a timeout.
-** If the interrupt signal from the ABCC has not been seen within this time it
+** (ABCC_CFG_POLL_ABCC_IRQ_PIN_ENABLED), this value will be used as a timeout.
+** If the interrupt signal from the ABCC has not been seen within this time, it
 ** is assumed that the ABCC is not present or not responding.
 **
-** If the driver has not been been configured to poll the ABCC interrupt pin
+** If the driver has not been been configured to poll the ABCC interrupt pin,
 ** the driver will wait for this time to expire before starting the handshake
 ** operations against the ABCC.
 **
 ** Check the chapter "Initialization and Startup" in the "Anybus CompactCom 40
 ** Software Design Guide" for more details about the startup stage that this
-** delay is applicable to, and which operation modes that supports direct
-** startup detection via the ABCCs interrupt signal.
+** delay is applicable to, and which operation modes support direct startup
+** detection via the ABCCs interrupt signal.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_STARTUP_TIME_MS
