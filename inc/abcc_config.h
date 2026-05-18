@@ -330,7 +330,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Enable/disable driver to retrieve the module identification from external
 ** hardware. If 1, the ABCC_HAL_ReadModuleId() function must be implemented
 ** in the hardware abstraction layer. If 0, module identification
-** ABP_MODULE_ID_ACTIVE_ABCC40 is be assumed.
+** ABP_MODULE_ID_ACTIVE_ABCC40 is assumed.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_MODULE_ID_PINS_CONN
