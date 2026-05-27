@@ -79,7 +79,7 @@ void ABCC_SpiRunDriver( void )
 }
 
 #if ABCC_CFG_INT_ENABLED
-void ABCC_SpiISR()
+void ABCC_SpiISR( void )
 {
    ABCC_MainStateType eMainState;
 
@@ -99,7 +99,7 @@ void ABCC_SpiISR()
    ABCC_CbfEvent( 0 );
 }
 #else
-void ABCC_SpiISR()
+void ABCC_SpiISR( void )
 {
    ABCC_LOG_WARNING( ABCC_EC_INTERNAL_ERROR,
       0,

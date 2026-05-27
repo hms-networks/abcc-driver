@@ -936,7 +936,7 @@ UINT16 ABCC_ModCap( void )
    return( pnABCC_DrvGetModCap() );
 }
 
-UINT16 ABCC_LedStatus()
+UINT16 ABCC_LedStatus( void )
 {
    return( pnABCC_DrvGetLedStatus() );
 }
