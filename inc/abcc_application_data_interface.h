@@ -259,23 +259,23 @@ AD_SINT64Type;
 **
 ** 2. bDataType               - Element data type format, which can be one of the
 **                              following:
-**                                  ABP_BOOL:    Boolean.
-**                                  ABP_SINT8:   8-bit signed integer.
-**                                  ABP_SINT16:  16-bit signed integer.
-**                                  ABP_SINT32:  32-bit signed integer.
-**                                  ABP_UINT8:   8-bit unsigned integer.
-**                                  ABP_UINT16:  16-bit unsigned integer.
-**                                  ABP_UINT32:  32-bit unsigned integer.
-**                                  ABP_CHAR:    Character.
-**                                  ABP_ENUM:    Enumeration.
-**                                  ABP_SINT64:  64-bit signed integer.
-**                                  ABP_UINT64:  64-bit unsigned integer.
-**                                  ABP_FLOAT:   floating point value (32-bits).
+**                                  ABP_BOOL     Boolean.
+**                                  ABP_SINT8    8-bit signed integer.
+**                                  ABP_SINT16   16-bit signed integer.
+**                                  ABP_SINT32   32-bit signed integer.
+**                                  ABP_UINT8    8-bit unsigned integer.
+**                                  ABP_UINT16   16-bit unsigned integer.
+**                                  ABP_UINT32   32-bit unsigned integer.
+**                                  ABP_CHAR     Character.
+**                                  ABP_ENUM     Enumeration.
+**                                  ABP_SINT64   64-bit signed integer.
+**                                  ABP_UINT64   64-bit unsigned integer.
+**                                  ABP_FLOAT    floating point value (32-bits).
 **                                  ABP_DOUBLE   floating point value (64-bits).
-**                                  ABP_OCTET:   8-bit data.
-**                                  ABP_BITS8:   8-bit data type.
-**                                  ABP_BITS16:  16-bit data type.
-**                                  ABP_BITS32:  32-bit data type.
+**                                  ABP_OCTET    8-bit data.
+**                                  ABP_BITS8    8-bit data type.
+**                                  ABP_BITS16   16-bit data type.
+**                                  ABP_BITS32   32-bit data type.
 **                                  ABP_BIT1     1-bit data type.
 **                                  ABP_BIT2     2-bit data type.
 **                                     :
@@ -283,22 +283,22 @@ AD_SINT64Type;
 **                                  ABP_PAD0     0-pad-bit data type.
 **                                  ABP_PAD1     1-pad-bit data type.
 **                                     :
-**                                  ABP_PAD7     7-pad-bit data type.
+**                                  ABP_PAD16    16-pad-bit data type.
 **                                  ABP_BOOL1    1-bit boolean.
 **
 ** 3. iNumSubElem             - Number of sub elements of the specified (2) bDataType.
 **                              Only allowed to be larger than 1 for ABP_CHAR or ABP_OCTET.
 **
-** 4. bDesc                   - Entry descriptor; bits filled with the following
+** 4. bDesc                   - Entry descriptor.  Bits filled with the following
 **                              configurations:
 **                                  ABP_APPD_DESCR_GET_ACCESS: Get service is
-**                                  allowed on value attribute.
+**                                  allowed on the ADI value attribute.
 **                                  ABP_APPD_DESCR_SET_ACCESS: Set service is
-**                                  allowed on value attribute.
-**                                  ABP_APPD_DESCR_MAPPABLE_WRITE_PD: Set if
-**                                  possible to map.
-**                                  ABP_APPD_DESCR_MAPPABLE_READ_PD: Set if
-**                                  possible to map.
+**                                  allowed on the ADI value attribute.
+**                                  ABP_APPD_DESCR_MAPPABLE_WRITE_PD: Allows the ADI
+**                                  to be mapped as write process data.
+**                                  ABP_APPD_DESCR_MAPPABLE_READ_PD: Allows the ADI
+**                                  to be mapped as read process data.
 **
 ** 5. bBitOffset              - Bit offset, relative to the address in (6) pxValuePtr,
 **                              indicating where this element's data begins within
@@ -313,7 +313,7 @@ AD_SINT64Type;
 **                              an octet boundary, only the starting offset is constrained.
 **
 **                              For PAD entries where pxValuePtr is NULL, this field
-**                              is ignored; the pad width is determined solely by the 
+**                              is ignored; the pad width is determined solely by the
 **                              data type (e.g., ABP_PAD7 = 7 bits of skip). However,
 **                              in the struct ADI example below, it was retained for
 **                              clarity's sake.
@@ -373,7 +373,7 @@ typedef void (*ABCC_GetAdiValueFuncType)( const struct AD_AdiEntry* psAdiEntry,
 ** an action based on the ADI update.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psAdiEntry               - Pointer to ADI entry
+**    psAdiEntry               - Pointer to ADI entry.
 **    bNumElements             - Number of elements that has been updated.
 **    bStartIndex              - Start index of first updated element.
 ** Returns:
@@ -427,7 +427,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **------------------------------------------------------------------------------
 ** 1. iInstance               - ADI instance number (1-65535); 0 is reserved for
 **                              the Application Data (AD) Object itself.
-** 
+**
 **                              NOTE: The entries in the ADI list cannot be
 **                              placed in arbitrary order, they must be sorted
 **                              in ascending order for all lookup functions in
@@ -442,23 +442,23 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                              following (Ignored for structured data types.
 **                              Structures have a separate type indicator for
 **                              each element, see struct type definition above):
-**                                  ABP_BOOL:    Boolean.
-**                                  ABP_SINT8:   8-bit signed integer.
-**                                  ABP_SINT16:  16-bit signed integer.
-**                                  ABP_SINT32:  32-bit signed integer.
-**                                  ABP_UINT8:   8-bit unsigned integer.
-**                                  ABP_UINT16:  16-bit unsigned integer.
-**                                  ABP_UINT32:  32-bit unsigned integer.
-**                                  ABP_CHAR:    Character.
-**                                  ABP_ENUM:    Enumeration.
-**                                  ABP_SINT64:  64-bit signed integer.
-**                                  ABP_UINT64:  64-bit unsigned integer.
-**                                  ABP_FLOAT:   floating point value (32-bits).
-**                                  ABP_DOUBLE:  floating point value (64-bits).
-**                                  ABP_OCTET:   8-bit data.
-**                                  ABP_BITS8:   8-bit data type.
-**                                  ABP_BITS16:  16-bit data type.
-**                                  ABP_BITS32:  32-bit data type.
+**                                  ABP_BOOL     Boolean.
+**                                  ABP_SINT8    8-bit signed integer.
+**                                  ABP_SINT16   16-bit signed integer.
+**                                  ABP_SINT32   32-bit signed integer.
+**                                  ABP_UINT8    8-bit unsigned integer.
+**                                  ABP_UINT16   16-bit unsigned integer.
+**                                  ABP_UINT32   32-bit unsigned integer.
+**                                  ABP_CHAR     Character.
+**                                  ABP_ENUM     Enumeration.
+**                                  ABP_SINT64   64-bit signed integer.
+**                                  ABP_UINT64   64-bit unsigned integer.
+**                                  ABP_FLOAT    floating point value (32-bits).
+**                                  ABP_DOUBLE   floating point value (64-bits).
+**                                  ABP_OCTET    8-bit data.
+**                                  ABP_BITS8    8-bit data type.
+**                                  ABP_BITS16   16-bit data type.
+**                                  ABP_BITS32   32-bit data type.
 **                                  ABP_BIT1     1-bit data type.
 **                                  ABP_BIT2     2-bit data type.
 **                                     :
@@ -466,18 +466,18 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                  ABP_PAD0     0-pad-bit data type.
 **                                  ABP_PAD1     1-pad-bit data type.
 **                                     :
-**                                  ABP_PAD7     7-pad-bit data type.
+**                                  ABP_PAD16    16-pad-bit data type.
 **                                  ABP_BOOL1    1-bit boolean.
 **
 ** 4. bNumOfElements          - For arrays ( psStruct (8) is NULL ):
-**                                  Number of elements of the specified data type (3)
+**                                  Number of elements of the specified data type (3).
 **
 **                            - For structured data type ( psStruct (8) != NULL ):
-**                                  Number of elements in the structure
+**                                  Number of elements in the structure.
 **
-** 5. bDesc                   - Ignored for structured data types ( psStruct (8) != NULL )
+** 5. bDesc                   - Ignored for structured data types ( psStruct (8) != NULL ).
 **                              All other data types:
-**                              Entry descriptor; bits filled with the following
+**                              Entry descriptor.  Bits filled with the following
 **                              configurations:
 **                                  ABP_APPD_DESCR_GET_ACCESS: Get service is
 **                                  allowed on the ADI value attribute.
@@ -488,11 +488,11 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                  ABP_APPD_DESCR_MAPPABLE_READ_PD: Allows the ADI
 **                                  to be mapped as read process data.
 **
-** 6. pxValuePtr              - Ignored for structured data type ( psStruct (8) != NULL )
+** 6. pxValuePtr              - Ignored for structured data type ( psStruct (8) != NULL ).
 **                              All other data types:
 **                              Pointer to the local value variable.
 **
-** 7. psValueProps            - Ignored for structured data type ( psStruct (8) != NULL )
+** 7. psValueProps            - Ignored for structured data type ( psStruct (8) != NULL ).
 **                              All other data types:
 **                              Pointer to the local value properties struct.
 **                              If NULL, no properties are applied (max/min/default).
