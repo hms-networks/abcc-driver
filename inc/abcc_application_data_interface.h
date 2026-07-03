@@ -283,7 +283,7 @@ AD_SINT64Type;
 **                                  ABP_PAD0     0-pad-bit data type.
 **                                  ABP_PAD1     1-pad-bit data type.
 **                                     :
-**                                  ABP_BIT7     7-pad-bit data type.
+**                                  ABP_PAD7     7-pad-bit data type.
 **                                  ABP_BOOL1    1-bit boolean.
 **
 ** 3. iNumSubElem             - Number of sub elements of the specified (2) bDataType.
@@ -316,7 +316,7 @@ AD_SINT64Type;
 **                              is ignored; the pad width is determined solely by the 
 **                              data type (e.g., ABP_PAD7 = 7 bits of skip). However,
 **                              in the struct ADI example below, it was retained for
-**                              clarity sake.
+**                              clarity's sake.
 **
 ** 6. pxValuePtr              - Pointer to the local value variable.
 **
@@ -466,7 +466,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                  ABP_PAD0     0-pad-bit data type.
 **                                  ABP_PAD1     1-pad-bit data type.
 **                                     :
-**                                  ABP_BIT7     7-pad-bit data type.
+**                                  ABP_PAD7     7-pad-bit data type.
 **                                  ABP_BOOL1    1-bit boolean.
 **
 ** 4. bNumOfElements          - For arrays ( psStruct (8) is NULL ):
