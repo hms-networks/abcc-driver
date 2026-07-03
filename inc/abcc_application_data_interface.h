@@ -425,87 +425,89 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **
 ** Note! The example at the end of this file shows how to use this type.
 **------------------------------------------------------------------------------
-** 1. iInstance               - ADI instance number (1-65535); 0 is reserved for
-**                              the Application Data (AD) Object itself.
+** 1. iInstance                 - ADI instance number (1-65535); 0 is reserved for
+**                                the Application Data (AD) Object itself.
+**                              
+**                                NOTE: The entries in the ADI list cannot be
+**                                placed in arbitrary order, they must be sorted
+**                                in ascending order for all lookup functions in
+**                                the driver and the Application Data Object to
+**                                work as intended!
+**                              
+** 2. pacName                   - Name of the ADI as a character string
+**                                (ADI instance attribute #1).
+**                                If NULL, a 0 length name will be returned.
+**                              
+** 3. bDataType                 - ADI data type format, which can be one of the
+**                                following (Ignored for structured data types.
+**                                Structures have a separate type indicator for
+**                                each element, see struct type definition above):
+**                                    ABP_BOOL     Boolean.
+**                                    ABP_SINT8    8-bit signed integer.
+**                                    ABP_SINT16   16-bit signed integer.
+**                                    ABP_SINT32   32-bit signed integer.
+**                                    ABP_UINT8    8-bit unsigned integer.
+**                                    ABP_UINT16   16-bit unsigned integer.
+**                                    ABP_UINT32   32-bit unsigned integer.
+**                                    ABP_CHAR     Character.
+**                                    ABP_ENUM     Enumeration.
+**                                    ABP_SINT64   64-bit signed integer.
+**                                    ABP_UINT64   64-bit unsigned integer.
+**                                    ABP_FLOAT    floating point value (32-bits).
+**                                    ABP_DOUBLE   floating point value (64-bits).
+**                                    ABP_OCTET    8-bit data.
+**                                    ABP_BITS8    8-bit data type.
+**                                    ABP_BITS16   16-bit data type.
+**                                    ABP_BITS32   32-bit data type.
+**                                    ABP_BIT1     1-bit data type.
+**                                    ABP_BIT2     2-bit data type.
+**                                       :
+**                                    ABP_BIT7     7-bit data type.
+**                                    ABP_PAD0     0-pad-bit data type.
+**                                    ABP_PAD1     1-pad-bit data type.
+**                                       :
+**                                    ABP_PAD16    16-pad-bit data type.
+**                                    ABP_BOOL1    1-bit boolean.
+**                              
+** 4. bNumOfElements            - For arrays ( psStruct (8) is NULL ):
+**                                    Number of elements of the specified data type (3).
+**                              
+**                              - For structured data type ( psStruct (8) != NULL ):
+**                                    Number of elements in the structure.
+**                              
+** 5. bDesc                     - Ignored for structured data types ( psStruct (8) != NULL ).
+**                                All other data types:
+**                                Entry descriptor.  Bits filled with the following
+**                                configurations:
+**                                    ABP_APPD_DESCR_GET_ACCESS: Get service is
+**                                    allowed on the ADI value attribute.
+**                                    ABP_APPD_DESCR_SET_ACCESS: Set service is
+**                                    allowed on the ADI value attribute.
+**                                    ABP_APPD_DESCR_MAPPABLE_WRITE_PD: Allows the ADI
+**                                    to be mapped as write process data.
+**                                    ABP_APPD_DESCR_MAPPABLE_READ_PD: Allows the ADI
+**                                    to be mapped as read process data.
+**                              
+** 6. pxValuePtr                - Ignored for structured data type ( psStruct (8) != NULL ).
+**                                All other data types:
+**                                Pointer to the local value variable.
+**                              
+** 7. psValueProps              - Ignored for structured data type ( psStruct (8) != NULL ).
+**                                All other data types:
+**                                Pointer to the local value properties struct.
+**                                If NULL, no properties are applied (max/min/default).
+**                              
+** 8. psStruct(optional)        - Pointer to an AD_StructDataType.
+**                                Set to NULL for non-structured data type. This field is
+**                                enabled by defining ABCC_CFG_STRUCT_DATA_TYPE_ENABLED.
+**                              
+** 9. pnGetAdiValue (optional)  - Pointer to an ABCC_GetAdiValueFuncType.
+**                                If defined, the function pointed-to is called when
+**                                getting the ADI value.
 **
-**                              NOTE: The entries in the ADI list cannot be
-**                              placed in arbitrary order, they must be sorted
-**                              in ascending order for all lookup functions in
-**                              the driver and the Application Data Object to
-**                              work as intended!
-**
-** 2. pacName                 - Name of the ADI as a character string
-**                              (ADI instance attribute #1).
-**                              If NULL, a 0 length name will be returned.
-**
-** 3. bDataType               - ADI data type format, which can be one of the
-**                              following (Ignored for structured data types.
-**                              Structures have a separate type indicator for
-**                              each element, see struct type definition above):
-**                                  ABP_BOOL     Boolean.
-**                                  ABP_SINT8    8-bit signed integer.
-**                                  ABP_SINT16   16-bit signed integer.
-**                                  ABP_SINT32   32-bit signed integer.
-**                                  ABP_UINT8    8-bit unsigned integer.
-**                                  ABP_UINT16   16-bit unsigned integer.
-**                                  ABP_UINT32   32-bit unsigned integer.
-**                                  ABP_CHAR     Character.
-**                                  ABP_ENUM     Enumeration.
-**                                  ABP_SINT64   64-bit signed integer.
-**                                  ABP_UINT64   64-bit unsigned integer.
-**                                  ABP_FLOAT    floating point value (32-bits).
-**                                  ABP_DOUBLE   floating point value (64-bits).
-**                                  ABP_OCTET    8-bit data.
-**                                  ABP_BITS8    8-bit data type.
-**                                  ABP_BITS16   16-bit data type.
-**                                  ABP_BITS32   32-bit data type.
-**                                  ABP_BIT1     1-bit data type.
-**                                  ABP_BIT2     2-bit data type.
-**                                     :
-**                                  ABP_BIT7     7-bit data type.
-**                                  ABP_PAD0     0-pad-bit data type.
-**                                  ABP_PAD1     1-pad-bit data type.
-**                                     :
-**                                  ABP_PAD16    16-pad-bit data type.
-**                                  ABP_BOOL1    1-bit boolean.
-**
-** 4. bNumOfElements          - For arrays ( psStruct (8) is NULL ):
-**                                  Number of elements of the specified data type (3).
-**
-**                            - For structured data type ( psStruct (8) != NULL ):
-**                                  Number of elements in the structure.
-**
-** 5. bDesc                   - Ignored for structured data types ( psStruct (8) != NULL ).
-**                              All other data types:
-**                              Entry descriptor.  Bits filled with the following
-**                              configurations:
-**                                  ABP_APPD_DESCR_GET_ACCESS: Get service is
-**                                  allowed on the ADI value attribute.
-**                                  ABP_APPD_DESCR_SET_ACCESS: Set service is
-**                                  allowed on the ADI value attribute.
-**                                  ABP_APPD_DESCR_MAPPABLE_WRITE_PD: Allows the ADI
-**                                  to be mapped as write process data.
-**                                  ABP_APPD_DESCR_MAPPABLE_READ_PD: Allows the ADI
-**                                  to be mapped as read process data.
-**
-** 6. pxValuePtr              - Ignored for structured data type ( psStruct (8) != NULL ).
-**                              All other data types:
-**                              Pointer to the local value variable.
-**
-** 7. psValueProps            - Ignored for structured data type ( psStruct (8) != NULL ).
-**                              All other data types:
-**                              Pointer to the local value properties struct.
-**                              If NULL, no properties are applied (max/min/default).
-**
-** 8. psStruct(optional)      - Pointer to an AD_StructDataType.
-**                              Set to NULL for non-structured data type. This field is
-**                              enabled by defining ABCC_CFG_STRUCT_DATA_TYPE_ENABLED.
-**
-** 9. pnGetAdiValue (optional)- Pointer to an ABCC_GetAdiValueFuncType.
-**                              If defined, the pointed function is called when getting ADI value.
-**
-** 10. pnSetAdiValue (optional)- Pointer to an ABCC_SetAdiValueFuncType.
-**                               If defined, the pointed function is called when setting ADI value.
+** 10. pnSetAdiValue (optional) - Pointer to an ABCC_SetAdiValueFuncType.
+**                               If defined, the function pointed-to is called when
+**                               getting the ADI value.
 **
 ** 11. pnSetAdiValueTransparent (optional) - Pointer to an
 **                                           ABCC_AdiTransparentSetFuncType.
@@ -606,7 +608,7 @@ AD_MapType sDefaultMap[] =
 
 
 /*******************************************************************************
-** Example of ADI mapping structured data type.
+** Example of ADI mapping with structured data type support.
 ** (ABCC_CFG_STRUCT_DATA_TYPE_ENABLED defined to 1 in abcc_driver_config.h )
 ********************************************************************************
 */
