@@ -323,7 +323,7 @@ AD_SINT64Type;
 ** 7. psValueProps            - Pointer to the local value properties struct.
 **                              If NULL, no properties are applied (max/min/default).
 ** --------------------------------------------------------------------------------------------------------------------
-** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. pxValuePropPtr |
+** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. psValueProps |
 ** --------------------------------------------------------------------------------------------------------------------
 **------------------------------------------------------------------------------
 */
@@ -516,7 +516,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                           if the application e.g. needs to
 **                                           validate the ADI data.
 ** ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. pxValuePtr | 7. pxValuePropPtr | 8. psStruct | 9. pnGetAdiValue | 10. pnSetAdiValue | 11. pnSetAdiValueTransparent |
+** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. pxValuePtr | 7. psValueProps | 8. psStruct | 9. pnGetAdiValue | 10. pnSetAdiValue | 11. pnSetAdiValueTransparent |
 ** ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **------------------------------------------------------------------------------
 */
@@ -560,7 +560,7 @@ const AD_AdiEntryType AD_asADIEntryList[] =
 {
    /*
    ** --------------------------------------------------------------------------------------------------------------
-   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. pxValuePropPtr |
+   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. psValueProps |
    ** --------------------------------------------------------------------------------------------------------------
    */
    {  1,    "RadOnOff_BOOL8",            ABP_BOOL,   1,  ADI_DESCR_ALL_ACCESS,  { {  &VAPP_fRadOnOff,            &VAPP_BOOL8Props_fRadOnOff           } } },
@@ -650,7 +650,7 @@ static const AD_StructDataType ABCC_API_AdiStruct1[] =
 {
    /*
    ** --------------------------------------------------------------------------------------------------------------------
-   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. pxValuePropPtr |
+   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. psValueProps |
    ** --------------------------------------------------------------------------------------------------------------------
    */
    /* Index: 0 */ {  "Element01",  ABP_UINT16,  1,  ADI_DESCR_ALL_ACCESS,  0,  { {  &struct1.iData,  NULL  } } },
@@ -685,7 +685,7 @@ static const AD_StructDataType ABCC_API_AdiStruct2[] =
 {
    /*
    ** --------------------------------------------------------------------------------------------------------------------
-   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. pxValuePropPtr |
+   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. psValueProps |
    ** --------------------------------------------------------------------------------------------------------------------
    */
    /* Index: 0 */ {  "Element01",  ABP_BIT5,    1,  ADI_DESCR_ALL_ACCESS,  0,  { {  &struct2.bBitData[ 0 ],  NULL  } } }, /* First 5 bits in struct2.bBitData[ 0 ]                                       */
@@ -706,7 +706,7 @@ const AD_AdiEntryType AD_asADIEntryList[] =
 {
    /*
    ** ----------------------------------------------------------------------------------------------------------------------------
-   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. pxValuePropPtr | 8. psStruct |
+   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. psValueProps | 8. psStruct |
    ** ----------------------------------------------------------------------------------------------------------------------------
    */
    {  10,  "Struct1",   ABP_BOOL,   2,  ADI_DESCR_ALL_ACCESS,  { { NULL,    NULL } },  ABCC_API_AdiStruct1  },
