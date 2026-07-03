@@ -302,8 +302,8 @@ AD_SINT64Type;
 **
 ** 5. bBitOffset              - Bit offset, relative to the address in (6) pxValuePtr,
 **                              indicating where this element's data begins within
-**                              the holder variable. This allows to pack multiple bit-type
-**                              data types in the ADI placeholder.
+**                              the holder variable. This allows packing multiple
+**                              bit-type data types in the ADI placeholder.
 **
 **                              On 8-bit char platforms, the offset must fall within
 **                              an octet (bits 0-7); on 16-bit char systems, within
@@ -434,7 +434,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                              the driver and the Application Data Object to
 **                              work as intended!
 **
-** 2. pabName                 - Name of the ADI as a character string
+** 2. pacName                 - Name of the ADI as a character string
 **                              (ADI instance attribute #1).
 **                              If NULL, a 0 length name will be returned.
 **
@@ -514,7 +514,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                           if the application e.g. needs to
 **                                           validate the ADI data.
 ** ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-** | 1. iInstance | 2. pabName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. pxValuePtr | 7. pxValuePropPtr | 8. psStruct | 9. pnGetAdiValue | 10. pnSetAdiValue | 11. pnSetAdiValueTransparent |
+** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. pxValuePtr | 7. pxValuePropPtr | 8. psStruct | 9. pnGetAdiValue | 10. pnSetAdiValue | 11. pnSetAdiValueTransparent |
 ** ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **------------------------------------------------------------------------------
 */
@@ -558,7 +558,7 @@ const AD_AdiEntryType AD_asADIEntryList[] =
 {
    /*
    ** --------------------------------------------------------------------------------------------------------------
-   ** | 1. iInstance | 2. pabName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. pxValuePropPtr |
+   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. pxValuePropPtr |
    ** --------------------------------------------------------------------------------------------------------------
    */
    {  1,    "RadOnOff_BOOL8",            ABP_BOOL,   1,  ADI_DESCR_ALL_ACCESS,  { {  &VAPP_fRadOnOff,            &VAPP_BOOL8Props_fRadOnOff           } } },
@@ -704,7 +704,7 @@ const AD_AdiEntryType AD_asADIEntryList[] =
 {
    /*
    ** ----------------------------------------------------------------------------------------------------------------------------
-   ** | 1. iInstance | 2. pabName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. pxValuePropPtr | 8. psStruct |
+   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6.pxValuePtr | 7. pxValuePropPtr | 8. psStruct |
    ** ----------------------------------------------------------------------------------------------------------------------------
    */
    {  10,  "Struct1",   ABP_BOOL,   2,  ADI_DESCR_ALL_ACCESS,  { { NULL,    NULL } },  ABCC_API_AdiStruct1  },
