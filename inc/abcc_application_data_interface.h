@@ -307,7 +307,7 @@ AD_SINT64Type;
 **
 **                              On 8-bit char platforms, the offset must fall within
 **                              an octet (bits 0-7); on 16-bit char systems, within
-**                              a 16 bit word (bits 0-15).
+**                              a 16-bit word (bits 0-15).
 **
 **                              Note that the bit field itself is permitted to cross
 **                              an octet boundary, only the starting offset is constrained.
@@ -427,7 +427,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **------------------------------------------------------------------------------
 ** 1. iInstance                 - ADI instance number (1-65535); 0 is reserved for
 **                                the Application Data (AD) Object itself.
-**                              
+**
 **                                NOTE: The entries in the ADI list cannot be
 **                                placed in arbitrary order, they must be sorted
 **                                in ascending order for all lookup functions in
