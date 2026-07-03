@@ -582,7 +582,7 @@ const AD_AdiEntryType AD_asADIEntryList[] =
 ** Array of mapping elements containing ADI in AD_asADIEntryList
 ** in native mapping order and direction of the map.
 **
-** Note! Mapping sequence is terminated by AD_DEFAULT_MAP_ENTRY and
+** Note! Mapping sequence is terminated by AD_MAP_END_ENTRY and
 ** MUST be present at the end of list.
 **------------------------------------------------------------------------------
 */
