@@ -506,8 +506,8 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                getting the ADI value.
 **
 ** 10. pnSetAdiValue (optional) - Pointer to an ABCC_SetAdiValueFuncType.
-**                               If defined, the function pointed-to is called when
-**                               getting the ADI value.
+**                                If defined, the function pointed-to is called when
+**                                setting the ADI value.
 **
 ** 11. pnSetAdiValueTransparent (optional) - Pointer to an
 **                                           ABCC_AdiTransparentSetFuncType.
