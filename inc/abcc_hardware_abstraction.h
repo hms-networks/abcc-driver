@@ -5,6 +5,32 @@
 ** File Description:
 ** Defines system specific interface.
 ********************************************************************************
+** Services:
+**    ABCC_HAL_AbccInterruptEnable   - Enable hardware interrupt.
+**    ABCC_HAL_AbccInterruptDisable  - Disable hardware interrupt.
+**    ABCC_HAL_SyncInterruptEnable   - Enable sync interrupt.
+**    ABCC_HAL_SyncInterruptDisable  - Disable sync interrupt.
+**    ABCC_HAL_HWReset               - Puts Anybus HW into reset.
+**    ABCC_HAL_HWReleaseReset        - Pulls Anybus HW out of reset.
+**    ABCC_HAL_IsAbccInterruptActive - Check if interrupt is active.
+**    ABCC_HAL_ReadModuleId          - Read Module Identification pins from the
+**                                     ABCC interface.
+**    ABCC_HAL_SetOpmode             - Sets ABCC Operating Mode pins from the
+**                                     ABCC interface.
+**    ABCC_HAL_GetOpmode             - Reads ABCC Operating Mode from hardware.
+**    ABCC_HAL_ModuleDetect          - Detects if a module is present by reading
+**                                     the Module Detection pins.
+**    ABCC_HAL_HwInit                - Initiate local hardware before driver
+**                                     startup.
+**    ABCC_HAL_GpioReset             - Clear a digital output for SYNC timing
+**                                     measurements.
+**    ABCC_HAL_GpioSet               - Set a digital output for SYNC timing
+**                                     measurements.
+**    ABCC_HAL_Init                  - Hardware or system dependent
+**                                     initialization.
+**    ABCC_HAL_Close                 - Close or free all resources allocated in
+**                                     ABCC_HAL_Init.
+********************************************************************************
 */
 #ifndef ABCC_HAL_
 #define ABCC_HAL_
@@ -12,9 +38,10 @@
 #include "abcc_types.h"
 
 /*------------------------------------------------------------------------------
-** Enable the ABCC HW interrupt (IRQ_N pin on the application interface)
-** This function will be called by the driver when the ABCC interrupt shall be
-** enabled.
+** This function shall enable the interrupt functionality on the
+** host controller side for the GPIO connected to the ABCC /IRQ pin
+** on the application interface. It is called by the driver
+** when the ABCC interrupt shall be enabled.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -28,7 +55,10 @@ EXTFUNC void ABCC_HAL_AbccInterruptEnable( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** Disable ABCC HW interrupt (IRQ_N pin on the application interface)
+** This function shall disable the interrupt functionality on the
+** host controller side for the GPIO connected to the ABCC /IRQ pin
+** on the application interface. It is called by the driver
+** when the ABCC interrupt shall be disabled.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -42,10 +72,10 @@ EXTFUNC void ABCC_HAL_AbccInterruptDisable( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** Enable the sync interrupt triggered by the sync pin on the application
-** interface (MI0/SYNC).
-** This function will be called by the driver when the sync interrupt shall be
-** enabled.
+** This function shall enable the interrupt functionality on the
+** host controller side for the GPIO connected to the
+** ABCC MI0/SYNC pin on the application interface. It is called
+** by the driver when the sync interrupt shall be enabled.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -59,7 +89,10 @@ EXTFUNC void ABCC_HAL_SyncInterruptEnable( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** Disable sync interrupt
+** This function shall disable the interrupt functionality on the
+** host controller side for the GPIO connected to the
+** ABCC MI0/SYNC pin on the application interface. It is called
+** by the driver when the sync interrupt shall be disabled.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -73,7 +106,7 @@ EXTFUNC void ABCC_HAL_SyncInterruptDisable( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** Reset ABCC. Set the reset pin on the ABCC interface to low.
+** Reset ABCC. Set the /Reset pin on the ABCC interface to LOW.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -85,7 +118,7 @@ EXTFUNC void ABCC_HAL_SyncInterruptDisable( void );
 EXTFUNC void ABCC_HAL_HWReset( void );
 
 /*------------------------------------------------------------------------------
-** Release reset of ABCC. Sets the reset pin on the ABCC_ interface to high.
+** Release reset of ABCC. Sets the /Reset pin on the ABCC interface to HIGH.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -97,8 +130,11 @@ EXTFUNC void ABCC_HAL_HWReset( void );
 EXTFUNC void ABCC_HAL_HWReleaseReset( void );
 
 /*------------------------------------------------------------------------------
-** This function shall be able to read the interrupt signal from the ABCC. It is
-** used to enable polling of interrupts if they should not be enabled.
+** This function shall read the interrupt signal from the CompactCom
+** and return TRUE if the interrupt pin is LOW (i.e. interrupt is active)
+** and return FALSE if the interrupt pin is HIGH (i.e. the interrupt is
+** inactive). It is used to poll the interrupt pin of the CompactCom interface
+** if interrupts are not enabled.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -112,9 +148,10 @@ EXTFUNC BOOL ABCC_HAL_IsAbccInterruptActive( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** Read Module Identification pins on the host connector.
-** If the identification pins are not connected the ABCC_CFG_MODULE_ID_PINS_CONN
-** definition must be set to 0 in abcc_driver_config.h.
+** This function shall read the Module Identification pins MI0/MI1
+** on the CompactCom. If the Module Identification pins are not connected,
+** the ABCC_CFG_MODULE_ID_PINS_CONN definition must be set to 0
+** in abcc_driver_config.h.
 **
 ** Valid return values:
 **    00b (0) Active CompactCom 30-series
@@ -135,10 +172,11 @@ EXTFUNC UINT8 ABCC_HAL_ReadModuleId( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** Sets ABCC Operating Mode pins on the ABCC interface. If the operating mode is
-** fixed the definition ABCC_CFG_ABCC_OP_MODE_X shall be set to the configured
-** operating mode instead of implementing this function. If it is hardware
-** configurable ABCC_CFG_OP_MODE_HW_CONF must be defined.
+** This function shall set ABCC Operating Mode pins OM0..3 on the
+** ABCC interface in case the operating mode is configurable. Otherwise,
+** the definition ABCC_CFG_ABCC_OP_MODE_X shall be set to the configured in
+** abcc_driver_config.h instead of implementing this function. If it is
+** hardware configurable, ABCC_CFG_OP_MODE_HW_CONF must be defined.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    bOpMode - 1 SPI
@@ -160,10 +198,8 @@ EXTFUNC void ABCC_HAL_SetOpmode( UINT8 bOpMode );
 #endif
 
 /*------------------------------------------------------------------------------
-** Read the configured operating mode to be used from hardware. It could be
-** either e.g. a switch or the operating mode pins of the host connector.
-** This function needs to be implemented if the operating mode is hardware
-** configurable.
+** This function shall return the operating mode fetched from an external source.
+** and needs to be implemented if the operating mode is hardware configurable.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -185,10 +221,10 @@ EXTFUNC UINT8 ABCC_HAL_GetOpmode( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** Detects if a module is present by reading the Module Detection pins on the
-** ABCC interface.
-** If the ABCC Module detection pins are not connected
-** ABCC_CFG_MOD_DETECT_PINS_CONN must be defined.
+** This function shall detects if a module is present by reading the
+** Module Detection pins MD on the ABCC interface. If the Module Detection pins
+** are not connected, the ABCC_CFG_MOD_DETECT_PINS_CONN definition must be set
+** to 0 in abcc_driver_config.h.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -205,7 +241,7 @@ EXTFUNC BOOL ABCC_HAL_ModuleDetect( void );
 /*------------------------------------------------------------------------------
 ** This function is called by the driver from the ABCC_HwInit() interface.
 ** If there is any hardware or system dependent initialization required
-** to be done at the power up initialization it shall be done here.
+** to be done at the power up initialization, it shall be done here.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
@@ -254,9 +290,9 @@ EXTFUNC void ABCC_HAL_GpioSet( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** This function is called by the driver at the beginning ABCC_StartDriver().
+** This function is called by the driver at the beginning of ABCC_StartDriver().
 ** If there is any hardware specific tasks required to be done every time the
-** driver starts it shall be done here. Note that ABCC_StartDriver() will also
+** driver starts, it shall be done here. Note that ABCC_StartDriver() will also
 ** be called during restart of the driver.
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -270,10 +306,10 @@ EXTFUNC void ABCC_HAL_GpioSet( void );
 EXTFUNC BOOL ABCC_HAL_Init( void );
 
 /*------------------------------------------------------------------------------
-** Called from driver at the end of ABCC_ShutDown(). Any hardware specific
-** tasks that is required to be done every time the driver is stopped it shall
-** be done here. Note that the driver could be started  again by calling
-** ABCC_StartDriver().
+** This function is called by the driver at the end of ABCC_ShutDown().
+** Any hardware specific tasks that are required to be done every time
+** the driver is stopped, shall be done here. Note that the driver
+** could be started again by calling ABCC_StartDriver().
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
