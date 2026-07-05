@@ -6,13 +6,13 @@
 ** Defines system specific interface.
 ********************************************************************************
 ** Services:
-**    ABCC_HAL_AbccInterruptEnable   - Enable hardware interrupt.
-**    ABCC_HAL_AbccInterruptDisable  - Disable hardware interrupt.
-**    ABCC_HAL_SyncInterruptEnable   - Enable sync interrupt.
-**    ABCC_HAL_SyncInterruptDisable  - Disable sync interrupt.
+**    ABCC_HAL_AbccInterruptEnable   - Enable hardware interrupt on GPIO.
+**    ABCC_HAL_AbccInterruptDisable  - Disable hardware interrupt on GPIO.
+**    ABCC_HAL_SyncInterruptEnable   - Enable sync interrupt on GPIO.
+**    ABCC_HAL_SyncInterruptDisable  - Disable sync interrupt on GPIO.
 **    ABCC_HAL_HWReset               - Puts Anybus HW into reset.
 **    ABCC_HAL_HWReleaseReset        - Pulls Anybus HW out of reset.
-**    ABCC_HAL_IsAbccInterruptActive - Check if interrupt is active.
+**    ABCC_HAL_IsAbccInterruptActive - Poll ABCC interrupt pin.
 **    ABCC_HAL_ReadModuleId          - Read Module Identification pins from the
 **                                     ABCC interface.
 **    ABCC_HAL_SetOpmode             - Sets ABCC Operating Mode pins from the
@@ -140,7 +140,7 @@ EXTFUNC void ABCC_HAL_HWReleaseReset( void );
 **       None.
 **
 ** Returns:
-**       Returns TRUE if an interrupt is active, otherwise it returns 0.
+**       Return TRUE if an interrupt is active, otherwise return FALSE.
 **------------------------------------------------------------------------------
 */
 #if ABCC_CFG_POLL_ABCC_IRQ_PIN_ENABLED
@@ -174,9 +174,9 @@ EXTFUNC UINT8 ABCC_HAL_ReadModuleId( void );
 /*------------------------------------------------------------------------------
 ** This function shall set ABCC Operating Mode pins OM0..3 on the
 ** ABCC interface in case the operating mode is configurable. Otherwise,
-** the definition ABCC_CFG_ABCC_OP_MODE_X shall be set to the configured in
-** abcc_driver_config.h instead of implementing this function. If it is
-** hardware configurable, ABCC_CFG_OP_MODE_HW_CONF must be defined.
+** the definition ABCC_CFG_ABCC_OP_MODE_X shall be set in abcc_driver_config.h
+** instead of implementing this function. If it is hardware configurable,
+** ABCC_CFG_OP_MODE_HW_CONF must be defined.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    bOpMode - 1 SPI
@@ -198,7 +198,7 @@ EXTFUNC void ABCC_HAL_SetOpmode( UINT8 bOpMode );
 #endif
 
 /*------------------------------------------------------------------------------
-** This function shall return the operating mode fetched from an external source.
+** This function shall return the operating mode fetched from an external source
 ** and needs to be implemented if the operating mode is hardware configurable.
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -224,7 +224,7 @@ EXTFUNC UINT8 ABCC_HAL_GetOpmode( void );
 ** This function shall detects if a module is present by reading the
 ** Module Detection pins MD on the ABCC interface. If the Module Detection pins
 ** are not connected, the ABCC_CFG_MOD_DETECT_PINS_CONN definition must be set
-** to 0 in abcc_driver_config.h.
+** to 0 in abcc_driver_config.h instead of implementing this function.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
