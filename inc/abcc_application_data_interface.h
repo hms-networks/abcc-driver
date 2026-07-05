@@ -300,7 +300,7 @@ AD_SINT64Type;
 **                                  ABP_APPD_DESCR_MAPPABLE_READ_PD: Allows the ADI
 **                                  to be mapped as read process data.
 **
-** 5. bBitOffset              - Bit offset, relative to the address in (6) pxValuePtr,
+** 5. bBitOffset              - Bit offset, relative to the address in (6) psValuePtr,
 **                              indicating where this element's data begins within
 **                              the holder variable. This allows packing multiple
 **                              bit-type data types in the ADI placeholder.
@@ -312,18 +312,18 @@ AD_SINT64Type;
 **                              Note that the bit field itself is permitted to cross
 **                              an octet boundary, only the starting offset is constrained.
 **
-**                              For PAD entries where pxValuePtr is NULL, this field
+**                              For PAD entries where psValuePtr is NULL, this field
 **                              is ignored; the pad width is determined solely by the
 **                              data type (e.g., ABP_PAD7 = 7 bits of skip). However,
 **                              in the struct ADI example below, it was retained for
 **                              clarity's sake.
 **
-** 6. pxValuePtr              - Pointer to the local value variable.
+** 6. psValuePtr              - Pointer to the local value variable.
 **
 ** 7. psValueProps            - Pointer to the local value properties struct.
 **                              If NULL, no properties are applied (max/min/default).
 ** ------------------------------------------------------------------------------------------------------------------
-** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. psValueProps |
+** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. psValuePtr | 7. psValueProps |
 ** ------------------------------------------------------------------------------------------------------------------
 **------------------------------------------------------------------------------
 */
@@ -488,7 +488,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                    ABP_APPD_DESCR_MAPPABLE_READ_PD: Allows the ADI
 **                                    to be mapped as read process data.
 **
-** 6. pxValuePtr                - Ignored for structured data type ( psStruct (8) != NULL ).
+** 6. psValuePtr                - Ignored for structured data type ( psStruct (8) != NULL ).
 **                                All other data types:
 **                                Pointer to the local value variable.
 **
@@ -516,7 +516,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                           if the application e.g. needs to
 **                                           validate the ADI data.
 ** -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. pxValuePtr | 7. psValueProps | 8. psStruct | 9. pnGetAdiValue | 10. pnSetAdiValue | 11. pnSetAdiValueTransparent |
+** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. psValuePtr | 7. psValueProps | 8. psStruct | 9. pnGetAdiValue | 10. pnSetAdiValue | 11. pnSetAdiValueTransparent |
 ** -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **------------------------------------------------------------------------------
 */
@@ -560,7 +560,7 @@ const AD_AdiEntryType AD_asADIEntryList[] =
 {
    /*
    ** -------------------------------------------------------------------------------------------------------------
-   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. pxValuePtr | 7. psValueProps |
+   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. psValuePtr | 7. psValueProps |
    ** -------------------------------------------------------------------------------------------------------------
    */
    {  1,    "RadOnOff_BOOL8",            ABP_BOOL,   1,  ADI_DESCR_ALL_ACCESS,  { {  &VAPP_fRadOnOff,            &VAPP_BOOL8Props_fRadOnOff           } } },
@@ -650,7 +650,7 @@ static const AD_StructDataType ABCC_API_AdiStruct1[] =
 {
    /*
    ** ------------------------------------------------------------------------------------------------------------------
-   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. psValueProps |
+   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. psValuePtr | 7. psValueProps |
    ** ------------------------------------------------------------------------------------------------------------------
    */
    /* Index: 0 */ {  "Element01",  ABP_UINT16,  1,  ADI_DESCR_ALL_ACCESS,  0,  { {  &struct1.iData,  NULL  } } },
@@ -685,7 +685,7 @@ static const AD_StructDataType ABCC_API_AdiStruct2[] =
 {
    /*
    ** ------------------------------------------------------------------------------------------------------------------
-   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. pxValuePtr | 7. psValueProps |
+   ** | 1. pacElementName | 2. bDataType | 3. iNumSubElem | 4. bDesc | 5. bBitOffset | 6. psValuePtr | 7. psValueProps |
    ** ------------------------------------------------------------------------------------------------------------------
    */
    /* Index: 0 */ {  "Element01",  ABP_BIT5,    1,  ADI_DESCR_ALL_ACCESS,  0,  { {  &struct2.bBitData[ 0 ],  NULL  } } }, /* First 5 bits in struct2.bBitData[ 0 ]                                       */
@@ -706,7 +706,7 @@ const AD_AdiEntryType AD_asADIEntryList[] =
 {
    /*
    ** ---------------------------------------------------------------------------------------------------------------------------
-   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. pxValuePtr | 7. psValueProps | 8. psStruct |
+   ** | 1. iInstance | 2. pacName | 3. bDataType | 4. bNumOfElements | 5. bDesc | 6. psValuePtr | 7. psValueProps | 8. psStruct |
    ** ---------------------------------------------------------------------------------------------------------------------------
    */
    {  10,  "Struct1",   ABP_BOOL,   2,  ADI_DESCR_ALL_ACCESS,  { { NULL,    NULL } },  ABCC_API_AdiStruct1  },
@@ -750,13 +750,13 @@ AD_MapType sDefaultMap[] =
    ** | 1. iInstance | 2. eDir | 3. bNumElem | 4. bElemStartIndex |
    ** -------------------------------------------------------------
    */
-   {  10,              PD_READ,   AD_MAP_ALL_ELEM,  0  },          /* ADI 10  is mapped. ( All elements )                  */
+   {  10,              PD_READ,   AD_MAP_ALL_ELEM,          0  },  /* ADI 10  is mapped. ( All elements )                  */
    {  20,              PD_READ,   1,                        1  },  /* ADI 20  element 1 (index) is mapped. ( 4 Bits )      */
    {  AD_MAP_PAD_ADI,  PD_READ,   4,                        0  },  /* PAD process data with 4 bits for correct alignment.  */
    {  30,              PD_READ,   1,                        0  },  /* Map ADI 30.                                          */
    {  20,              PD_WRITE,  2,                        0  },  /* ADI 20 element 0 and 1 is mapped. ( 9 bits )         */
    {  AD_MAP_PAD_ADI,  PD_WRITE,  7,                        0  },  /* PAD process data with 7 bits for correct alignment.  */
-   {  AD_MAP_END_ENTRY                                 }
+   {  AD_MAP_END_ENTRY                                         }
 };
 
 
