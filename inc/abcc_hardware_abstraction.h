@@ -15,11 +15,11 @@
 **    ABCC_HAL_IsAbccInterruptActive - Poll ABCC interrupt pin.
 **    ABCC_HAL_ReadModuleId          - Read Module Identification pins from the
 **                                     ABCC interface.
-**    ABCC_HAL_SetOpmode             - Sets ABCC Operating Mode pins from the
+**    ABCC_HAL_SetOpmode             - Sets ABCC Operating Mode pins on the
 **                                     ABCC interface.
 **    ABCC_HAL_GetOpmode             - Reads ABCC Operating Mode from hardware.
-**    ABCC_HAL_ModuleDetect          - Detects if a module is present by reading
-**                                     the Module Detection pins.
+**    ABCC_HAL_ModuleDetect          - Detects if an ABCC module is present
+**                                     by reading the Module Detection pins.
 **    ABCC_HAL_HwInit                - Initialize local hardware before driver
 **                                     startup.
 **    ABCC_HAL_GpioReset             - Clear a digital output for SYNC timing
@@ -39,7 +39,7 @@
 
 /*------------------------------------------------------------------------------
 ** This function shall enable the interrupt functionality on the
-** host controller side for the GPIO connected to the ABCC /IRQ pin
+** host controller side for the GPIO connected to the ABCC IRQ_N pin
 ** on the application interface. It is called by the driver
 ** when the ABCC interrupt shall be enabled.
 **------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ EXTFUNC void ABCC_HAL_AbccInterruptEnable( void );
 
 /*------------------------------------------------------------------------------
 ** This function shall disable the interrupt functionality on the
-** host controller side for the GPIO connected to the ABCC /IRQ pin
+** host controller side for the GPIO connected to the ABCC IRQ_N pin
 ** on the application interface. It is called by the driver
 ** when the ABCC interrupt shall be disabled.
 **------------------------------------------------------------------------------
