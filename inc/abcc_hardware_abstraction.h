@@ -20,7 +20,7 @@
 **    ABCC_HAL_GetOpmode             - Reads ABCC Operating Mode from hardware.
 **    ABCC_HAL_ModuleDetect          - Detects if a module is present by reading
 **                                     the Module Detection pins.
-**    ABCC_HAL_HwInit                - Initiate local hardware before driver
+**    ABCC_HAL_HwInit                - Initialize local hardware before driver
 **                                     startup.
 **    ABCC_HAL_GpioReset             - Clear a digital output for SYNC timing
 **                                     measurements.
@@ -125,7 +125,7 @@ EXTFUNC void ABCC_HAL_HWReset( void );
 **
 ** Returns:
 **    None
-**-------------------------------------------------------------------------------
+**------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_HAL_HWReleaseReset( void );
 
@@ -140,7 +140,7 @@ EXTFUNC void ABCC_HAL_HWReleaseReset( void );
 **       None.
 **
 ** Returns:
-**       Return TRUE if an interrupt is active, otherwise return FALSE.
+**       TRUE if an interrupt is active, otherwise FALSE.
 **------------------------------------------------------------------------------
 */
 #if ABCC_CFG_POLL_ABCC_IRQ_PIN_ENABLED
@@ -221,7 +221,7 @@ EXTFUNC UINT8 ABCC_HAL_GetOpmode( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** This function shall detects if a module is present by reading the
+** This function shall detect if a module is present by reading the
 ** Module Detection pins MD on the ABCC interface. If the Module Detection pins
 ** are not connected, the ABCC_CFG_MOD_DETECT_PINS_CONN definition must be set
 ** to 0 in abcc_driver_config.h instead of implementing this function.
