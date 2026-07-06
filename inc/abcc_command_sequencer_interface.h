@@ -3,7 +3,7 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** ABCC command sequencer API used by the the application.
+** ABCC command sequencer API used by the application.
 ********************************************************************************
 */
 #ifndef ABCC_CMD_SEQ_IF_H_
@@ -108,7 +108,7 @@ typedef ABCC_CmdSeqCmdStatusType (*ABCC_CmdSeqCmdHandler)( ABP_MsgType* psCmdMsg
 ** Returns:
 **    ABCC_CmdSeqRespStatusType:
 **    ABCC_CMDSEQ_RESP_EXEC_NEXT    - Move to next command in sequence
-**    ABCC_CMDSEQ_RESP_EXEC_CURRENT - Execute current command again.
+**    ABCC_CMDSEQ_RESP_EXEC_CURRENT - Execute current command again
 **    ABCC_CMDSEQ_RESP_ABORT        - Abort whole sequence
 **------------------------------------------------------------------------------
 */
