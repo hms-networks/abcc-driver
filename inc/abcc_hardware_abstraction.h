@@ -10,8 +10,8 @@
 **    ABCC_HAL_AbccInterruptDisable  - Disable hardware interrupt on GPIO.
 **    ABCC_HAL_SyncInterruptEnable   - Enable sync interrupt on GPIO.
 **    ABCC_HAL_SyncInterruptDisable  - Disable sync interrupt on GPIO.
-**    ABCC_HAL_HWReset               - Puts Anybus HW into reset.
-**    ABCC_HAL_HWReleaseReset        - Pulls Anybus HW out of reset.
+**    ABCC_HAL_HWReset               - Puts ABCC hardware into reset.
+**    ABCC_HAL_HWReleaseReset        - Pulls ABCC hardware out of reset.
 **    ABCC_HAL_IsAbccInterruptActive - Poll ABCC interrupt pin.
 **    ABCC_HAL_ReadModuleId          - Read Module Identification pins from the
 **                                     ABCC interface.
@@ -221,11 +221,11 @@ EXTFUNC UINT8 ABCC_HAL_GetOpmode( void );
 #endif
 
 /*------------------------------------------------------------------------------
-** This function shall detect if a module is present by reading the
-** Module Detection pin/s MD0/[MD1] on the ABCC interface. If the Module
-** Detection pins are not connected, the ABCC_CFG_MOD_DETECT_PINS_CONN
-** definition must be set to 0 in abcc_driver_config.h instead of implementing
-** this function.
+** This function shall detect if an ABCC module is present by reading the
+** Module Detection pins MD0 and MD1 on the M40 or MD0 on the B40 interface.
+** If the Module Detection pins are not connected, the
+** ABCC_CFG_MOD_DETECT_PINS_CONN definition must be set to 0 in
+** abcc_driver_config.h instead of implementing this function.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
