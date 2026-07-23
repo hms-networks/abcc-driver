@@ -3,10 +3,14 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Implementation of CRC calculation used for SPI.
+** CRC calculation optimized for ABCC40 SPI frames.
+**
+** This implementation assumes ABCC40 SPI frames are composed of N 16-bit words,
+** resulting in an even number of bytes. It is not compatible with data frames
+** containing an odd number of bytes.
 **
 ** CRC algorithm name: CRC-32/BZIP2.
-** Polynome: 0x04C11DB7.
+** Polynomial: 0x04C11DB7.
 ** Seed: 0xFFFFFFFF.
 ** Input reflected: no.
 ** Result reflected: no.
@@ -70,10 +74,10 @@ UINT32 CRC_Crc32( UINT8* pbBuffer, size_t xLength )
       pbBuffer += 2;
 #else
       lData =
-         pbBuffer[0] << 24 |
-         pbBuffer[1] << 16 |
-         pbBuffer[2] <<  8 |
-         pbBuffer[3];
+         (UINT32)pbBuffer[0] << 24 |
+         (UINT32)pbBuffer[1] << 16 |
+         (UINT32)pbBuffer[2] <<  8 |
+         (UINT32)pbBuffer[3];
       pbBuffer += 4;
 #endif
       lCrc = lCrc ^ lData;
