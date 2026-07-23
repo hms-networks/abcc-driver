@@ -222,9 +222,10 @@ EXTFUNC UINT8 ABCC_HAL_GetOpmode( void );
 
 /*------------------------------------------------------------------------------
 ** This function shall detect if a module is present by reading the
-** Module Detection pins MD on the ABCC interface. If the Module Detection pins
-** are not connected, the ABCC_CFG_MOD_DETECT_PINS_CONN definition must be set
-** to 0 in abcc_driver_config.h instead of implementing this function.
+** Module Detection pin/s MD0/[MD1] on the ABCC interface. If the Module
+** Detection pins are not connected, the ABCC_CFG_MOD_DETECT_PINS_CONN
+** definition must be set to 0 in abcc_driver_config.h instead of implementing
+** this function.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None
