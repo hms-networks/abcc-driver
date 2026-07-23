@@ -3,7 +3,7 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** This is the public header file for the CRC calculation routines.
+** This is the public header file for the CRC calculation routine.
 ********************************************************************************
 */
 
@@ -19,7 +19,7 @@
 ** Calculates a CRC32 checksum on the indicated octets for SPI use.
 **------------------------------------------------------------------------------
 ** Inputs:
-**    pbBufferStart            - Where to start the calculation.
+**    pbBuffer                 - Where to start the calculation.
 **    xLength                  - The amount of octets to include.
 **
 ** Outputs:

@@ -3,7 +3,14 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Object containing implementations for Crc calculations.
+** Implementation of CRC calculation used for SPI.
+**
+** CRC algorithm name: CRC-32/BZIP2.
+** Polynome: 0x04C11DB7.
+** Seed: 0xFFFFFFFF.
+** Input reflected: no.
+** Result reflected: no.
+** Final XOR value: 0xFFFFFFFF.
 ********************************************************************************
 */
 #include "abcc_config.h"
@@ -49,17 +56,29 @@ UINT32 CRC_Crc32( UINT8* pbBuffer, size_t xLength )
    UINT32 lData;
    UINT32 lCrc = 0xFFFFFFFF;
    size_t xNum32Bits;
-   size_t xNumRemainderBytes;
 
    xNum32Bits = xLength / 4;
-   xNumRemainderBytes = xLength & 3;
 
    while( xNum32Bits-- )
    {
-      lData = pbBuffer[ 0 ] << 24 | pbBuffer[ 1 ] << 16 | pbBuffer[ 2 ] << 8 | pbBuffer[ 3 ];
-
+#ifdef ABCC_SYS_16_BIT_CHAR
+      lData =
+         ( (UINT32)( pbBuffer[0] & 0xFF ) << 24 ) |
+         ( (UINT32)( pbBuffer[0] >> 8 )   << 16 ) |
+         ( (UINT32)( pbBuffer[1] & 0xFF ) <<  8 ) |
+         ( (UINT32)( pbBuffer[1] >> 8 ) );
+      pbBuffer += 2;
+#else
+      lData =
+         pbBuffer[0] << 24 |
+         pbBuffer[1] << 16 |
+         pbBuffer[2] <<  8 |
+         pbBuffer[3];
+      pbBuffer += 4;
+#endif
       lCrc = lCrc ^ lData;
 #if ABCC_SPI_CRC_REDUCED_TABLE_ENABLED
+      // 8 lookups for 8 nibbles
       lCrc = ( lCrc << 4 ) ^ crc_table32[ lCrc >> 28 ];
       lCrc = ( lCrc << 4 ) ^ crc_table32[ lCrc >> 28 ];
       lCrc = ( lCrc << 4 ) ^ crc_table32[ lCrc >> 28 ];
@@ -69,26 +88,39 @@ UINT32 CRC_Crc32( UINT8* pbBuffer, size_t xLength )
       lCrc = ( lCrc << 4 ) ^ crc_table32[ lCrc >> 28 ];
       lCrc = ( lCrc << 4 ) ^ crc_table32[ lCrc >> 28 ];
 #else
+      // 4 lookups for 4 bytes
       lCrc = ( lCrc << 8 ) ^ crc_table32[ lCrc >> 24 ];
       lCrc = ( lCrc << 8 ) ^ crc_table32[ lCrc >> 24 ];
       lCrc = ( lCrc << 8 ) ^ crc_table32[ lCrc >> 24 ];
       lCrc = ( lCrc << 8 ) ^ crc_table32[ lCrc >> 24 ];
 #endif
-
-      pbBuffer += 4;
    }
 
-   while( xNumRemainderBytes-- )
+   // Handle trailing two bytes
+   if ( xLength & 2 )
    {
-      lCrc = lCrc ^ (*pbBuffer++ << 24);
-#if ABCC_SPI_CRC_REDUCED_TABLE_ENABLED
-      lCrc = ( lCrc << 4 ) ^ crc_table32[ lCrc >> 28 ];
-      lCrc = ( lCrc << 4 ) ^ crc_table32[ lCrc >> 28 ];
+#ifdef ABCC_SYS_16_BIT_CHAR
+      lData =
+         ( (UINT32)( pbBuffer[0] & 0xFF ) << 24 ) |
+         ( (UINT32)( pbBuffer[0] >> 8 )   << 16 );
 #else
-      lCrc = ( lCrc << 8 ) ^ crc_table32[ lCrc >> 24 ];
+      lData =
+         pbBuffer[0] << 24 |
+         pbBuffer[1] << 16;
+#endif
+      lCrc = lCrc ^ lData;
+#if ABCC_SPI_CRC_REDUCED_TABLE_ENABLED
+      // 4 lookups for 4 nibbles
+      lCrc = ( lCrc << 4 ) ^ crc_table32[lCrc >> 28];
+      lCrc = ( lCrc << 4 ) ^ crc_table32[lCrc >> 28];
+      lCrc = ( lCrc << 4 ) ^ crc_table32[lCrc >> 28];
+      lCrc = ( lCrc << 4 ) ^ crc_table32[lCrc >> 28];
+#else
+      // 2 lookups for 2 bytes
+      lCrc = ( lCrc << 8 ) ^ crc_table32[lCrc >> 24];
+      lCrc = ( lCrc << 8 ) ^ crc_table32[lCrc >> 24];
 #endif
    }
-
    return( ~lCrc );
 }
 
