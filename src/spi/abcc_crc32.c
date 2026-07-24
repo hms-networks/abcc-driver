@@ -3,11 +3,11 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** CRC calculation optimized for ABCC40 SPI frames.
+** Optimized CRC32 calculation for ABCC40 SPI frames.
 **
-** This implementation assumes ABCC40 SPI frames are composed of N 16-bit words,
-** resulting in an even number of bytes. It is not compatible with data frames
-** containing an odd number of bytes.
+** This implementation assumes input data sizes divisible by two,
+** as ABCC40 SPI frames consist of N x 16-bit words. Odd-sized buffers
+** are incompatible with this optimized algorithm.
 **
 ** CRC algorithm name: CRC-32/BZIP2.
 ** Polynomial: 0x04C11DB7.
@@ -101,7 +101,7 @@ UINT32 CRC_Crc32( UINT8* pbBuffer, size_t xLength )
    }
 
    // Handle trailing two bytes
-   if ( xLength & 2 )
+   if( xLength & 2 )
    {
 #ifdef ABCC_SYS_16_BIT_CHAR
       lData =
