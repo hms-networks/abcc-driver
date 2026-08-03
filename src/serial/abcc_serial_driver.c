@@ -419,7 +419,7 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
 }
 
 /*------------------------------------------------------------------------------
-**  Handles preparation and sending of TX telegram
+**  Handles preparation and sending of Tx telegram
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
