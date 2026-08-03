@@ -14,14 +14,16 @@
 #include "abcc_types.h"
 
 /*------------------------------------------------------------------------------
-** Function types used by user to deliver messages to the application.
+** Function type for processing incoming ABCC messages
+** by passing a pointer to the message structure.
 **------------------------------------------------------------------------------
 */
 typedef void (*ABCC_MsgHandlerFuncType)( ABP_MsgType* psMsg );
 
 /*------------------------------------------------------------------------------
-** Function to indicate that a segmentation session has finished and the message
-** has been completely sent.
+** Function to indicate that a segmentation session has finished
+** and the message has been completely sent.
+**
 ** See description of ABCC_StartServerRespSegmentationSession().
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -37,7 +39,7 @@ typedef void (*ABCC_SegMsgHandlerDoneFuncType)( void* pxObject );
 /*------------------------------------------------------------------------------
 ** Function callback to fetch next block of data to be sent by the segmentation
 ** handler. Note that the size of the block is unrelated to the segment size
-** used by the driver i.e. the segment size does not need to be known by the
+** used by the driver, i.e. the segment size does not need to be known by the
 ** callback function.
 **
 ** See ABCC_StartServerRespSegmentationSession
@@ -64,7 +66,7 @@ typedef UINT8* (*ABCC_SegMsgHandlerNextBlockFuncType)( void* pxObject, UINT32* p
 #endif
 
 #ifndef ABCC_lEndianSwap
-#define ABCC_lEndianSwap( lFoo )      (UINT32)( ( (UINT32)ABCC_iEndianSwap( (UINT16)( (UINT32)(lFoo) ) ) << 16 ) | (UINT32)ABCC_iEndianSwap( (UINT32)(lFoo) >> 16 ) )
+#define ABCC_lEndianSwap( lFoo )    (UINT32)( ( (UINT32)ABCC_iEndianSwap( (UINT16)( (UINT32)(lFoo) ) ) << 16 ) | (UINT32)ABCC_iEndianSwap( (UINT32)(lFoo) >> 16 ) )
 #endif
 
 #if ( ABCC_CFG_64BIT_ADI_SUPPORT_ENABLED || ABCC_CFG_DOUBLE_ADI_SUPPORT_ENABLED )
@@ -98,11 +100,11 @@ while( 0 )
 #endif
 
 #ifndef ABCC_iLSB
-#define ABCC_iLSB( iFoo )           (UINT16)( (iFoo) & 0x00FF )
+#define ABCC_iLSB( iFoo )    (UINT16)( (iFoo) & 0x00FF )
 #endif
 
 #ifndef ABCC_iMSB
-#define ABCC_iMSB( iFoo )           (UINT16)( (UINT16)(iFoo) >> 8 )
+#define ABCC_iMSB( iFoo )    (UINT16)( (UINT16)(iFoo) >> 8 )
 #endif
 
 /*------------------------------------------------------------------------------
@@ -199,6 +201,8 @@ while( 0 )
 ** ABCC_GetMsgCmdBits( psMsg )                - Message command
 ** ABCC_GetMsgCmdField( psMsg )               - Entire command field
 ** ABCC_SetMsgCmdField( psMsg, bCmdVal )      - Set entire command field
+** ABCC_GetMsgReserved( psMsg )               - bReserved field
+** ABCC_SetMsgReserved( psMsg, bCmdVal )      - Set bReserved field
 ** ABCC_GetMsgCmdExt0( psMsg )                - Command extension 0
 ** ABCC_SetMsgCmdExt0( psMsg, bCmdExt0Val )   - Set command extension 0
 ** ABCC_GetMsgCmdExt1( psMsg )                - Command extension 1
@@ -225,6 +229,8 @@ while( 0 )
 #define ABCC_GetMsgCmdBits(  psMsg               ) ( ABCC_GetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved ) & ABP_MSG_HEADER_CMD_BITS )
 #define ABCC_GetMsgCmdField( psMsg               ) ( ABCC_GetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved                             ) )
 #define ABCC_SetMsgCmdField( psMsg, bCmdVal      )   ABCC_SetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved, bCmdVal                    )
+#define ABCC_GetMsgReserved( psMsg               ) ( ABCC_GetHighAddrOct(  ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved                             ) )
+#define ABCC_SetMsgReserved( psMsg, bReservedVal )   ABCC_SetHighAddrOct(  ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved, bReservedVal               )
 #define ABCC_GetMsgCmdExt0(  psMsg               ) ( ABCC_GetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdExt0CmdExt1                          ) )
 #define ABCC_SetMsgCmdExt0(  psMsg, bCmdExt0Val  )   ABCC_SetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdExt0CmdExt1, bCmdExt0Val             )
 #define ABCC_GetMsgCmdExt1(  psMsg               ) ( ABCC_GetHighAddrOct(  ((ABP_MsgHeaderType16*) (psMsg))->iCmdExt0CmdExt1                          ) )
@@ -246,6 +252,8 @@ while( 0 )
 #define ABCC_GetMsgCmdBits(  psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmd & ABP_MSG_HEADER_CMD_BITS     )
 #define ABCC_GetMsgCmdField( psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmd                               )
 #define ABCC_SetMsgCmdField( psMsg, bCmdVal      ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmd        = (bCmdVal)            )
+#define ABCC_GetMsgReserved( psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bReserved                          )
+#define ABCC_SetMsgReserved( psMsg, bReservedVal ) (         ((ABP_MsgHeaderType*)   (psMsg))->bReserved       = (bReservedVal)   )
 #define ABCC_GetMsgCmdExt0(  psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmdExt0                           )
 #define ABCC_SetMsgCmdExt0(  psMsg, bCmdExt0Val  ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmdExt0        = (bCmdExt0Val)    )
 #define ABCC_GetMsgCmdExt1(  psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmdExt1                           )
@@ -259,49 +267,49 @@ while( 0 )
 
 /*------------------------------------------------------------------------------
 ** 8/16 bit char platform dependent macros to read and write message data.
-** Two version of each get/set function exist:
-** ABCC_GetMsgData<x> takes the abcc message pointer as input.
-** ABCC_GetData<x> takes the abcc message payload pointer as input.
+** Two versions of each get/set function exist:
+** ABCC_GetMsgData<x> takes the ABCC message pointer as input.
+** ABCC_GetData<x> takes the ABCC message payload pointer as input.
 **------------------------------------------------------------------------------
-** ABCC_Set<x>String()  - Copy native string to ABCC message payload
-** ABCC_Get<x>String()  - Copy ABCC message payload string to native string
-** ABCC_Set<x>Data8()   - Write 8 bit data to ABCC message payload
-** ABCC_Set<x>Data16()  - Write 16 bit data to ABCC message payload
-** ABCC_Set<x>Data32()  - Write 32 bit data to ABCC message payload
-** ABCC_Set<x>Data64()  - Write 64 bit data to ABCC message payload
-** ABCC_Get<x>Data8()   - Read 8 bit data from an ABCC message payload
-** ABCC_Get<x>Data16()  - Read 16 bit data from an ABCC message payload
-** ABCC_Get<x>Data32()  - Read 32 bit data from an ABCC message payload
-** ABCC_Get<x>Data64()  - Read 64 bit data from an ABCC message payload
+** ABCC_Set<x>String()  - Copy native string to ABCC message payload.
+** ABCC_Get<x>String()  - Copy ABCC message payload string to native string.
+** ABCC_Set<x>Data8()   - Write 8 bit data to ABCC message payload.
+** ABCC_Set<x>Data16()  - Write 16 bit data to ABCC message payload.
+** ABCC_Set<x>Data32()  - Write 32 bit data to ABCC message payload.
+** ABCC_Set<x>Data64()  - Write 64 bit data to ABCC message payload.
+** ABCC_Get<x>Data8()   - Read 8 bit data from an ABCC message payload.
+** ABCC_Get<x>Data16()  - Read 16 bit data from an ABCC message payload.
+** ABCC_Get<x>Data32()  - Read 32 bit data from an ABCC message payload.
+** ABCC_Get<x>Data64()  - Read 64 bit data from an ABCC message payload.
 **------------------------------------------------------------------------------
 ** ABCC_SetMsgString( psMsg, pcString, iNumChar, iOctetOffset )
-**    psMsg - Pointer to message
+**    psMsg - Pointer to message.
 ** ABCC_SetString( pxDst, pcString, iNumChar, iOctetOffset )
-**    pxDst - Pointer to message payload
-**    pcString - String to be written
-**    iNumChar - Number of chars in the string
+**    pxDst - Pointer to message payload.
+**    pcString - String to be written.
+**    iNumChar - Number of chars in the string.
 **    iOctetOffset - Offset to where the string shall be written.
 **
 ** ABCC_GetMsgString( pxSrc, pcString, iNumChar, iOctetOffset )
-**    psMsg - Pointer to message
+**    psMsg - Pointer to message.
 ** ABCC_GetString( psMsg, pcString, iNumChar, iOctetOffset )
-**    pxSrc - Pointer to message payload
-**    pcString - String to be written
-**    iNumChar - Number of chars in the string
+**    pxSrc - Pointer to message payload.
+**    pcString - String to be written.
+**    iNumChar - Number of chars in the string.
 **    iOctetOffset - Offset to where the string shall be read.
 **
 ** ABCC_SetMsgDataX( psMsg, Data, iOctetOffset )
-**    psMsg - Pointer to message
+**    psMsg - Pointer to message.
 ** ABCC_SetDataX( pxDst, Data, iOctetOffset )
-**    pxDst - Pointer to message payload
-**    Data  - Data to be set
+**    pxDst - Pointer to message payload.
+**    Data  - Data to be set.
 **    iOctetOffset - Offset to where data shall be written.
 **
 ** ABCC_GetMsgDataX( psMsg, Data, iOctetOffset )
-**    psMsg - Pointer to message
+**    psMsg - Pointer to message.
 ** ABCC_GetDataX( pxSrc, Data, iOctetOffset )
-**    pxSrc - Pointer to message
-**    Data  - Read data variable
+**    pxSrc - Pointer to message.
+**    Data  - Read data variable.
 **    iOctetOffset - Offset to where data shall be read.
 **------------------------------------------------------------------------------
 */
