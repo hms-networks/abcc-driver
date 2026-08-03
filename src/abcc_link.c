@@ -3,8 +3,8 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Implements message queuing, write message flow control and 
-** response handler functionality.
+** Implements message queuing, write message flow control
+** and response handler functionality.
 ********************************************************************************
 */
 
@@ -67,7 +67,7 @@ static UINT16 link_iMaxMsgSize;
 ** Command and response queues.
 */
 static ABP_MsgType* link_psCmds[ LINK_MAX_NUM_CMDS_IN_Q ];
-static ABP_MsgType* link_psResponses[ LINK_MAX_NUM_RESP_IN_Q];
+static ABP_MsgType* link_psResponses[ LINK_MAX_NUM_RESP_IN_Q ];
 
 static MsgQueueType link_sCmdQueue;
 static MsgQueueType link_sRespQueue;
