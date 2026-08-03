@@ -202,7 +202,7 @@ while( 0 )
 ** ABCC_GetMsgCmdField( psMsg )               - Entire command field
 ** ABCC_SetMsgCmdField( psMsg, bCmdVal )      - Set entire command field
 ** ABCC_GetMsgReserved( psMsg )               - bReserved field
-** ABCC_SetMsgReserved( psMsg, bCmdVal )      - Set bReserved field
+** ABCC_SetMsgReserved( psMsg, bReservedVal ) - Set bReserved field
 ** ABCC_GetMsgCmdExt0( psMsg )                - Command extension 0
 ** ABCC_SetMsgCmdExt0( psMsg, bCmdExt0Val )   - Set command extension 0
 ** ABCC_GetMsgCmdExt1( psMsg )                - Command extension 1

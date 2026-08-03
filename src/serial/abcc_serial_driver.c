@@ -811,7 +811,7 @@ void ABCC_DrvSerSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
    {
       ABCC_LOG_ERROR( ABCC_EC_RDPD_SIZE_ERR,
                       0,
-                      "Read PD size too big for serial operating mode PD size error %" PRIu16 ">%d\n",
+                      "Read PD size too big for serial operating mode. PD size error %" PRIu16 ">%d\n",
                       iReadPdSize,
                       ABP_MAX_PROCESS_DATA );
 
@@ -821,7 +821,7 @@ void ABCC_DrvSerSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
    {
       ABCC_LOG_ERROR( ABCC_EC_WRPD_SIZE_ERR,
                       0,
-                      "Read PD size too big for serial operating mode PD size error %" PRIu16 ">%d\n",
+                      "Write PD size too big for serial operating mode. PD size error %" PRIu16 ">%d\n",
                       iWritePdSize,
                       ABP_MAX_PROCESS_DATA );
 
