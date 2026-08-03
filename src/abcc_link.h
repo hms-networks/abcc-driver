@@ -63,9 +63,9 @@ EXTFUNC ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg );
 EXTFUNC UINT16 ABCC_LinkGetNumCmdQueueEntries( void );
 
 /*------------------------------------------------------------------------------
-** Write message to the driver. ABCC_MsgCmdStatus is returned.
+** Write message to the driver. ABCC_ErrorCodeType is returned.
 ** Note that if the message was sent successfully before 
-** returning from the function no callback is invoked.
+** returning from the function, no callback is invoked.
 **------------------------------------------------------------------------------
 ** Arguments:
 **          psWriteMsg:    Pointer to message.
@@ -82,7 +82,7 @@ EXTFUNC ABCC_ErrorCodeType ABCC_LinkWrMsgWithNotification( ABP_MsgType* psWriteM
 ** Allocates a message buffer.
 **------------------------------------------------------------------------------
 ** Arguments:
-**          iSize:         Required size (in bytes) of the buffer.
+**          ppsBuffer:     Required size (in bytes) of the buffer.
 **
 ** Returns:
 **          None.
@@ -135,10 +135,10 @@ EXTFUNC BOOL ABCC_LinkIsSrcIdUsed( UINT8 bSrcId );
 ** Receive read message if available.
 **------------------------------------------------------------------------------
 ** Arguments:
-**         None.
+**          None.
 **
 ** Returns:
-**         Pointer to received message. NULL if no message is found.
+**          Pointer to received message. NULL if no message is found.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_LinkReadMessage( void );
@@ -147,23 +147,12 @@ EXTFUNC ABP_MsgType* ABCC_LinkReadMessage( void );
 ** Check queues for write messages.
 **------------------------------------------------------------------------------
 ** Arguments:
-**         None.
+**          None.
 **
 ** Returns:
-**        None.
+**          None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_LinkCheckSendMessage( void );
-
-/*------------------------------------------------------------------------------
-** Check queues for write mess.
-**------------------------------------------------------------------------------
-** Arguments:
-**         None.
-**
-** Returns:
-**        None.
-**------------------------------------------------------------------------------
-*/
 
 #endif  /* inclusion lock */
