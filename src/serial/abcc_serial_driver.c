@@ -175,7 +175,8 @@ static void drv_RxTelegramReceived( void )
 **------------------------------------------------------------------------------
 ** Arguments:
 **       psFragHandle   Pointer to write fragmentation information.
-**       psMsg          Pointer t0 start of message.
+**       psMsg          Pointer to start of message.
+**       iMsgSize       Message length.
 **       iFragLength    Fragment length.
 **
 ** Returns:
