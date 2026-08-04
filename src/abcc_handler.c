@@ -3,7 +3,7 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Implementation of operation mode independent parts of the abcc handler.
+** Implementation of operation mode independent parts of the ABCC handler.
 ********************************************************************************
 */
 
@@ -1012,14 +1012,12 @@ UINT8 ABCC_GetOpmode( void )
    return( ABCC_HAL_GetOpmode() );
 #elif ( defined( ABCC_CFG_ABCC_OP_MODE ) )
    return( ABCC_CFG_ABCC_OP_MODE );
-#elif defined( ABCC_CFG_ABCC_OP_MODE )
-   return( ABCC_CFG_ABCC_OP_MODE );
 #else
    /*
    ** The user has not configured any way to determine the operating mode
    */
    #error "No method to determine the operating mode is available. Either set ABCC_CFG_OP_MODE_GETTABLE to 1 or any of ABCC_CFG_ABCC_OP_MODE_X. See descriptions in abcc_config.h for details."
-#endif /* End of #if defined( ABCC_CFG_OP_MODE_HW_CONF ) */
+#endif /* End of #if ABCC_CFG_OP_MODE_GETTABLE */
 }
 
 
