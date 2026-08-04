@@ -75,7 +75,7 @@ EXTFUNC void ABCC_SetReadyForCommunication( void );
 
 /*------------------------------------------------------------------------------
 ** Set main state machine into error state. This will stop ABCC_ISR()
-** and ABCC_RunDriver to perform any action towards application or Anybus.
+** and ABCC_RunDriver() to perform any action towards application or Anybus.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       eSeverity         - Severity of the event (see ABCC_LogSeverityType).
@@ -92,7 +92,7 @@ EXTFUNC void ABCC_SetError( ABCC_LogSeverityType eSeverity,
    UINT32 lAdditionalInfo );
 
 /*------------------------------------------------------------------------------
-** Get currents state.
+** Get current state.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
