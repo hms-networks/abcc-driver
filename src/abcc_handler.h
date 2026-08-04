@@ -3,7 +3,7 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Interface for driver internal interface to the abcc_handler
+** Declaration of the internal driver interface to the ABCC handler.
 ********************************************************************************
 */
 
@@ -46,8 +46,7 @@ EXTVAR BOOL fAbccUserSyncMeasurementIp;
 EXTVAR UINT16 ABCC_iInterruptEnableMask;
 
 /*------------------------------------------------------------------------------
-** ABCC_SetPdSize()
-** Sets the new process data sizes.
+** Set the new process data sizes.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       iReadPdSize       - Size of the read process data (in bytes), used from
@@ -62,8 +61,8 @@ EXTVAR UINT16 ABCC_iInterruptEnableMask;
 EXTFUNC void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
 
 /*------------------------------------------------------------------------------
-** The anybus is ready for communication. This function shall be called either
-** due to power up interrupt or initial handshake timeout
+** The Anybus is ready for communication. This function shall be called either
+** upon power up interrupt or initial handshake timeout.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -76,10 +75,13 @@ EXTFUNC void ABCC_SetReadyForCommunication( void );
 
 /*------------------------------------------------------------------------------
 ** Set main state machine into error state. This will stop ABCC_ISR()
-** and ABCC_RunDriver to perform any action towards application or anybus
+** and ABCC_RunDriver to perform any action towards application or Anybus.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**       eSeverity         - Severity of the event (see ABCC_LogSeverityType).
+**       eErrorCode        - Error code.
+**       lAdditionalInfo   - Depending on error, different additional
+**                           information can be included.
 **
 ** Returns:
 **       None.
@@ -90,7 +92,7 @@ EXTFUNC void ABCC_SetError( ABCC_LogSeverityType eSeverity,
    UINT32 lAdditionalInfo );
 
 /*------------------------------------------------------------------------------
-** Gets currents state
+** Get currents state.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -102,14 +104,14 @@ EXTFUNC void ABCC_SetError( ABCC_LogSeverityType eSeverity,
 EXTFUNC ABCC_MainStateType ABCC_GetMainState( void );
 
 /*------------------------------------------------------------------------------
-** Checks if update write process data is requested.
+** Check if write process data update is requested.
 ** If requested, the update is performed.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
 **
 ** Returns:
-**       None:
+**       None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_CheckWrPdUpdate( void );
