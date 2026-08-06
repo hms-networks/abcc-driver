@@ -475,9 +475,7 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                              - For structured data type ( psStruct (8) != NULL ):
 **                                    Number of elements in the structure.
 **
-** 5. bDesc                     - Ignored for structured data types ( psStruct (8) != NULL ).
-**                                All other data types:
-**                                Entry descriptor.  Bits filled with the following
+** 5. bDesc                     - Entry descriptor.  Bits filled with the following
 **                                configurations:
 **                                    ABP_APPD_DESCR_GET_ACCESS: Get service is
 **                                    allowed on the ADI value attribute.
@@ -487,6 +485,16 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                    to be mapped as write process data.
 **                                    ABP_APPD_DESCR_MAPPABLE_READ_PD: Allows the ADI
 **                                    to be mapped as read process data.
+**                                For structured data type ( psStruct (8) != NULL ),
+**                                this field must be set to the logical OR of
+**                                the access flags for all elements in the
+**                                structure.
+**                                This means that if one element in the
+**                                structure has a get access, the entire
+**                                structure will have get access. Non-getable
+**                                elements will be returned as 0's.
+**                                This is the same for set access. Values for
+**                                non-setable elements will be ignored.
 **
 ** 6. pxValuePtr                - Ignored for structured data type ( psStruct (8) != NULL ).
 **                                All other data types:
