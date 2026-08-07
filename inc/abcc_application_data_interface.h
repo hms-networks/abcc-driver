@@ -491,10 +491,10 @@ typedef ABP_MsgErrorCodeType (*ABCC_AdiTransparentSetFuncType)( const struct AD_
 **                                structure.
 **                                This means that if one element in the
 **                                structure has a get access, the entire
-**                                structure will have get access. Non-getable
+**                                structure will have get access. Non-gettable
 **                                elements will be returned as 0's.
 **                                This is the same for set access. Values for
-**                                non-setable elements will be ignored.
+**                                non-settable elements will be ignored.
 **
 ** 6. pxValuePtr                - Ignored for structured data type ( psStruct (8) != NULL ).
 **                                All other data types:
