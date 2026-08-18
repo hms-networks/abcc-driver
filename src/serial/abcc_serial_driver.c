@@ -10,7 +10,7 @@
 ** The UART interface communicates using the legacy wire format defined by
 ** ABP_Msg255Type. Internally, the driver utilizes the expanded ABP_MsgType
 ** structure. The serial driver handles the conversion between these two
-** formats, including byte packing and unpacking required for 16-bit char
+** formats on the fly, including byte packing and unpacking required for 16-bit char
 ** architectures.
 **
 ** Header Structure Comparison:
@@ -70,10 +70,10 @@ typedef struct WrMsgFragType
 
 typedef struct RdMsgFragType
 {
-  UINT8*             pbCurrPtr;           /* Pointer to the current position in receive buffer. */
+  UINT8*             pbCurrPtr;           /* Pointer to the current position in the receive buffer. */
   UINT16             iNumBytesReceived;   /* Number of bytes received. */
   UINT16             iFragLength;         /* Current fragmentation block length. */
-  UINT16             iMaxLength;          /* Max num bytes to receive. */
+  UINT16             iMaxLength;          /* Max number of bytes to receive. */
 } RdMsgFragType;
 
 ABCC_SYS_PACK_ON
@@ -145,7 +145,7 @@ static UINT16               drv_iCrcErrorCount;         /* CRC error counter. */
 static ABCC_TimerHandle     xWdTmoHandle;
 static BOOL                 fWdTmo;                     /* Current wd timeout status */
 static ABCC_TimerHandle     xTelegramTmoHandle;
-static BOOL                 fTelegramTmo;               /* Current telegram tmo status */
+static BOOL                 fTelegramTmo;               /* Current telegram timeout status */
 static UINT16               iTelegramTmoMs;             /* Telegram timeout  */
 
 
@@ -171,7 +171,7 @@ static void drv_RxTelegramReceived( void )
 }
 
 /*------------------------------------------------------------------------------
-** Init write message fragmentation
+** Init write message fragmentation.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       psFragHandle   Pointer to write fragmentation information.
@@ -191,7 +191,7 @@ static void drv_WriteFragInit( WrMsgFragType* psFragHandle, UINT8* psMsg, UINT16
 }
 
 /*------------------------------------------------------------------------------
-** Get current write message fragment
+** Get current write message fragment.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       psFragHandle   Pointer to write fragmentation information.
@@ -249,7 +249,7 @@ static BOOL drv_PrepareNextWriteFrag( WrMsgFragType* const psFragHandle )
 }
 
 /*------------------------------------------------------------------------------
-** Check if write message sending is in progress
+** Check if write message sending is in progress.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       psFragHandle   Pointer to write fragmentation information.
@@ -266,10 +266,10 @@ static BOOL drv_isWrMsgSendingInprogress( WrMsgFragType* const psFragHandle )
 ** Init read message fragmentation.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information.
+**       psFragHandle   Pointer to read fragmentation information.
 **       psMsg          Pointer to start of message.
 **       iFragLength    Fragment length.
-**       iMaxMsgLength  Maximum lenth of message.
+**       iMaxMsgLength  Maximum length of message.
 **
 ** Returns:
 **       None.
@@ -284,10 +284,10 @@ static void drv_InitReadFrag( RdMsgFragType* psFragHandle, UINT8* psMsg, UINT16 
 }
 
 /*------------------------------------------------------------------------------
-** Add read message fragment
+** Add read message fragment.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information.
+**       psFragHandle   Pointer to read fragmentation information.
 **       pbBuffer       Pointer to source buffer.
 ** Returns:
 **       None.
@@ -318,12 +318,12 @@ static void drv_AddReadFrag( RdMsgFragType* const psFragHandle, UINT8* const pbB
 }
 
 /*------------------------------------------------------------------------------
-** Check if read message receiving is in progress
+** Check if read message receiving is in progress.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       psFragHandle   Pointer to read fragmentation information.
 ** Returns:
-**       TRUE if sending is ongoing.
+**       TRUE if receiving is ongoing.
 **------------------------------------------------------------------------------
 */
 static BOOL drv_isRdMsgReceiveInprogress( RdMsgFragType* const psFragHandle )
@@ -419,7 +419,7 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
 }
 
 /*------------------------------------------------------------------------------
-**  Handles preparation and sending of Tx telegram
+**  Handles preparation and sending of Tx telegram.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -451,7 +451,7 @@ void ABCC_DrvSerRunDriverTx( void )
 
          if( ( drv_psWriteMessage != 0 ) && !drv_isWrMsgSendingInprogress( &sTxFragHandle ) )
          {
-            ABCC_SetMsgReserved( drv_psWriteMessage, ABCC_GetMsgDataSize( drv_psWriteMessage ) );            
+            ABCC_SetMsgReserved( drv_psWriteMessage, (UINT8)ABCC_GetMsgDataSize( drv_psWriteMessage ) );
 #ifdef ABCC_SYS_16_BIT_CHAR
             drv_WriteFragInit( &sTxFragHandle,
                                (UINT8*)( &drv_psWriteMessage->sHeader.iSourceIdDestObj ),
@@ -531,7 +531,7 @@ void ABCC_DrvSerRunDriverTx( void )
 }
 
 /*------------------------------------------------------------------------------
-**  Handle the reception of the Rx telegram
+**  Handle the reception of the Rx telegram.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       psResp:  Pointer to the response message.
@@ -623,7 +623,7 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       if( drv_isWrMsgSendingInprogress( &sTxFragHandle ) )
       {
          /*
-         ** End mark is succesfully sent.
+         ** End mark is successfully sent.
          */
 
          if( fSendWriteMessageEndMark )
@@ -811,7 +811,7 @@ void ABCC_DrvSerSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
    {
       ABCC_LOG_ERROR( ABCC_EC_RDPD_SIZE_ERR,
                       0,
-                      "Read PD size too big for serial operating mode. PD size error %" PRIu16 ">%d\n",
+                      "Read PD size is out of range for serial operating mode. PD size error %" PRIu16 ">%d\n",
                       iReadPdSize,
                       ABP_MAX_PROCESS_DATA );
 
@@ -821,7 +821,7 @@ void ABCC_DrvSerSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
    {
       ABCC_LOG_ERROR( ABCC_EC_WRPD_SIZE_ERR,
                       0,
-                      "Write PD size too big for serial operating mode. PD size error %" PRIu16 ">%d\n",
+                      "Write PD size is out of range for serial operating mode. PD size error %" PRIu16 ">%d\n",
                       iWritePdSize,
                       ABP_MAX_PROCESS_DATA );
 

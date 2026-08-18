@@ -248,7 +248,7 @@ EXTFUNC void ABCC_DrvSerSetIntMask( const UINT16 iIntMask );
 EXTFUNC void* ABCC_DrvSerGetWrPdBuffer( void );
 
 /*------------------------------------------------------------------------------
-** Get module capabillity.
+** Get module capability.
 ** Note! This is not supported by serial protocol.
 **------------------------------------------------------------------------------
 ** Arguments:
