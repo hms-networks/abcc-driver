@@ -56,7 +56,7 @@
 **
 ** At least one of the low-level drivers must be enabled.
 **
-** These identifiers enables/disables the inclusion of the corresponding
+** These identifiers enable/disable the inclusion of the corresponding
 ** low-level application interface driver and handshaking code.
 **
 ** These are related to, but are not the same as the Operating Mode setting.
@@ -162,7 +162,8 @@
 ** abstraction layer.
 **
 ** If this is not 1, ABCC_CFG_ABCC_OP_MODE must be defined with one of the 
-** operation modes ABP_OP_MODE_* described above (see below).
+** operation modes ABP_OP_MODE_* (see the ABCC_CFG_ABCC_OP_MODE configuration
+** further down, and the operating mode summary earlier in this file).
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_OP_MODE_GETTABLE
@@ -188,11 +189,11 @@
 /*------------------------------------------------------------------------------
 ** #define ABCC_CFG_ABCC_OP_MODE
 **
-** If the operating mode is fixed (hardware strapped) ABCC_CFG_ABCC_OP_MODE must
-** be defined to the fixed operating mode unless it's gettable (configured by
-** ABCC_CFG_OP_MODE_GETTABLE).
+** If the operating mode is fixed (hardware strapped), ABCC_CFG_ABCC_OP_MODE
+** must be defined to the fixed operating mode unless it's gettable (configured
+** by ABCC_CFG_OP_MODE_GETTABLE).
 **
-** Available operating modes are available in abp.h as "ABP_OP_MODE_*".
+** Operating modes are defined in abp.h as "ABP_OP_MODE_*".
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_ABCC_OP_MODE
@@ -246,12 +247,12 @@
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
-** Enable/disable driver support for memory mapped ABCC interface. If memory
-** direct access is chosen the user will have access directly to the ABCC
-** process data memory, i.e. no internal copy is required.
+** Enable/disable driver support for memory-mapped ABCC interface. If
+** memory-mapped access is enabled, the user can access the ABCC
+** process data memory directly, without requiring an internal copy.
 **
-** If 0, the following functions must be implemented in the hardware abstraction
-** layer:
+** If 0, the following functions must be implemented in the
+** hardware abstraction layer:
 **    ABCC_HAL_ParallelRead()
 **    ABCC_HAL_ParallelRead16()
 **    ABCC_HAL_ParallelWrite()
@@ -272,7 +273,7 @@
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
-** Define the base address of the ABCC if a memory mapped interface is used.
+** Define the base address of the ABCC if a memory-mapped interface is used.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_PARALLEL_BASE_ADR
@@ -290,7 +291,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
-** Sets the baudrate-dependent telegram-cyle timeout time, in milliseconds,
+** Sets the baudrate dependent telegram cycle timeout time, in milliseconds,
 ** for the asynchronous serial application interface. This time is used in
 ** "abcc_serial_driver.c" for each serial telegram cycle.
 **
@@ -388,10 +389,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Note! ABCC40 supports 1524 bytes of message data. ABCC_CFG_MAX_MSG_SIZE should
 ** be set to largest size that will be sent or received. If this size is not
-** known it is recommended to set the maximum supported size.
+** known, it is recommended to set the maximum supported size.
 **
 ** This code requires at least 16 bytes of message data to be supported. If a
-** smaller size is configured the code will not compile.
+** smaller size is configured, the code will not compile.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_MAX_MSG_SIZE
@@ -432,7 +433,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** When dynamic message fragment length is enabled, this define sets the maximum
 ** message fragment length that can be used at runtime.
-** The maximum message performance can be reached, when it is possible to fit a
+** The maximum message performance can be reached when it is possible to fit a
 ** full message (ABCC_CFG_MAX_MSG_SIZE + 12 bytes for the message header) in the
 ** message fragment.
 **------------------------------------------------------------------------------
@@ -595,8 +596,8 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Defines what ABCC interrupts shall be enabled in parallel operating mode.
 ** This is a bit mask built up by the ABP_INTMASK_X definitions in abp.h.
-** If an event is not notified via the ABCC interrupt it must be polled by
-** ABCC_RunDriver(). If not defined in abcc_driver_config.h the default mask
+** If an event is not notified via the ABCC interrupt, it must be polled by
+** ABCC_RunDriver(). If not defined in abcc_driver_config.h, the default mask
 ** is 0.
 **------------------------------------------------------------------------------
 */
@@ -611,11 +612,11 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Defines what ABCC interrupts shall be enabled in SPI operating mode.
 ** The mask is composed of ABP_INTMASK_X definitions in abp.h.
-** If an event is not notified via the ABCC interrupt it must be polled using
+** If an event is not notified via the ABCC interrupt, it must be polled using
 ** ABCC_RunDriver().
-** If not defined in abcc_driver_config.h the default mask is 0.
+** If not defined in abcc_driver_config.h, the default mask is 0.
 **
-** Note! There are currently no support in the driver to handle interrupt
+** Note! There is currently no support in the driver to handle interrupt
 ** driven SPI based on ABCC events.
 **------------------------------------------------------------------------------
 */
@@ -634,7 +635,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** but not configured to be handled by the ISR will be translated to a bit field
 ** of ABCC_ISR_EVENT_X definitions and forwarded to the user via the
 ** ABCC_CbfEvent() callback.
-** If not defined in abcc_driver_config.h the default value will be:
+** If not defined in abcc_driver_config.h, the default value will be:
 ** Parallel 16/8: 0 (No events handled by the ISR)
 ** Other operating modes N/A
 **------------------------------------------------------------------------------
@@ -675,7 +676,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Default value below can be overridden in abcc_driver_config.h
 **
-** Enable/disable driver and AD object support for structured data data types.
+** Enable/disable driver and AD object support for structured data types.
 ** This define will affect the AD_AdiEntryType
 ** (abcc_application_data_interface.h) used for defining the user ADI:s.
 **------------------------------------------------------------------------------
@@ -692,8 +693,8 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Enable/disable driver support for triggering of callback notifications each
 ** time an ADI is read or written. This define will affect the AD_AdiEntryType
 ** (abcc_application_data_interface.h) used for defining the user ADI:s.
-** If an ADI is read by the network the callback is invoked before the action.
-** If an ADI is written by the network the callback is invoked after the action.
+** If an ADI is read by the network, the callback is invoked before the action.
+** If an ADI is written by the network, the callback is invoked after the action.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_ADI_GET_SET_CALLBACK_ENABLED
@@ -770,7 +771,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** #define ABCC_CFG_LOG_COLORS_ENABLED      1 - Enable / 0 - Disable
 **
-** Enable colored debug logs. The console displaying the logs need to support
+** Enable colored debug logs. The console displaying the logs needs to support
 ** ANSI colors for this to work.
 **
 ** #define ABCC_CFG_LOG_TIMESTAMPS_ENABLED  1 - Enable / 0 - Disable
@@ -799,7 +800,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 #endif
 
 /*------------------------------------------------------------------------------
-** Enable component specifc debug logs.
+** Enable component specific debug logs.
 **
 ** #define ABCC_CFG_DEBUG_HEXDUMP_SPI_ENABLED          1 - Enable / 0 - Disable
 ** #define ABCC_CFG_DEBUG_HEXDUMP_UART_ENABLED         1 - Enable / 0 - Disable
@@ -913,7 +914,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** If the interrupt signal from the ABCC has not been seen within this time, it
 ** is assumed that the ABCC is not present or not responding.
 **
-** If the driver has not been been configured to poll the ABCC interrupt pin,
+** If the driver has not been configured to poll the ABCC interrupt pin,
 ** the driver will wait for this time to expire before starting the handshake
 ** operations against the ABCC.
 **
@@ -935,8 +936,8 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Assume firmware update on initial communication timeout.
 **
 ** If the application hasn't implemented attribute 5 (ABP_APP_IA_FW_AVAILABLE)
-** in the application object to be stored in NVS it may opt to enable this
-** define instead. If enabled the driver and the application can assume that
+** in the Application Object to be stored in NVS, it may opt to enable this
+** define instead. If enabled, the driver and the application can assume that
 ** the ABCC is performing a firmware update in the following cases:
 **
 ** 1. If interrupts are enabled and the ABCC hasn't generated a startup interrupt
@@ -945,19 +946,19 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** 2. If interrupts are disabled and the initial communication fails after 1.5
 **    seconds.
 **
-** When enabled ABCC_isReadyForCommunication can return ABCC_ASSUME_FW_UPDATE
+** When enabled, ABCC_isReadyForCommunication can return ABCC_ASSUME_FW_UPDATE
 ** if it believes the ABCC is performing a firmware update. It can also be
 ** assumed that a firmware update is ongoing if the watchdog timeout is triggered
 ** for the first command sent from the application to the ABCC.
 **
 ** NOTE
 ** The driver does not support detecting an assumed firmware update for
-** parallell operating modes with interrupts disabled.
+** parallel operating modes with interrupts disabled.
 **
 ** IMPORTANT
 ** This should only be enabled after it has been verified that the application
 ** hardware is working properly (e.g. if the SPI controller hasn't been
-** properly configured the initial communication failure is likely casued
+** properly configured, the initial communication failure is likely caused
 ** by that).
 **------------------------------------------------------------------------------
 */
@@ -973,12 +974,12 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Enable/disable driver support for measurement of input processing time (used
 ** for SYNC). This define is used during development by activating it and
 ** compiling special test versions of the product.
-** When ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED is 1 ABCC_HAL_GpioReset() is
-** called at the WRPD interrupt. If running in SPI operating mode it is
-** instead called when ABCC_SpiRunDriver() has finished sending data to the
+** When ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED is 1, ABCC_HAL_GpioReset() is
+** called at the WRPD interrupt. If running in SPI operating mode, it is
+** instead called after ABCC_SpiRunDriver() has finished sending data to the
 ** Anybus.
-** When ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED is 1 ABCC_GpioSet() needs to be
-** called at the Input Capture Point.
+** When ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED is 1, ABCC_HAL_GpioSet() needs
+** to be called at the Input Capture Point.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED
@@ -993,10 +994,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Enable/disable driver support for measurement of output processing time
 ** (used for SYNC). This define is used during development by activating it and
 ** compiling special test versions of the product.
-** When ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED is 1 ABCC_HAL_GpioSet() is called
+** When ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED is 1, ABCC_HAL_GpioSet() is called
 ** from the RDPDI interrupt.
-** When ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED is 1 ABCC_GpioReset() needs to be
-** called at the Output Valid Point.
+** When ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED is 1, ABCC_HAL_GpioReset() needs
+** to be called at the Output Valid Point.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED
@@ -1036,7 +1037,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** When the command sequencer (abcc_command_sequencer_interface.h) sends a
 ** command, it utilizes ABCC_GetCmdMsgBuffer() to get a buffer resource. The
-** command sequencer can handle temporary resource problems and will re-try each
+** command sequencer can handle temporary resource problems and will retry each
 ** main loop cycle (ABCC_RunDriver()). When ABCC_CFG_CMD_SEQ_MAX_NUM_RETRIES
 ** number of retries has been reached, ABCC_EC_OUT_OF_MSG_BUFFERS error will be
 ** reported.
