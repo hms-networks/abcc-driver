@@ -134,7 +134,7 @@ EXTFUNC void ABCC_GpioSet( void );
 ** Arguments:
 **       None.
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_HwInit( void );
@@ -156,7 +156,7 @@ EXTFUNC ABCC_ErrorCodeType ABCC_HwInit( void );
 **       lMaxStartupTimeMs     - Max startup time for ABCC.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_StartDriver( UINT32 lMaxStartupTimeMs );
@@ -211,7 +211,7 @@ EXTFUNC BOOL ABCC_WaitForFwUpdate( UINT32 lTimeoutMs );
 **       None.
 **
 ** Returns:
-**       ABCC_CommunicationState.
+**       ABCC_CommunicationStateType.
 **       ( see description of ABCC_CommunicationStateType )
 **
 **------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ EXTFUNC ABCC_CommunicationStateType ABCC_isReadyForCommunication( void );
 ** ABCC_CFG_INT_ENABLE_MASK: specifies which events are allowed
 ** to generate an interrupt.
 **
-** ABCC_CFG_HANDLE_IN_ABCC_ISR_MASK: specifies which of those enabled events
+** ABCC_CFG_HANDLE_INT_IN_ISR_MASK: specifies which of those enabled events
 ** are handled directly by the ISR, versus which are forwarded to the
 ** application via ABCC_CbfEvent().
 **------------------------------------------------------------------------------
@@ -308,16 +308,18 @@ EXTFUNC void ABCC_HWReleaseReset( void );
 
 /*------------------------------------------------------------------------------
 ** This function drives the ABCC driver sending and receiving mechanism.
+**
 ** The driver must be ready for communication before this function is called
-** (ABCC_isReadyForCommunication() must be TRUE). This function may be called
-** cyclically or be based on events from the ABCC. If all events are handled in
-** the interrupt context then there is no need to call this function.
+** (ABCC_isReadyForCommunication() must return ABCC_READY_FOR_COMMUNICATION).
+** This function may be called cyclically or be based on events from the ABCC.
+** If all events are handled in the interrupt context then there is no need
+** to call this function.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_RunDriver( void );
@@ -358,7 +360,7 @@ EXTFUNC void ABCC_UserInitComplete( void );
 **                      message.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType* psCmdMsg,
@@ -390,7 +392,7 @@ EXTFUNC UINT16 ABCC_GetCmdQueueSize( void );
 **       psMsgResp - Pointer to the message.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_SendRespMsg( ABP_MsgType* psMsgResp );
@@ -422,11 +424,11 @@ EXTFUNC ABCC_ErrorCodeType ABCC_SendRespMsg( ABP_MsgType* psMsgResp );
 **                        NULL if all data is supplied in pxData.
 **       pnDone         - Callback function to indicate that the entire message
 **                        is sent.
-**       pxObject       - User defined object. Forwarded as parameter in `pxData` and
-**                        `pnNext` callback functions.
+**       pxObject       - User defined object. Forwarded as parameter to the
+**                        `pnNext` and `pnDone` callback functions.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_StartServerRespSegmentationSession( const ABP_MsgHeaderType* psReqMsgHeader,
@@ -448,7 +450,7 @@ EXTFUNC ABCC_ErrorCodeType ABCC_StartServerRespSegmentationSession( const ABP_Ms
 **       iNewWritePdSize - WrPd size when the remap is done.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 #if ABCC_CFG_REMAP_SUPPORT_ENABLED
@@ -493,8 +495,8 @@ EXTFUNC void ABCC_SetAppStatus( ABP_AppStatusType eAppStatus  );
 **       None.
 **
 ** Returns:
-**       ABP_Msg* - Pointer to the message buffer.
-**                  NULL is returned if no resource is available.
+**       ABP_MsgType* - Pointer to the message buffer.
+**                      NULL is returned if no resource is available.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_GetCmdMsgBuffer( void );
@@ -509,7 +511,7 @@ EXTFUNC ABP_MsgType* ABCC_GetCmdMsgBuffer( void );
 **                   The buffer pointer will be set to NULL.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_ReturnMsgBuffer( ABP_MsgType** ppsBuffer );
@@ -746,7 +748,7 @@ EXTFUNC UINT8 ABCC_GetOpmode( void );
 **
 ** If, for example, the read process data is chosen to be interrupt driven and
 ** the message handling chosen to be polled ( see ABCC_CFG_INT_ENABLE_MASK and
-** ABCC_CFG_HANDLE_INT_IN_ISR_MASK in abcc_driver_config.h ), ABCC_CbfNewReadPd()
+** ABCC_CFG_HANDLE_INT_IN_ISR_MASK in inc/abcc_config.h ), ABCC_CbfNewReadPd()
 ** will be called from interrupt context and ABCC_CbfHandleCommandMessage() will
 ** be called from the same context as ABCC_RunDriver().
 ********************************************************************************
@@ -755,10 +757,10 @@ EXTFUNC UINT8 ABCC_GetOpmode( void );
 #if ABCC_CFG_INT_ENABLED
 /*------------------------------------------------------------------------------
 ** This function is called from ABCC_ISR() when events specified in
-** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function returns
-** ABCC_ISR_EVENT_X bits with the currently active events that have not already
-** been handled by the ISR itself. Which interrupt is to be handled by the ISR is
-** defined in the ABCC_CFG_HANDLE_INT_IN_ISR_MASK.
+** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function returns a bit field
+** of ABCC_ISR_EVENT_X definitions with the currently active events that
+** have not already been handled by the ISR itself. Which interrupt is
+** to be handled by the ISR is defined in the ABCC_CFG_HANDLE_INT_IN_ISR_MASK.
 ** This function is always called from interrupt context.
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -1122,7 +1124,7 @@ EXTFUNC void ABCC_SetMsgHeader( ABP_MsgType* psMsg,
 **       psMsg - Pointer to message buffer.
 **
 ** Returns:
-**       ABCC_ErrorCode.
+**       ABCC_ErrorCodeType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_VerifyMessage( const ABP_MsgType* psMsg );
@@ -1172,9 +1174,9 @@ EXTFUNC UINT16 ABCC_GetDataTypeSizeInBits( UINT8 bDataType );
 /*------------------------------------------------------------------------------
 ** Get size of the message channel in number of octets.
 **
-** Note that his isn't necessarily the same as the maximum message size as the
+** Note that this isn't necessarily the same as the maximum message size as the
 ** user can configure the driver to use a smaller message size. For that
-** purpose, use ABCC_GetMaxMessageSize() .
+** purpose, use ABCC_GetMaxMessageSize().
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
