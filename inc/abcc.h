@@ -21,7 +21,7 @@
 
 /*------------------------------------------------------------------------------
 ** Bit definitions of ABCC events.
-** These bit definitions are used in the bit mask
+** These bit definitions are used in the bit field
 ** forwarded to the ABCC_CbfEvent() callback.
 **------------------------------------------------------------------------------
 */
@@ -175,6 +175,9 @@ EXTFUNC void ABCC_ShutdownDriver( void );
 
 #if ABCC_CFG_DRV_ASSUME_FW_UPDATE_ENABLED
 /*------------------------------------------------------------------------------
+** Initiates a grace period to allow the ABCC hardware to complete a
+** firmware update.
+
 ** Waits a specified time for the ABCC hardware to complete a firmware update.
 ** This function should be called only when initial communication with the ABCC
 ** fails, indicating that the device is likely in the middle of a
@@ -192,8 +195,8 @@ EXTFUNC void ABCC_ShutdownDriver( void );
 ** or is blocked by another issue.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       lTimeoutMs - Duration (in milliseconds) to wait for the update 
-**                    to finish.
+**       lTimeoutMs - Maximum duration (in milliseconds) to wait for the
+**                    firmware update process to finish.
 **
 ** Returns:
 **       TRUE       - if this is the first attempt to wait for firmware update.
@@ -243,9 +246,10 @@ EXTFUNC ABCC_CommunicationStateType ABCC_isReadyForCommunication( void );
 EXTFUNC void ( *ABCC_ISR )( void );
 
 /*------------------------------------------------------------------------------
-** This function is responsible for handling all timers for the ABCC driver. It
-** is recommended to call this function on a regular basis from a timer
-** interrupt. Without this function no timeout and watchdog functionality will
+** This function is responsible for handling all timers for the ABCC driver.
+**
+** It is recommended to call this function on a regular basis from a timer
+** interrupt. Without this function, no timeout and watchdog functionality will
 ** work. This function can be called after ABCC_StartDriver() has been called.
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -344,12 +348,13 @@ EXTFUNC void ABCC_UserInitComplete( void );
 /*------------------------------------------------------------------------------
 ** Sends a command message to the ABCC.
 **
-** A message buffer must be obtained by calling ABCC_GetCmdMsgBuffer().
-** Previously received response buffers may be reused for this purpose.
+** A message buffer needs to be obtained first by e.g. calling
+** ABCC_GetCmdMsgBuffer(). Previously received response buffers
+** may be reused for this purpose.
 **
-** The driver uses the SourceId field (part of the message header) to route
-** the corresponding response to the correct response handler. To obtain a
-** unique SourceId, call ABCC_GetNewSourceId().
+** The driver uses the SourceId field (part of the message header)
+** to route the corresponding response to the correct response handler.
+** To obtain a unique SourceId, call ABCC_GetNewSourceId().
 **
 ** Example of using ABCC_CbfMessageReceived() as the response handler:
 **
