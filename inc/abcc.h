@@ -175,9 +175,10 @@ EXTFUNC void ABCC_ShutdownDriver( void );
 
 #if ABCC_CFG_DRV_ASSUME_FW_UPDATE_ENABLED
 /*------------------------------------------------------------------------------
-** Waits for the ABCC hardware to complete a firmware update. This function
-** should be called only when initial communication with the ABCC fails,
-** indicating that the device is likely in the middle of a firmware update.
+** Waits a specified time for the ABCC hardware to complete a firmware update.
+** This function should be called only when initial communication with the ABCC
+** fails, indicating that the device is likely in the middle of a
+** firmware update.
 **
 **  Call this function if any of the following conditions are met:
 **  - ABCC_isReadyForCommunication returned ABCC_ASSUME_FW_UPDATE
@@ -185,7 +186,7 @@ EXTFUNC void ABCC_ShutdownDriver( void );
 **  - Initial communication was attempted but triggered a watchdog timeout
 **    (interrupts disabled).
 **
-** This routine can only be initiated successfully ONCE per boot cycle.
+** This routine can only be initiated successfully ONCE per driver start.
 ** Subsequent calls will return FALSE. This restriction prevents the system
 ** from entering an infinite wait loop if the firmware update fails
 ** or is blocked by another issue.
@@ -225,7 +226,7 @@ EXTFUNC ABCC_CommunicationStateType ABCC_isReadyForCommunication( void );
 **
 ** Two configuration masks determine how events are processed.
 **
-** ABCC_CFG_INT_ENABLE_MASK: specifies which events are allowed
+** ABCC_CFG_INT_ENABLE_MASK_X: specifies which events are allowed
 ** to generate an interrupt.
 **
 ** ABCC_CFG_HANDLE_INT_IN_ISR_MASK: specifies which of those enabled events
@@ -562,9 +563,9 @@ EXTFUNC UINT8 ABCC_ReadModuleId( void );
 ** Detects the presence of an ABCC module by checking the Module Detect pins
 ** on the host connector.
 **
-** If the Module Detect pins are physically unconnected, define
-** ABCC_CFG_MOD_DETECT_PINS_CONN in your configuration. When this macro is
-** defined, this function will bypass the hardware check and always return TRUE.
+** If the Module Detect pins are physically unconnected, set
+** ABCC_CFG_MOD_DETECT_PINS_CONN to 0 in your configuration. Then this
+** function will bypass the hardware check and always return TRUE.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -721,7 +722,7 @@ EXTFUNC ABCC_NetFormatType ABCC_NetFormat( void );
 **       None.
 **
 ** Returns:
-**       ParameterSupportType.
+**       ABCC_ParameterSupportType.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ParameterSupportType ABCC_ParameterSupport( void );
@@ -747,7 +748,7 @@ EXTFUNC UINT8 ABCC_GetOpmode( void );
 ** callback may differ depending on the implementation.
 **
 ** If, for example, the read process data is chosen to be interrupt driven and
-** the message handling chosen to be polled ( see ABCC_CFG_INT_ENABLE_MASK and
+** the message handling chosen to be polled ( see ABCC_CFG_INT_ENABLE_MASK_X and
 ** ABCC_CFG_HANDLE_INT_IN_ISR_MASK in inc/abcc_config.h ), ABCC_CbfNewReadPd()
 ** will be called from interrupt context and ABCC_CbfHandleCommandMessage() will
 ** be called from the same context as ABCC_RunDriver().
@@ -757,10 +758,9 @@ EXTFUNC UINT8 ABCC_GetOpmode( void );
 #if ABCC_CFG_INT_ENABLED
 /*------------------------------------------------------------------------------
 ** This function is called from ABCC_ISR() when events specified in
-** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function returns a bit field
-** of ABCC_ISR_EVENT_X definitions with the currently active events that
-** have not already been handled by the ISR itself. Which interrupt is
-** to be handled by the ISR is defined in the ABCC_CFG_HANDLE_INT_IN_ISR_MASK.
+** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function sets internal flags
+** to indicate that an event has occurred. Which interrupt is to be
+** handled by the ISR is defined in the ABCC_CFG_HANDLE_INT_IN_ISR_MASK.
 ** This function is always called from interrupt context.
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -1132,8 +1132,8 @@ EXTFUNC ABCC_ErrorCodeType ABCC_VerifyMessage( const ABP_MsgType* psMsg );
 /*------------------------------------------------------------------------------
 ** This function generates a unique source Id for outgoing command messages.
 **
-** Each call of this function returns a fresh source identifier that is
-** guaranteed to be distinct from previously issued IDs, provided the function
+** Each call of this function returns a new source identifier that is
+** guaranteed to be distinct from IDs currently in use, provided the function
 ** is invoked whenever a new command message is sent. This approach eliminates
 ** the need for users to manage fixed source IDs manually, reducing the risk of
 ** collisions.
