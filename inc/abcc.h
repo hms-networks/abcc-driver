@@ -141,9 +141,9 @@ EXTFUNC ABCC_ErrorCodeType ABCC_HwInit( void );
 
 /*------------------------------------------------------------------------------
 ** This function will initiate the driver, enable interrupt, and set the
-** operation mode. If a firmware update is pending, a delay (iMaxStartupTime)
+** operation mode. If a firmware update is pending, a delay (lMaxStartupTimeMs)
 ** can be defined describing how long the driver is to wait for the startup
-** interrupt. iMaxStartupTime set to Zero (0) makes the driver use the
+** interrupt. lMaxStartupTimeMs set to Zero (0) makes the driver use the
 ** ABCC_CFG_STARTUP_TIME_MS time.
 **
 ** When this function has been called, the timer system can be started,
@@ -758,9 +758,11 @@ EXTFUNC UINT8 ABCC_GetOpmode( void );
 #if ABCC_CFG_INT_ENABLED
 /*------------------------------------------------------------------------------
 ** This function is called from ABCC_ISR() when events specified in
-** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function sets internal flags
-** to indicate that an event has occurred. Which interrupt is to be
+** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function is passed a bit field
+** of ABCC_ISR_EVENT_X definitions with the currently active events that
+** have not already been handled by the ISR itself. Which interrupt is
 ** handled by the ISR is defined in the ABCC_CFG_HANDLE_INT_IN_ISR_MASK.
+**
 ** This function is always called from interrupt context.
 **------------------------------------------------------------------------------
 ** Arguments:
