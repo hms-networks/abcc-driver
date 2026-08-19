@@ -177,14 +177,15 @@ EXTFUNC void ABCC_ShutdownDriver( void );
 /*------------------------------------------------------------------------------
 ** Initiates a grace period to allow the ABCC hardware to complete a
 ** firmware update.
-
-** Waits a specified time for the ABCC hardware to complete a firmware update.
-** This function should be called only when initial communication with the ABCC
-** fails, indicating that the device is likely in the middle of a
-** firmware update.
+**
+** This function does not block execution. Instead, it configures the
+** driver state machine to enter a waiting mode (ABCC_DRV_WAIT_COMMUNICATION_RDY)
+** and starts a timer. Use this function only when initial communication
+** attempts fail, suggesting the device is currently performing a firmware
+** update.
 **
 **  Call this function if any of the following conditions are met:
-**  - ABCC_isReadyForCommunication returned ABCC_ASSUME_FW_UPDATE
+**  - ABCC_isReadyForCommunication() returned ABCC_ASSUME_FW_UPDATE
 **    (interrupts enabled).
 **  - Initial communication was attempted but triggered a watchdog timeout
 **    (interrupts disabled).
@@ -195,12 +196,13 @@ EXTFUNC void ABCC_ShutdownDriver( void );
 ** or is blocked by another issue.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       lTimeoutMs - Maximum duration (in milliseconds) to wait for the
+**       lTimeoutMs - Maximum duration (in milliseconds) to allow for the
 **                    firmware update process to finish.
 **
 ** Returns:
-**       TRUE       - if this is the first attempt to wait for firmware update.
-**       FALSE      - if firmware update has been assumed at least once already.
+**       TRUE       - If the grace period was successfully started (first call).
+**       FALSE      - If a grace period has already been started during this
+**                    driver instance (subsequent calls).
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_WaitForFwUpdate( UINT32 lTimeoutMs );
