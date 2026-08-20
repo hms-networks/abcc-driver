@@ -5,6 +5,93 @@
 ** File Description:
 ** ABCC driver API used by the application.
 ********************************************************************************
+** Services provided by ABCC driver:
+**    ABCC_GpioReset()               - Clear a digital output for SYNC timing
+**                                     measurements.
+**    ABCC_GpioSet()                 - Set a digital output for SYNC timing
+**                                     measurements.
+**    ABCC_HwInit()                  - Initiate local hardware before driver
+**                                     startup.
+**    ABCC_StartDriver()             - Make the driver ready for use.
+**    ABCC_ShutdownDriver()          - Close the driver.
+**    ABCC_WaitForFwUpdate()         - Initiate grace period to allow for a
+**                                     firmware update.
+**    ABCC_isReadyForCommunication() - Check if the driver is ready to
+**                                     communicate.
+**    ABCC_ISR()                     - ABCC interrupt service routine.
+**    ABCC_RunTimerSystem()          - Handle timers for the ABCC driver.
+**    ABCC_GetUptimeMs()             - Get ABCC driver uptime.
+**    ABCC_HWReset                   - Reset ABCC.
+**    ABCC_HWReleaseReset            - Release the reset on ABCC.
+**    ABCC_RunDriver()               - Main routine to be called cyclically
+**                                     during polling.
+**    ABCC_UserInitComplete()        - End of user specific setup sequence.
+**    ABCC_SendCmdMsg()              - Send a command message to the ABCC.
+**    ABCC_SendRespMsg()             - Send a response message to the ABCC.
+**    ABCC_GetCmdQueueSize()         - Get the number of entries left in the
+**                                     command queue.
+**    ABCC_StartServerRespSegmentationSession() - Send a segmented response
+**                                                message to ABCC.
+**    ABCC_SendRemapRespMsg()        - Send remap response message.
+**    ABCC_GetAppStatus()            - Get current application status.
+**    ABCC_SetAppStatus()            - Set the application status.
+**    ABCC_GetCmdMsgBuffer()         - Allocate the command message buffer.
+**    ABCC_ReturnMsgBuffer()         - Free the message buffer.
+**    ABCC_TakeMsgBufferOwnership()  - Take the ownership of the message
+**                                     buffer.
+**    ABCC_SetMsgFragSize()          - Set the new SPI message fragment size.
+**    ABCC_ReadModuleId()            - Read module ID.
+**    ABCC_ModuleDetect()            - Detect if a module is present.
+**    ABCC_ModCap()                  - Read the module capability.
+**    ABCC_LedStatus()               - Read the LED status.
+**    ABCC_IsFirstCommandPending()   - Check if first message command to
+**                                     the ABCC is awaiting a response.
+**    ABCC_AnbState()                - Read the Anybus state.
+**    ABCC_IsSupervised()            - Get state of the SUP bit.
+**    ABCC_FirmwareVersion()         - Get ABCC firmware version.
+**    ABCC_NetworkType()             - Get network type.
+**    ABCC_ModuleType()              - Get module type.
+**    ABCC_NetFormat()               - Get network endianess.
+**    ABCC_ParameterSupport()        - Check if network supports
+**                                     parameter access.
+**    ABCC_GetOpmode()               - Get operating mode.
+**
+** Services to be implemented by the user:
+**    ABCC_CbfEvent()                - Events received. Called from ISR.
+**    ABCC_CbfSyncIsr()              - Callback for sync event.
+**    ABCC_CbfUserInitReq()          - User specific setup made by the
+**                                     application.
+**    ABCC_CbfHandleCommandMessage() - Callback for processing received
+**                                     ABCC commands.
+**    ABCC_CbfUpdateWriteProcessData() - Callback for updating the
+**                                       write process data buffer.
+**    ABCC_CbfNewReadPd()            - Process newly received
+**                                     read process data.
+**    ABCC_CbfWdTimeout()            - Communication lost.
+**    ABCC_CbfWdTimeoutRecovered()   - Communication restored.
+**    ABCC_CbfAdiMappingReq()        - Retrieve the ADI mapping information.
+**    ABCC_CbfDriverError()          - Callback for error notifications.
+**    ABCC_CbfAnbStateChanged()      - The Anybus state has changed.
+**    ABCC_CbfRemapDone()            - Acknowledge of remap has been sent
+**                                     to the ABCC.
+** Event related functions:
+**    ABCC_TriggerRdPdUpdate()       - Trigger the RdPd read.
+**    ABCC_TriggerReceiveMessage()   - Trigger the message read.
+**    ABCC_TriggerWrPdUpdate()       - Trigger the WrPd update.
+**    ABCC_TriggerAnbStatusUpdate()  - Check for Anybus status change.
+**    ABCC_TriggerTransmitMessage()  - Check sending queue.
+**
+** Message support functions:
+**    ABCC_GetAttribute()            - Fill "Get Attribute" message.
+**    ABCC_SetByteAttribute()        - Fill "Set Attribute" message.
+**    ABCC_SetMsgHeader()            - Set message header fields.
+**    ABCC_VerifyMessage()           - Check if E(rror) bit is set.
+**    ABCC_GetNewSourceId()          - Return an incrementing source id.
+**    ABCC_GetDataTypeSize()         - Return size of ABCC data type.
+**    ABCC_GetDataTypeSizeInBits()   - Return size of ABCC data type in bits.
+**    ABCC_GetMessageChannelSize()   - Get size of message channel.
+**    ABCC_GetMaxMessageSize()       - Get maximum data size of message channel.
+********************************************************************************
 */
 #ifndef ABCC_H_
 #define ABCC_H_
@@ -375,21 +462,6 @@ EXTFUNC ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType* psCmdMsg,
                                             ABCC_MsgHandlerFuncType pnMsgHandler );
 
 /*------------------------------------------------------------------------------
-** Retrieves the number of entries left in the command queue.
-**
-** Note! When sending a message the returned status must always be checked to
-** verify that the message has in fact been sent.
-**------------------------------------------------------------------------------
-** Arguments:
-**       None.
-**
-** Returns:
-**       Number of entries left in the command queue.
-**------------------------------------------------------------------------------
-*/
-EXTFUNC UINT16 ABCC_GetCmdQueueSize( void );
-
-/*------------------------------------------------------------------------------
 ** Sends a response message to the ABCC.
 **
 ** Note! The buffer from a received command message may be reused for the
@@ -404,6 +476,21 @@ EXTFUNC UINT16 ABCC_GetCmdQueueSize( void );
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_SendRespMsg( ABP_MsgType* psMsgResp );
+
+/*------------------------------------------------------------------------------
+** Retrieves the number of entries left in the command queue.
+**
+** Note! When sending a message the returned status must always be checked to
+** verify that the message has in fact been sent.
+**------------------------------------------------------------------------------
+** Arguments:
+**       None.
+**
+** Returns:
+**       Number of entries left in the command queue.
+**------------------------------------------------------------------------------
+*/
+EXTFUNC UINT16 ABCC_GetCmdQueueSize( void );
 
 /*------------------------------------------------------------------------------
 ** Sends a segmented response message to the ABCC.
@@ -657,9 +744,10 @@ EXTFUNC BOOL ABCC_IsSupervised( void );
 /*------------------------------------------------------------------------------
 ** Retrieve the ABCC firmware version.
 **
-** This function returns a valid value after ABCC_CbfAdiMappingReq has been
-** called by the driver. If called earlier, the function will return 0xFF for
-** each firmware version field which indicates that the version is unknown.
+** This function will return a valid value after the parameter has been
+** retrieved from the ABCC during SETUP state. If called earlier,
+** the function will return 0xFF for each firmware version field which
+** indicates that the version is unknown.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -673,10 +761,10 @@ EXTFUNC ABCC_FwVersionType ABCC_FirmwareVersion( void );
 /*------------------------------------------------------------------------------
 ** Retrieves the network type.
 **
-** This function will return a valid value after ABCC_CbfAdiMappingReq has been
-** called by the driver. If called earlier, the function will return 0xFFFF
-** which indicates that the network is unknown. The different network types
-** can be found in abp.h.
+** This function will return a valid value after the parameter has been
+** retrieved from the ABCC during SETUP state. If called earlier,
+** the function will return 0xFFFF which indicates that the network is
+** unknown. The different network types can be found in abp.h.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -690,10 +778,10 @@ EXTFUNC UINT16 ABCC_NetworkType( void );
 /*------------------------------------------------------------------------------
 ** Retrieves the module type.
 **
-** This function will return a valid value after ABCC_CbfAdiMappingReq has been
-** called by the driver. If called earlier, the function will return 0xFFFF
-** which indicates that the module type is unknown. The different module types
-** can be found in abp.h.
+** This function will return a valid value after the parameter has been
+** retrieved from the ABCC during SETUP state. If called earlier,
+** the function will return 0xFFFF which indicates that the module type is
+** unknown. The different module types can be found in abp.h.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -707,8 +795,9 @@ EXTFUNC UINT16 ABCC_ModuleType( void );
 /*------------------------------------------------------------------------------
 ** Retrieves the network format.
 **
-** This function will return a valid value after ABCC_CbfAdiMappingReq has been
-** called by the driver. If called earlier, the function will return NET_UNKNOWN.
+** This function will return a valid value after the parameter has been
+** retrieved from the ABCC during SETUP state. If called earlier,
+** the function will return NET_UNKNOWN.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -722,8 +811,9 @@ EXTFUNC ABCC_NetFormatType ABCC_NetFormat( void );
 /*------------------------------------------------------------------------------
 ** Retrieves the parameter support.
 **
-** This function will return a valid value after ABCC_CbfAdiMappingReq has been
-** called by the driver. If called earlier, PARAMETER_UNKNOWN will be returned.
+** This function will return a valid value after the parameter has been
+** retrieved from the ABCC during SETUP state. If called earlier,
+** PARAMETER_UNKNOWN will be returned.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
