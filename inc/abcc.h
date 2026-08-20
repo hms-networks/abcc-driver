@@ -51,7 +51,7 @@
 **    ABCC_FirmwareVersion()         - Get ABCC firmware version.
 **    ABCC_NetworkType()             - Get network type.
 **    ABCC_ModuleType()              - Get module type.
-**    ABCC_NetFormat()               - Get network endianess.
+**    ABCC_NetFormat()               - Get network endianness.
 **    ABCC_ParameterSupport()        - Check if network supports
 **                                     parameter access.
 **    ABCC_GetOpmode()               - Get operating mode.
@@ -91,7 +91,7 @@
 **    ABCC_GetDataTypeSizeInBits()   - Return size of ABCC data type in bits.
 **    ABCC_GetMessageChannelSize()   - Get size of message channel.
 **    ABCC_GetMaxMessageSize()       - Get maximum data size of the
-**                                     message channel.   
+**                                     message channel.
 ********************************************************************************
 */
 #ifndef ABCC_H_
@@ -498,7 +498,7 @@ EXTFUNC UINT16 ABCC_GetCmdQueueSize( void );
 **
 ** This function supports flexible data sourcing strategies:
 **
-** - Direct buffer: the provided payload buffer (`pxData`) contains the 
+** - Direct buffer: the provided payload buffer (`pxData`) contains the
 **   entire message data.
 ** - Callback stream: a callback function (`pnNext`) supplies data blocks
 **   on demand as the transmission progresses.

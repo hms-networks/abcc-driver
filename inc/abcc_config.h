@@ -42,7 +42,7 @@
 ** Default value below can be overridden in abcc_types.h.
 **
 ** Define as 1 if the internal and external memory bus of the host application
-** processor have different endianess. The default behavior is 'no endian swap'.
+** processor have different endianness. The default behavior is 'no endian swap'.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_PAR_EXT_BUS_ENDIAN_DIFF
@@ -158,6 +158,7 @@
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Enable/disable driver to retrieve the operating mode from external hardware.
+**
 ** If 1, the ABCC_HAL_GetOpmode() function must be implemented in the hardware
 ** abstraction layer.
 **
@@ -178,6 +179,7 @@
 ** Enable/disable driver to control the operating mode set to the ABCC host
 ** connector. Else it is assumed the operating mode signals of the host
 ** connector is fixed or controlled by external hardware.
+**
 ** If 1, the ABCC_HAL_SetOpmode() function must be implemented in the hardware
 ** abstraction layer.
 **------------------------------------------------------------------------------
@@ -329,9 +331,12 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Enable/disable driver to retrieve the module identification from external
-** hardware. If 1, the ABCC_HAL_ReadModuleId() function must be implemented
-** in the hardware abstraction layer. If 0, module identification
-** ABP_MODULE_ID_ACTIVE_ABCC40 is assumed.
+** hardware.
+**
+** If 1, the ABCC_HAL_ReadModuleId() function must be implemented
+** in the hardware abstraction layer.
+**
+** If 0, module identification ABP_MODULE_ID_ACTIVE_ABCC40 is assumed.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_MODULE_ID_PINS_CONN
@@ -344,8 +349,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Default value below can be overridden in abcc_driver_config.h
 **
 ** Set to 1, if the module detect pins on the ABCC host connector are
-** in use. If 1, the ABCC_HAL_ModuleDetect() function in the hardware
-** abstraction layer must be implemented.
+** in use.
+**
+** If 1, the ABCC_HAL_ModuleDetect() function must be implemented
+** in the hardware abstraction layer.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_MOD_DETECT_PINS_CONN
@@ -541,11 +548,14 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 **
 ** Enable/disable driver support to enable and disable sync interrupt using
 ** the sync signal from the ABCC.
+**
 ** If 1, ABCC_HAL_SyncInterruptEnable() and ABCC_HAL_SyncInterruptDisable()
 ** must be implemented by the application and ABCC_CbfSyncIsr() must be called
 ** from the sync interrupt handler.
+**
 ** If 0, the ABCC interrupt sync event will be used as sync source and
 ** ABCC_CbfSyncIsr() will be called by the driver.
+**
 ** The define is only valid if ABCC_CFG_SYNC_ENABLED is 1.
 **------------------------------------------------------------------------------
 */
@@ -974,10 +984,12 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Enable/disable driver support for measurement of input processing time (used
 ** for SYNC). This define is used during development by activating it and
 ** compiling special test versions of the product.
+**
 ** When ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED is 1, ABCC_HAL_GpioReset() is
 ** called at the WRPD interrupt. If running in SPI operating mode, it is
 ** instead called after ABCC_SpiRunDriver() has finished sending data to the
 ** Anybus.
+**
 ** When ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED is 1, ABCC_HAL_GpioSet() needs
 ** to be called at the Input Capture Point.
 **------------------------------------------------------------------------------
@@ -994,8 +1006,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** Enable/disable driver support for measurement of output processing time
 ** (used for SYNC). This define is used during development by activating it and
 ** compiling special test versions of the product.
+**
 ** When ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED is 1, ABCC_HAL_GpioSet() is called
 ** from the RDPDI interrupt.
+**
 ** When ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED is 1, ABCC_HAL_GpioReset() needs
 ** to be called at the Output Valid Point.
 **------------------------------------------------------------------------------
