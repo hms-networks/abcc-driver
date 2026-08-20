@@ -90,7 +90,8 @@
 **    ABCC_GetDataTypeSize()         - Return size of ABCC data type.
 **    ABCC_GetDataTypeSizeInBits()   - Return size of ABCC data type in bits.
 **    ABCC_GetMessageChannelSize()   - Get size of message channel.
-**    ABCC_GetMaxMessageSize()       - Get maximum data size of message channel.
+**    ABCC_GetMaxMessageSize()       - Get maximum data size of the
+**                                     message channel.   
 ********************************************************************************
 */
 #ifndef ABCC_H_
@@ -497,11 +498,12 @@ EXTFUNC UINT16 ABCC_GetCmdQueueSize( void );
 **
 ** This function supports flexible data sourcing strategies:
 **
-** - Direct buffer: the provided payload buffer (`pxData`) contains the entire message data.
-** - Callback stream: a callback function (`pnNext`) supplies data blocks on demand as the
-**   transmission progresses.
-** - Hybrid: a combination where `pxData` provides the initial block, followed by
-**   subsequent blocks via the callback.
+** - Direct buffer: the provided payload buffer (`pxData`) contains the 
+**   entire message data.
+** - Callback stream: a callback function (`pnNext`) supplies data blocks
+**   on demand as the transmission progresses.
+** - Hybrid: a combination where `pxData` provides the initial block,
+**   followed by subsequent blocks via the callback.
 **
 ** Using the callback method is particularly beneficial when data resides in
 ** scattered memory locations, as it eliminates the need to allocate a
