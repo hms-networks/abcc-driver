@@ -199,7 +199,7 @@
 ** must be defined to the operating mode chosen unless it's gettable (configured
 ** by ABCC_CFG_OP_MODE_GETTABLE).
 **
-** If the operating mode shall be fix, select from one of the following:
+** If the operating mode shall be fixed, select from one of the following:
 **
 ** "ABP_OP_MODE_SPI"
 ** "ABP_OP_MODE_16_BIT_PARALLEL"
@@ -661,7 +661,7 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** by the ISR will be translated to a bit field of definitions
 ** and forwarded to the user via the ABCC_CbfEvent() callback.
 **
-** If not defined in abcc_driver_config.h, the default value are:
+** If not defined in abcc_driver_config.h, the default values are:
 **
 ** for 8-bit / 16-bit parallel mode: 0 (no events handled by the ISR),
 ** for other operating modes: n/a.

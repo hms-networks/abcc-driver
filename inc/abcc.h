@@ -923,7 +923,7 @@ EXTFUNC void ABCC_CbfUserInitReq( void );
 **       psReceivedMsg       - Pointer to received message.
 **
 ** Returns:
-**       None
+**       None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_CbfHandleCommandMessage( ABP_MsgType* psReceivedMsg );
