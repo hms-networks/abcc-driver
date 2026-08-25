@@ -457,7 +457,6 @@ BOOL ABCC_DrvParIsSupervised( void )
    ** The Anybus supervision bis is stored in bit 3
    */
    return( ( iAnbStatus >> 3 ) & 1 );
-
 }
 
 UINT8 ABCC_DrvParGetAnbStatus( void )
@@ -469,6 +468,5 @@ UINT8 ABCC_DrvParGetAnbStatus( void )
    iAnbStatus = ABCC_DrvRead16( iAnbStatusAdrOffset );
    iAnbStatus = iLeExtBusTOi( iAnbStatus );
    return( (UINT8)iAnbStatus & 0xf );
-
 }
 #endif
