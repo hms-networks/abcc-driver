@@ -3,7 +3,7 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Defines the generic driver interface implemented by each specific driver.
+** Defines the SPI driver interface.
 ********************************************************************************
 */
 
@@ -21,10 +21,10 @@
 ** Must be called before the driver is used.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiInit( UINT8 bOpmode );
@@ -34,25 +34,25 @@ EXTFUNC void ABCC_DrvSpiInit( UINT8 bOpmode );
 ** Calls in the interrupt context to acknowledge received interrupts.
 **
 ** Remarks:
-**       The ISR routine will clear all pending interrupts.
+**    The ISR routine will clear all pending interrupts.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       Acknowledged interrupts.
+**    Acknowledged interrupts.
 **------------------------------------------------------------------------------
 */
-EXTFUNC UINT16  ABCC_DrvSpiISR( void );
+EXTFUNC UINT16 ABCC_DrvSpiISR( void );
 
 /*------------------------------------------------------------------------------
 ** Drives the internal send process.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiRunDriverTx( void );
@@ -61,55 +61,54 @@ EXTFUNC void ABCC_DrvSpiRunDriverTx( void );
 ** Drives the internal receive process.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       Pointer to successfully sent write message.
+**    Pointer to successfully sent write message.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvSpiRunDriverRx( void );
-
 
 /*------------------------------------------------------------------------------
 ** Writes a message to the driver.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psWriteMsg:    Pointer to message.
+**    psWriteMsg:    Pointer to message.
 **
 ** Returns:
-**       True:          Message was successfully written and can be deallocated
-**                      immediately.
-**       False:         Message was not yet written and cannot be deallocated.
-**                      The psWriteMsg pointer is owned by the driver until the
-**                      message is written and the pointer is returned in the
-**                      driver execution response.
+**    True:          Message was successfully written and can be deallocated
+**                   immediately.
+**    False:         Message was not yet written and cannot be deallocated.
+**                   The psWriteMsg pointer is owned by the driver until the
+**                   message is written and the pointer is returned in the
+**                   driver execution response.
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_DrvSpiWriteMessage( ABP_MsgType* psWriteMsg );
-
 
 /*------------------------------------------------------------------------------
 ** Writes current process data.
 ** The data is copied before returning from the method.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       pxProcessData: Pointer to process data to be sent.
+**    pxProcessData: Pointer to process data to be sent.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiWriteProcessData( void* pxProcessData );
 
 /*------------------------------------------------------------------------------
-** Checks if the driver is in the correct state for writing process data to the anybus
+** Checks if the driver is in the correct state for writing process data to the
+** Anybus.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       True:          Driver is in correct state to send WrPd
-**       False:         Driver is not in correct state to send Wrpd
+**    True:          Driver is in correct state to send WrPd.
+**    False:         Driver is not in correct state to send WrPd.
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_DrvSpiIsReadyForWrPd( void );
@@ -118,11 +117,11 @@ EXTFUNC BOOL ABCC_DrvSpiIsReadyForWrPd( void );
 ** Checks if the driver is ready to send a new write message.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       True:          Driver is ready to send a new write message.
-**       False:         Driver is not ready to send a new write message.
+**    True:          Driver is ready to send a new write message.
+**    False:         Driver is not ready to send a new write message.
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_DrvSpiIsReadyForWriteMessage( void );
@@ -132,23 +131,25 @@ EXTFUNC BOOL ABCC_DrvSpiIsReadyForWriteMessage( void );
 ** message.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       True:          OK to send new command.
-**       False:         NOK to send new command.
+**    True:          OK to send new command.
+**    False:         NOK to send new command.
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_DrvSpiIsReadyForCmd( void );
 
 /*------------------------------------------------------------------------------
-** Sets the number of simultaneous commands that is supported by the application.
+** Sets the number of simultaneous commands that are supported by the
+** application.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       bNbrOfCmds:    Number of commands that the application is ready to receive.
+**    bNbrOfCmds:    Number of commands that the application is ready to
+**                   receive.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiSetNbrOfCmds( UINT8 bNbrOfCmds );
@@ -158,10 +159,10 @@ EXTFUNC void ABCC_DrvSpiSetNbrOfCmds( UINT8 bNbrOfCmds );
 **  Note! This information is not supported by all protocols.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       eAppStatus:    Current application status.
+**    eAppStatus:    Current application status.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiSetAppStatus( ABP_AppStatusType eAppStatus );
@@ -170,11 +171,11 @@ EXTFUNC void ABCC_DrvSpiSetAppStatus( ABP_AppStatusType eAppStatus );
 ** Sets the current process data size.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       iReadPdSize:   Size of read process data (bytes)
-**       iWritePdSize:  Size of write process data (bytes)
+**    iReadPdSize:   Size of read process data (bytes)
+**    iWritePdSize:  Size of write process data (bytes)
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiSetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
@@ -184,10 +185,10 @@ EXTFUNC void ABCC_DrvSpiSetPdSize( const UINT16 iReadPdSize, const UINT16 iWrite
 ** Sets the new message fragment size for the SPI frame.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       iReqMsgFragSize:   Requested size of message fragment (bytes)
+**    iReqMsgFragSize:   Requested size of message fragment (bytes)
 **
 ** Returns:
-**       ABCC_ErrorCodeType
+**    ABCC_ErrorCodeType
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize( const UINT16 iReqMsgFragSize );
@@ -197,59 +198,59 @@ EXTFUNC ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize( const UINT16 iReqMsgFragSi
 ** Sets the receiver buffer, to be used for the next read message.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psReadMsg:     Pointer where next read message will be put.
-**                      psReadMsg is not allowed to contain a NULL value.
+**    psReadMsg:     Pointer where next read message will be put.
+**                   psReadMsg is not allowed to contain a NULL value.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
 
 /*------------------------------------------------------------------------------
-** Sets Interrupt mask according to h_aci.h.
+** Sets interrupt mask according to abp.h.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       iIntMask:      Interrupt mask set according to h_aci.h.
+**    iIntMask:      Interrupt mask according to abp.h.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiSetIntMask( const UINT16 iIntMask );
 
 /*------------------------------------------------------------------------------
-** Get WrpdBuffer for the user to update.
+** Get WrPdBuffer for the user to update.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       Pointer to WrPd buffer.
+**    Pointer to WrPd buffer.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void* ABCC_DrvSpiGetWrPdBuffer( void );
 
 /*------------------------------------------------------------------------------
-** Read module capabillity
+** Read module capability.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       Module capability.
+**    Module capability.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSpiGetModCap( void );
 
 /*------------------------------------------------------------------------------
-** Read module capability
+** Read LED status.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       Module capability.
+**    LED status.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSpiGetLedStatus( void );
@@ -258,14 +259,14 @@ EXTFUNC UINT16 ABCC_DrvSpiGetLedStatus( void );
 ** Gets the Anybus interrupt status.
 **
 ** Remarks:
-**       The ABCC_DrvISR() function will clear all pending interrupts. This
-**       function must be called before ABCC_DrvISR() or it will always return 0.
+**    The ABCC_DrvISR() function will clear all pending interrupts. This
+**    function must be called before ABCC_DrvISR() or it will always return 0.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       The Anybus interrupt status.
+**    The Anybus interrupt status.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSpiGetIntStatus( void );
@@ -274,10 +275,10 @@ EXTFUNC UINT16 ABCC_DrvSpiGetIntStatus( void );
 ** Gets the Anybus state.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       The Anybus state.
+**    The Anybus state.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT8 ABCC_DrvSpiGetAnybusState( void );
@@ -286,11 +287,11 @@ EXTFUNC UINT8 ABCC_DrvSpiGetAnybusState( void );
 ** Reads the read process data.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       A pointer to the read process data; or NULL if no process data to read
-**       was available.
+**    A pointer to the read process data; or NULL if no process data to read
+**    was available.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void* ABCC_DrvSpiReadProcessData( void );
@@ -299,12 +300,12 @@ EXTFUNC void* ABCC_DrvSpiReadProcessData( void );
 ** Reads the read message.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       A pointer to the read message; or NULL if no message is available.
-**       The pointer, if not NULL, will point to the buffer previously set by
-**       calling ABCC_DrvSetMsgReceiverBuffer().
+**    A pointer to the read message; or NULL if no message is available.
+**    The pointer, if not NULL, will point to the buffer previously set by
+**    calling ABCC_DrvSetMsgReceiverBuffer().
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvSpiReadMessage( void );
@@ -313,22 +314,22 @@ EXTFUNC ABP_MsgType* ABCC_DrvSpiReadMessage( void );
 **  Returns supervision bit in status register.
 **------------------------------------------------------------------------------
 ** Arguments:
-**          -
+**    None.
 **
 ** Returns:
-**          TRUE: The device is supervised by another network device.
+**    TRUE: The device is supervised by another network device.
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_DrvSpiIsSupervised( void );
 
 /*------------------------------------------------------------------------------
-**  Returns anybus status register.
+**  Returns Anybus status register.
 **------------------------------------------------------------------------------
 ** Arguments:
-**          -
+**    None.
 **
 ** Returns:
-**          Anybus status register
+**    Anybus status register
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT8 ABCC_DrvSpiGetAnbStatus( void );
