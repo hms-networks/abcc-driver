@@ -3,7 +3,7 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Parallel (PARI) driver implementation.
+** Parallel driver implementation.
 ********************************************************************************
 */
 
@@ -28,7 +28,7 @@
 #endif
 
 /*
-** If the internal and external memory bus have different endianess special
+** If the internal and external memory bus have different endianness, special
 ** macros are required to convert between bus endian and native endian.
 */
 #ifdef ABCC_SYS_BIG_ENDIAN
@@ -50,12 +50,12 @@
 #endif
 
 static ABCC_MsgType par_drv_uReadMessageData;
-static  void* par_drv_pbRdPdBuffer;
+static void* par_drv_pbRdPdBuffer;
 
 static UINT16   par_drv_iSizeOfReadPd;
 static UINT16   par_drv_iSizeOfWritePd;
 
-static   UINT8    par_drv_bNbrOfCmds;          /* Number of commands supported by the application. */
+static UINT8    par_drv_bNbrOfCmds;          /* Number of commands supported by the application. */
 
 static const    UINT16   iWRPDFlag     = 0x01;
 static const    UINT16   iRDPDFlag     = 0x02;
@@ -89,7 +89,6 @@ static const UINT16 iBufCtrlAdrOffset =      ABP_BUFCTRL_ADR_OFFSET;
 static const UINT16 iMsgHdrEndAdrOffset =    ABCC_MSG_HEADER_TYPE_SIZEOF;
 static const UINT16 iIntMaskAdrOffset =      ABP_INTMASK_ADR_OFFSET;
 static const UINT16 iIntStatusAdrOffset =    ABP_INTSTATUS_ADR_OFFSET;
-
 #endif
 
 void ABCC_DrvParInit( UINT8 bOpmode )
@@ -117,9 +116,9 @@ UINT16 ABCC_DrvParISR( void )
    /*---------------------------------------------------------------------------
    ** Read the interrupt status register and acknowledge all interrupts.
    ** Read interrupt status until all enabled interrupts are acknowledged.
-   ** This will make sure that edge triggered interrupt always will trigger
-   ** even if a new event has occurred between the int status read the
-   ** acknowledge.
+   ** This will make sure that an edge triggered interrupt will always trigger
+   ** even if a new event has occurred between the interrupt status read and
+   ** the acknowledge.
    **---------------------------------------------------------------------------
    */
    iIntStatus = ABCC_DrvRead16( iIntStatusAdrOffset );
@@ -155,17 +154,12 @@ ABP_MsgType* ABCC_DrvParRunDriverRx( void )
    return( NULL );
 }
 
-
 void ABCC_DrvParPrepareWriteMessage( ABP_MsgType* psWriteMsg )
 {
    if( !psWriteMsg )
    {
       ABCC_LOG_FATAL( ABCC_EC_UNEXPECTED_NULL_PTR, 0, "Unexpected NULL pointer\n" );
    }
-#ifdef MSG_TIMING
-   /*Toggle led for timing measurement*/
-   GPIO_OUT0  = 0;
-#endif
    ABCC_DrvParallelWrite( iWrMsgAdrOffset, psWriteMsg, ABCC_MSG_HEADER_TYPE_SIZEOF +  ABCC_GetMsgDataSize( psWriteMsg ) );
 }
 
@@ -198,7 +192,7 @@ BOOL ABCC_DrvParWriteMessage( ABP_MsgType* psWriteMsg )
 
       /*
       ** When a change of the number of commands which the host application
-      ** can receive is made from 0 to 1, it means that we can set the APPRF
+      ** can receive is made from 0 to 1, it means that we can set the APPR
       ** flag again to indicate for the Anybus that the host is now ready to
       ** receive a new command.
       */
@@ -212,10 +206,6 @@ BOOL ABCC_DrvParWriteMessage( ABP_MsgType* psWriteMsg )
    */
 
    ABCC_DrvWrite16( iBufCtrlAdrOffset, iTOiLeExtBus( iBufControlWriteFlags ) );
-#ifdef MSG_TIMING
-   /*Toggle led for timing measurement*/
-   GPIO_OUT0  = 1;
-#endif
    return( TRUE );
 }
 
@@ -239,10 +229,6 @@ void ABCC_DrvParWriteProcessData( void* pxProcessData )
       ** Update the buffer control register.
       */
       ABCC_DrvWrite16( iBufCtrlAdrOffset, iTOiLeExtBus( iWRPDFlag ) );
-#ifdef PD_TIMING
-      /*Toggle led for timing measurement*/
-      GPIO_OUT0  = 1;
-#endif
    }
 }
 
@@ -446,7 +432,6 @@ UINT16 ABCC_DrvParGetModCap( void )
    return( iLeExtBusTOi( iModCap ) );
 }
 
-
 UINT16 ABCC_DrvParGetLedStatus( void )
 {
    UINT16 iLedStatus;
@@ -458,7 +443,6 @@ BOOL ABCC_DrvParIsReadyForWrPd( void )
 {
    return( TRUE );
 }
-
 
 BOOL ABCC_DrvParIsSupervised( void )
 {
