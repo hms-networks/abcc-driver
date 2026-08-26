@@ -25,7 +25,7 @@
 ** before returning from this function.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psMsg:   Pointer to sent read remap response message.
+**    psMsg:         Pointer to sent read remap response message.
 **
 ** Returns:
 **    None.
@@ -38,7 +38,7 @@ EXTFUNC void ( *pnABCC_DrvCbfReadRemapDone )( const ABP_MsgType* const psMsg );
 ** Must be called before the driver is used.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    None.
+**    bOpmode:       Operating mode.
 **
 ** Returns:
 **    None.
@@ -49,12 +49,16 @@ EXTFUNC void ABCC_DrvSerInit( UINT8 bOpmode );
 
 /*------------------------------------------------------------------------------
 ** Calls in the interrupt context to acknowledge received interrupts.
+**
+** Remarks:
+**    Filler function since interrupt operation is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
 **
 ** Returns:
-**    None.
+**    0.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16  ABCC_DrvSerISR( void );
@@ -236,12 +240,16 @@ EXTFUNC void* ABCC_DrvSerGetWrPdBuffer( void );
 
 /*------------------------------------------------------------------------------
 ** Read module capability.
+**
+** Remarks:
+**    Filler function since module capability is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
 **
 ** Returns:
-**    Module capability.
+**    0.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSerGetModCap( void );
@@ -263,14 +271,14 @@ EXTFUNC UINT16 ABCC_DrvSerGetLedStatus( void );
 ** Gets the Anybus interrupt status.
 **
 ** Remarks:
-**    The ABCC_DrvISR() function will clear all pending interrupts. This
-**    function must be called before ABCC_DrvISR() or it will always return 0.
+**    Filler function since interrupt status is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
 **
 ** Returns:
-**    The Anybus interrupt status.
+**    0.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSerGetIntStatus( void );
@@ -294,7 +302,7 @@ EXTFUNC UINT8 ABCC_DrvSerGetAnybusState( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read process data; or NULL if no process data to read
+**    A pointer to the read process data or NULL if no process data to read
 **    was available.
 **------------------------------------------------------------------------------
 */
@@ -307,9 +315,9 @@ EXTFUNC void* ABCC_DrvSerReadProcessData( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read message; or NULL if no message is available.
+**    A pointer to the read message or NULL if no message is available.
 **    The pointer, if not NULL, will point to the buffer previously set by
-**    calling ABCC_DrvSetMsgReceiverBuffer().
+**    calling ABCC_DrvSerSetMsgReceiverBuffer().
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvSerReadMessage( void );
