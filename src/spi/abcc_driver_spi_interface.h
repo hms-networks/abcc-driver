@@ -205,11 +205,10 @@ EXTFUNC ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize( const UINT16 iReqMsgFragSi
 **    DrvSpiSetMsgReceiverBuffer() instead.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psReadMsg:     Pointer where next read message will be put.
-**                   psReadMsg is not allowed to contain a NULL value.
+**    -
 **
 ** Returns:
-**    None.
+**    -
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
