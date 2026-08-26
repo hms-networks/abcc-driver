@@ -199,6 +199,10 @@ EXTFUNC ABCC_ErrorCodeType ABCC_DrvSpiNewMsgFragSize( const UINT16 iReqMsgFragSi
 
 /*------------------------------------------------------------------------------
 ** Sets the receiver buffer, to be used for the next read message.
+**
+** Remarks:
+**    Not implemented, the SPI driver uses the static function
+**    DrvSpiSetMsgReceiverBuffer() instead.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    psReadMsg:     Pointer where next read message will be put.
@@ -297,7 +301,7 @@ EXTFUNC UINT8 ABCC_DrvSpiGetAnybusState( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read process data; or NULL if no process data to read
+**    A pointer to the read process data or NULL if no process data to read
 **    was available.
 **------------------------------------------------------------------------------
 */
@@ -311,8 +315,8 @@ EXTFUNC void* ABCC_DrvSpiReadProcessData( void );
 **
 ** Returns:
 **    A pointer to the read message or NULL if no message is available.
-**    The pointer, if not NULL, will point to the buffer previously set by
-**    calling ABCC_DrvSpiSetMsgReceiverBuffer().
+**    The pointer, if not NULL, will point to the driver's internally
+**    allocated read-message buffer.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvSpiReadMessage( void );
