@@ -204,11 +204,10 @@ EXTFUNC void ABCC_DrvParSetPdSize( const UINT16 iReadPdSize, const UINT16 iWrite
 **    DrvParSetMsgReceiverBuffer() instead.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psReadMsg:     Pointer where next read message will be put.
-**                   psReadMsg is not allowed to contain a NULL value.
+**    -
 **
 ** Returns:
-**    None.
+**    -
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvParSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
