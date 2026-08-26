@@ -21,7 +21,7 @@
 ** Must be called before the driver is used.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    None.
+**    bOpmode:       Operating mode.
 **
 ** Returns:
 **    None.
@@ -124,8 +124,7 @@ EXTFUNC void ABCC_DrvParWriteProcessData( void* pxProcessData );
 **    None.
 **
 ** Returns:
-**    True:          Driver is in correct state to send WrPd
-**    False:         Driver is not in correct state to send WrPd
+**    Always True.
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_DrvParIsReadyForWrPd( void );
@@ -293,7 +292,7 @@ EXTFUNC UINT8 ABCC_DrvParGetAnybusState( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read process data; or NULL if no process data to read
+**    A pointer to the read process data or NULL if no process data to read
 **    was available.
 **------------------------------------------------------------------------------
 */
@@ -306,9 +305,9 @@ EXTFUNC void* ABCC_DrvParReadProcessData( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read message; or NULL if no message is available.
+**    A pointer to the read message or NULL if no message is available.
 **    The pointer, if not NULL, will point to the buffer previously set by
-**    calling ABCC_DrvSetMsgReceiverBuffer().
+**    calling ABCC_DrvParSetMsgReceiverBuffer().
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvParReadMessage( void );
