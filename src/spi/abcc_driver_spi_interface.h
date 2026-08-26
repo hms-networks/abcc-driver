@@ -21,7 +21,7 @@
 ** Must be called before the driver is used.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    None.
+**    bOpmode:       Operating mode.
 **
 ** Returns:
 **    None.
@@ -35,6 +35,9 @@ EXTFUNC void ABCC_DrvSpiInit( UINT8 bOpmode );
 **
 ** Remarks:
 **    The ISR routine will clear all pending interrupts.
+**
+**    Not implemented since the SPI driver does not support
+**    interrupt operation.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
@@ -141,7 +144,7 @@ EXTFUNC BOOL ABCC_DrvSpiIsReadyForWriteMessage( void );
 EXTFUNC BOOL ABCC_DrvSpiIsReadyForCmd( void );
 
 /*------------------------------------------------------------------------------
-** Sets the number of simultaneous commands that are supported by the
+** Sets the number of simultaneous commands that is supported by the
 ** application.
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -233,12 +236,16 @@ EXTFUNC void* ABCC_DrvSpiGetWrPdBuffer( void );
 
 /*------------------------------------------------------------------------------
 ** Read module capability.
+**
+** Remarks:
+**    Filler function since module capability is not supported by
+**    the SPI driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
 **
 ** Returns:
-**    Module capability.
+**    0.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSpiGetModCap( void );
@@ -259,14 +266,14 @@ EXTFUNC UINT16 ABCC_DrvSpiGetLedStatus( void );
 ** Gets the Anybus interrupt status.
 **
 ** Remarks:
-**    The ABCC_DrvISR() function will clear all pending interrupts. This
-**    function must be called before ABCC_DrvISR() or it will always return 0.
+**    Filler function since interrupt status is not supported by
+**    the SPI driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
 **
 ** Returns:
-**    The Anybus interrupt status.
+**    0xFFFF.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSpiGetIntStatus( void );
@@ -303,9 +310,9 @@ EXTFUNC void* ABCC_DrvSpiReadProcessData( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read message; or NULL if no message is available.
+**    A pointer to the read message or NULL if no message is available.
 **    The pointer, if not NULL, will point to the buffer previously set by
-**    calling ABCC_DrvSetMsgReceiverBuffer().
+**    calling ABCC_DrvSpiSetMsgReceiverBuffer().
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvSpiReadMessage( void );
