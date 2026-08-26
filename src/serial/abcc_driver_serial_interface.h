@@ -202,13 +202,16 @@ EXTFUNC void ABCC_DrvSerSetPdSize( const UINT16 iReadPdSize, const UINT16 iWrite
 
 /*------------------------------------------------------------------------------
 ** Sets the receiver buffer, to be used for the next read message.
+**
+** Remarks:
+**    Not implemented, the serial driver uses the static function
+**    DrvSerSetMsgReceiverBuffer() instead.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psReadMsg:     Pointer where next read message will be put.
-**                   psReadMsg is not allowed to contain a NULL value.
+**    -
 **
 ** Returns:
-**    None.
+**    -
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSerSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
@@ -257,12 +260,16 @@ EXTFUNC UINT16 ABCC_DrvSerGetModCap( void );
 
 /*------------------------------------------------------------------------------
 ** Read LED status.
+**
+** Remarks:
+**    Filler function since LED status is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
 **
 ** Returns:
-**    LED status.
+**    0.
 **------------------------------------------------------------------------------
 */
 EXTFUNC UINT16 ABCC_DrvSerGetLedStatus( void );
@@ -316,8 +323,8 @@ EXTFUNC void* ABCC_DrvSerReadProcessData( void );
 **
 ** Returns:
 **    A pointer to the read message or NULL if no message is available.
-**    The pointer, if not NULL, will point to the buffer previously set by
-**    calling ABCC_DrvSerSetMsgReceiverBuffer().
+**    The pointer, if not NULL, will point to the driver's internally
+**    allocated read-message buffer.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvSerReadMessage( void );
