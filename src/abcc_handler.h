@@ -20,7 +20,7 @@ typedef union
 } ABCC_MsgType;
 
 /*
-** Type for ABCC main states
+** Type for ABCC main states.
 */
 typedef enum ABCC_MainStateType
 {
@@ -34,14 +34,14 @@ typedef enum ABCC_MainStateType
 
 #if ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED
 /*------------------------------------------------------------------------------
-** Flag used for sync measurement
+** Flag used for sync measurement.
 **------------------------------------------------------------------------------
 */
 EXTVAR BOOL fAbccUserSyncMeasurementIp;
 #endif
 
 /*
-** The interrupt mask that has been set to the ABCC at start up.
+** The interrupt mask that has been set to the ABCC at startup.
 */
 EXTVAR UINT16 ABCC_iInterruptEnableMask;
 
@@ -49,13 +49,13 @@ EXTVAR UINT16 ABCC_iInterruptEnableMask;
 ** Set the new process data sizes.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       iReadPdSize       - Size of the read process data (in bytes), used from
-**                           this point on.
-**       iWritePdSize      - Size of the write process data (in bytes), used from
-**                           this point on.
+**    iReadPdSize       - Size of the read process data (in bytes), used from
+**                        this point on.
+**    iWritePdSize      - Size of the write process data (in bytes), used from
+**                        this point on.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
@@ -65,10 +65,10 @@ EXTFUNC void ABCC_SetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize
 ** upon power up interrupt or initial handshake timeout.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_SetReadyForCommunication( void );
@@ -78,27 +78,27 @@ EXTFUNC void ABCC_SetReadyForCommunication( void );
 ** and ABCC_RunDriver() to perform any action towards application or Anybus.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       eSeverity         - Severity of the event (see ABCC_LogSeverityType).
-**       eErrorCode        - Error code.
-**       lAdditionalInfo   - Depending on error, different additional
-**                           information can be included.
+**    eSeverity         - Severity of the event (see ABCC_LogSeverityType).
+**    eErrorCode        - Error code.
+**    lAdditionalInfo   - Depending on error, different additional
+**                        information can be included.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_SetError( ABCC_LogSeverityType eSeverity,
-   ABCC_ErrorCodeType eErrorCode,
-   UINT32 lAdditionalInfo );
+                            ABCC_ErrorCodeType eErrorCode,
+                            UINT32 lAdditionalInfo );
 
 /*------------------------------------------------------------------------------
 ** Get current state.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       Current state ( ABCC_MainStateType )
+**    Current state ( ABCC_MainStateType ).
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_MainStateType ABCC_GetMainState( void );
@@ -108,10 +108,10 @@ EXTFUNC ABCC_MainStateType ABCC_GetMainState( void );
 ** If requested, the update is performed.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_CheckWrPdUpdate( void );

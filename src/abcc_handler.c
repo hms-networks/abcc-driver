@@ -49,7 +49,7 @@
 #endif
 
 /*
-** Registerd handler functions
+** Registered handler functions.
 */
 EXTFUNC void ABCC_SpiRunDriver( void );
 EXTFUNC void ABCC_SpiISR( void );
@@ -61,18 +61,18 @@ EXTFUNC void ABCC_SerRunDriver( void );
 EXTFUNC void ABCC_SerISR( void );
 
 /*
-** Registered handler functions
+** Registered handler functions.
 */
 void ( *ABCC_ISR )( void );
 void ( *ABCC_TriggerWrPdUpdate )( void );
 
 /*
-** The interrupt mask that has been set to the ABCC at start up.
+** The interrupt mask that has been set to the ABCC at startup.
 */
 UINT16 ABCC_iInterruptEnableMask;
 
 /*
-** Registerd driver functions
+** Registered driver functions.
 */
 void ( *pnABCC_DrvRun )( void );
 void  ( *pnABCC_DrvInit )( UINT8 bOpmode );
@@ -121,35 +121,35 @@ static BOOL abcc_fFwUpdateAttempted;
 #endif
 
 /*
-** Pointer to WRPD buffer.
+** Pointer to WrPd buffer.
 */
 static void* abcc_pbWrPdBuffer;
 
 /*
-** Tmo handler for
+** Timeout handler.
 */
 static ABCC_TimerHandle abcc_TmoHandle;
 
 /*
-** Indicate ready for communication
+** Indicate ready for communication.
 */
 static BOOL abcc_fReadyForCommunicationTmo = FALSE;
 static BOOL abcc_fReadyForCommunication = FALSE;
 
 /*
-** Current operation mode
+** Current operation mode.
 */
 static UINT8 abcc_bOpmode = 0;
 
 #if ( ABCC_CFG_DRV_SPI_ENABLED || ABCC_CFG_DRV_SERIAL_ENABLED )
 /*
-** Flag to indicate that WrPD update shall be done
+** Flag to indicate that WrPd update shall be done.
 */
 static BOOL abcc_fDoWrPdUpdate = FALSE;
 #endif
 
 /*
-** The Application status register value of the Anybus module
+** The Application Status Register value of the Anybus module.
 */
 static volatile ABP_AppStatusType abcc_eAppStatus = ABP_APPSTAT_NO_ERROR;
 
@@ -700,7 +700,7 @@ void ABCC_TriggerRdPdUpdate( void )
 #if ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED
    /*
    ** This is the Output Valid point (for OuputValidTime = 0). The
-   ** applications has received data and handled it. Thus we reset the
+   ** application has received data and handled it. Thus we reset the
    ** ABCC_CFG_SYNC_MEASUREMENT_OP_ENABLED measurement.
    */
    ABCC_HAL_GpioReset();
@@ -816,7 +816,7 @@ ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType*  psCmdMsg, ABCC_MsgHandlerFuncT
       if( eResult != ABCC_EC_NO_ERROR )
       {
          /*
-         ** Free message handler resource
+         ** Free message handler resource.
          */
          (void)ABCC_LinkGetMsgHandler( ABCC_GetLowAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj ) );
       }
@@ -826,7 +826,7 @@ ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType*  psCmdMsg, ABCC_MsgHandlerFuncT
       eResult = ABCC_EC_NO_RESOURCES;
 
       /*
-      ** Report error
+      ** Report error.
       */
       ABCC_LOG_WARNING( ABCC_EC_NO_RESOURCES, 0, "No resources available to map response handler\n" );
    }
@@ -1014,7 +1014,7 @@ UINT8 ABCC_GetOpmode( void )
    return( ABCC_CFG_ABCC_OP_MODE );
 #else
    /*
-   ** The user has not configured any way to determine the operating mode
+   ** The user has not configured any way to determine the operating mode.
    */
    #error "No method to determine the operating mode is available. Either set ABCC_CFG_OP_MODE_GETTABLE to 1 or any of ABCC_CFG_ABCC_OP_MODE_X. See descriptions in abcc_config.h for details."
 #endif /* End of #if ABCC_CFG_OP_MODE_GETTABLE */
