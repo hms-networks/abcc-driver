@@ -50,7 +50,7 @@ EXTFUNC void ABCC_HAL_SpiRegDataReceived( ABCC_HAL_SpiDataReceivedCbfType pnData
 **    iLength              Length of SPI frame ( in bytes ).
 **
 ** Returns:
-**    None.
+**    None
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_HAL_SpiSendReceive( void* pxSendDataBuffer, void* pxReceiveDataBuffer, UINT16 iLength );
