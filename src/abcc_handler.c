@@ -126,7 +126,7 @@ static BOOL abcc_fFwUpdateAttempted;
 static void* abcc_pbWrPdBuffer;
 
 /*
-** Timeout handler for watchdog.
+** Timeout handler.
 */
 static ABCC_TimerHandle abcc_TmoHandle;
 
