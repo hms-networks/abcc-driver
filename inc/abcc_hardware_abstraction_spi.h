@@ -39,17 +39,18 @@ EXTFUNC void ABCC_HAL_SpiRegDataReceived( ABCC_HAL_SpiDataReceivedCbfType pnData
 ** Two buffers are provided, one with MOSI data frame to be sent and one buffer
 ** to store the received MISO frame.
 ** If the callback registered by ABCC_HAL_SpiRegDataReceived() is invoked within
-** this function, indicating that the MISO frame is already received ,the MISO
+** this function, indicating that the MISO frame is already received,the MISO
 ** frame will be processed by the SPI driver on return of this function.
 ** Otherwise the MISO frame will be processed the next time the driver is polled
 ** (ABCC_RunDriver() ) after the MISO frame received callback is invoked.
 **------------------------------------------------------------------------------
 ** Arguments:
-**             pxSendDataBuffer     Pointer to MOSI Buffer to send
-**             pxReceiveDataBuffer  Pointer to MISO Buffer.
-**             iLength              Length of SPI frame ( in bytes )
+**    pxSendDataBuffer     Pointer to MOSI Buffer to send.
+**    pxReceiveDataBuffer  Pointer to MISO Buffer.
+**    iLength              Length of SPI frame ( in bytes ).
+**
 ** Returns:
-**          None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_HAL_SpiSendReceive( void* pxSendDataBuffer, void* pxReceiveDataBuffer, UINT16 iLength );
