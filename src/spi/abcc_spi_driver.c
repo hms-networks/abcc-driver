@@ -124,7 +124,7 @@ typedef struct drv_SpiMosiFrameType
 ** SPI MISO structure.
 **------------------------------------------------------------------------------
 */
-typedef struct
+typedef struct drv_SpiMisoFrameType
 {
    UINT16 iReserved;
    UINT16 iLedStat;
@@ -137,7 +137,7 @@ typedef struct
 ** Message fragmentation info types.
 **------------------------------------------------------------------------------
 */
-typedef struct
+typedef struct drv_SpiWriteMsgFragInfoType
 {
   ABP_MsgType*       psWriteMsg;          /* Pointer to the write message. */
   UINT16*            puCurrPtr;           /* Pointer to the current fragment. */
@@ -145,7 +145,7 @@ typedef struct
   UINT16             iCurrFragLength;     /* Current fragmention block length. */
 } drv_SpiWriteMsgFragInfoType;
 
-typedef struct
+typedef struct drv_SpiReadMsgFragInfoType
 {
   ABP_MsgType* psReadMsg;                 /* Pointer to the receive message buffer. */
   UINT16*            puCurrPtr;           /* Pointer to the current position in receive buffer. */
@@ -157,7 +157,7 @@ typedef struct
 ** Info for dynamic SPI message fragment size handling.
 **------------------------------------------------------------------------------
 */
-typedef struct
+typedef struct drv_SpiMsgFragSizeInfoType
 {
    BOOL     fUpdated;
    UINT16   iMsgFragSizeReq;
@@ -168,7 +168,7 @@ typedef struct
 ** Internal SPI states.
 **------------------------------------------------------------------------------
 */
-typedef enum
+typedef enum drv_SpiStateType
 {
    SM_SPI_INIT = 0,
    SM_SPI_RDY_TO_SEND_MOSI,
@@ -183,9 +183,9 @@ static drv_SpiMisoFrameType         spi_drv_sMisoFrame;           /* Place holde
 static drv_SpiReadMsgFragInfoType   spi_drv_sReadFragInfo;        /* Read message info. */
 static BOOL                         spi_drv_fNewMisoReceived;     /* MISO received flag. */
 static UINT8                        spi_drv_bAnbStatus;           /* Latest received anb status. */
-static UINT16                       spi_drv_iLedStatus;            /* Latest received anb status. */
-static UINT8                        spi_drv_bAnbCmdCnt;            /* Latest correct received cmd count */
-static UINT8*                       spi_drv_bpRdPd;                /* Pointer to latest correctly received RdPd */
+static UINT16                       spi_drv_iLedStatus;           /* Latest received anb status. */
+static UINT8                        spi_drv_bAnbCmdCnt;           /* Latest correct received cmd count. */
+static UINT8*                       spi_drv_bpRdPd;               /* Pointer to latest correctly received RdPd. */
 
 static ABP_MsgType*                 spi_drv_psReadMessage;        /* Pointer to the read message. */
 
@@ -196,8 +196,8 @@ static ABP_MsgType*                 spi_drv_psReadMessage;        /* Pointer to 
 static drv_SpiMosiFrameType         spi_drv_sMosiFrame;           /* Place holder for the MISO frame. */
 static drv_SpiWriteMsgFragInfoType  spi_drv_sWriteFragInfo;       /* Write message info. */
 static UINT8                        spi_drv_bNbrOfCmds;           /* Number of commands support by the application. */
-static UINT8                        spi_drv_bNextAppStatus;       /* Appstatus to be sent in next MOSI frame */
-static UINT8                        spi_drv_bNextIntMask;         /* Intmask to be sent in next MOSI frame */
+static UINT8                        spi_drv_bNextAppStatus;       /* Appstatus to be sent in next MOSI frame. */
+static UINT8                        spi_drv_bNextIntMask;         /* Intmask to be sent in next MOSI frame. */
 
 /*------------------------------------------------------------------------------
 ** General privates.
@@ -215,9 +215,9 @@ static BOOL                         spi_drv_fRetransmit;          /* Indicate re
 
 static drv_SpiStateType             spi_drv_eState;               /* SPI driver state. */
 static ABCC_TimerHandle             xWdTmoHandle;
-static BOOL                         fWdTmo;                       /* Current wd timeout status */
+static BOOL                         fWdTmo;                       /* Current wd timeout status. */
 
-static UINT16                       spi_drv_iMsgLen;              /* Message length ( in words ) */
+static UINT16                       spi_drv_iMsgLen;              /* Message length ( in words ). */
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 static drv_SpiMsgFragSizeInfoType   spi_drv_sSpiMsgFragSizeInfo =
@@ -227,7 +227,7 @@ static drv_SpiMsgFragSizeInfoType   spi_drv_sSpiMsgFragSizeInfo =
    };
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
-static UINT16                       drv_iCrcErrorCount;           /* CRC error counter */
+static UINT16                       drv_iCrcErrorCount;           /* CRC error counter. */
 
 static void spi_drv_DataReceived( void );
 static void spi_drv_ResetReadFragInfo( void );
@@ -241,10 +241,10 @@ static void DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
 **  could be blocking until the MISO is received.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       Driver status.
+**    None.
 **------------------------------------------------------------------------------
 */
 void ABCC_DrvSpiRunDriverTx( void )
@@ -284,12 +284,12 @@ void ABCC_DrvSpiRunDriverTx( void )
             {
                /*
                ** Shift process data to new offset in frame according to new
-               ** message fragment size
+               ** message fragment size.
                */
                if( spi_drv_iPdOffset < NUM_BYTES_2_WORDS( iMsgFragSizeReqBuffer ) )
                {
                   /*
-                  ** Move process data towards the end of the frame
+                  ** Move process data towards the end of the frame.
                   **
                   ** Since source and destination can overlap within the same
                   ** buffer, copy backwards from the last word to prevent
@@ -307,7 +307,7 @@ void ABCC_DrvSpiRunDriverTx( void )
                else
                {
                   /*
-                  ** Move process data towards the beginning of the frame
+                  ** Move process data towards the beginning of the frame.
                   **
                   ** Since source and destination can overlap within the same
                   ** buffer, copy forwards from the first word. This is safe
@@ -447,10 +447,10 @@ void ABCC_DrvSpiRunDriverTx( void )
 **  Handle the reception of the MISO frame.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psResp:  Pointer to the response message.
+**    None.
 **
 ** Returns:
-**       None.
+**    psResp:  Pointer to the response message.
 **------------------------------------------------------------------------------
 */
 ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
@@ -498,7 +498,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       }
 
       /*
-      ** Restart watchdog
+      ** Restart watchdog.
       */
       if( fWdTmo )
       {
@@ -510,7 +510,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       ABCC_TimerStart( xWdTmoHandle, ABCC_CFG_WD_TIMEOUT_MS );
 
       /*
-      ** Save the current anybus status.
+      ** Save the current Anybus status.
       */
       spi_drv_bAnbStatus =  ABCC_GetLowAddrOct( spi_drv_sMisoFrame.iSpiStatusAnbStatus );
       spi_drv_iLedStatus  = iLeTOi( spi_drv_sMisoFrame.iLedStat );
@@ -628,10 +628,10 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
 ** Callback from the physical layer to indicate that a MISO frame was received.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 static void spi_drv_DataReceived( void )
@@ -643,10 +643,10 @@ static void spi_drv_DataReceived( void )
 ** Reset the read fragmentation information.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 static void spi_drv_ResetReadFragInfo( void )
@@ -660,10 +660,10 @@ static void spi_drv_ResetReadFragInfo( void )
 ** Reset the write fragmentation information.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 static void spi_drv_ResetWriteFragInfo( void )
@@ -683,10 +683,10 @@ static void spi_drv_ResetWriteFragInfo( void )
 ** Watchdog timeout handler.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 static void drv_WdTimeoutHandler( void )
@@ -751,7 +751,7 @@ void ABCC_DrvSpiInit( UINT8 bOpmode )
 
 #if ABCC_CFG_SYNC_MEASUREMENT_IP_ENABLED
    /*
-   ** Initialise sync measurement flag
+   ** Initialize sync measurement flag.
    */
    fAbccUserSyncMeasurementIp = FALSE;
 #endif
@@ -779,7 +779,7 @@ BOOL ABCC_DrvSpiWriteMessage( ABP_MsgType* psWriteMsg )
    #pragma GCC diagnostic push
    #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
    /*
-   ** psWriteMsg is 32 bit aligned so it is safe to ignore this warning
+   ** psWriteMsg is 32 bit aligned so it is safe to ignore this warning.
    */
 #endif
    spi_drv_sWriteFragInfo.puCurrPtr = (UINT16*)psWriteMsg;
@@ -910,7 +910,7 @@ static void DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg )
    #pragma GCC diagnostic push
    #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
    /*
-   ** psReadMsg is 32 bit aligned so it is safe to ignore this warning
+   ** psReadMsg is 32 bit aligned so it is safe to ignore this warning.
    */
 #endif
       spi_drv_sReadFragInfo.puCurrPtr = (UINT16*)psReadMsg;
@@ -1003,7 +1003,7 @@ BOOL ABCC_DrvSpiIsReadyForWrPd( void )
 BOOL ABCC_DrvSpiIsSupervised( void )
 {
    /*
-   ** The Anybus supervision bit is stored in bit 3
+   ** The Anybus supervision bit is stored in bit 3.
    */
    return( ( spi_drv_bAnbStatus  >> 3 ) & 1 );
 }
