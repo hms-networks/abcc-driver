@@ -857,7 +857,7 @@ EXTFUNC UINT8 ABCC_GetOpmode( void );
 #if ABCC_CFG_INT_ENABLED
 /*------------------------------------------------------------------------------
 ** This function is called from ABCC_ISR() when events specified in
-** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function is passed a bit field
+** ABCC_CFG_INT_ENABLE_MASK_X have occurred. The function receives a bit field
 ** of ABCC_ISR_EVENT_X definitions with the currently active events that
 ** have not already been handled by the ISR itself. Which interrupt is
 ** handled by the ISR is defined in the ABCC_CFG_HANDLE_INT_IN_ISR_MASK.
