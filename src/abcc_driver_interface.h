@@ -31,12 +31,14 @@
 **    None
 **------------------------------------------------------------------------------
 */
+#if ABCC_CFG_DRV_PARALLEL_ENABLED
 #if ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED
 #define ABCC_DrvParallelRead( iMemOffset, pxData, iLength )                    \
         ABCC_PORT_MemCpy( (pxData), (void*)( ABCC_CFG_PARALLEL_BASE_ADR + (iMemOffset) ), (iLength) )
 #else
 #define ABCC_DrvParallelRead( iMemOffset, pxData, iLength )                    \
         ABCC_HAL_ParallelRead( iMemOffset, pxData, iLength )
+#endif
 #endif
 
 /*------------------------------------------------------------------------------
@@ -51,11 +53,13 @@
 **    Read UINT8
 **------------------------------------------------------------------------------
 */
+#if ABCC_CFG_DRV_PARALLEL_ENABLED
 #if ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED
 #define ABCC_DrvRead16( iMemOffset )                                           \
         *(volatile UINT16*)( ABCC_CFG_PARALLEL_BASE_ADR + (iMemOffset) )
 #else
 #define ABCC_DrvRead16( iMemOffset ) ABCC_HAL_ParallelRead16( iMemOffset )
+#endif
 #endif
 
 /*------------------------------------------------------------------------------
@@ -73,12 +77,14 @@
 **    None
 **------------------------------------------------------------------------------
 */
+#if ABCC_CFG_DRV_PARALLEL_ENABLED
 #if ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED
 #define ABCC_DrvParallelWrite( iMemOffset, pxData, iLength )                   \
         ABCC_PORT_MemCpy( (void*)( ABCC_CFG_PARALLEL_BASE_ADR + (iMemOffset) ), (pxData), (iLength) )
 #else
 #define ABCC_DrvParallelWrite( iMemOffset, pxData, iLength )                   \
         ABCC_HAL_ParallelWrite( iMemOffset, pxData, iLength )
+#endif
 #endif
 
 /*------------------------------------------------------------------------------
@@ -95,12 +101,14 @@
 **
 **------------------------------------------------------------------------------
 */
+#if ABCC_CFG_DRV_PARALLEL_ENABLED
 #if ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED
 #define ABCC_DrvWrite16( iMemOffset, pbData )                                  \
         *(volatile UINT16*)( ABCC_CFG_PARALLEL_BASE_ADR + (iMemOffset) ) = pbData
 #else
 #define ABCC_DrvWrite16( iMemOffset, pbData )                                  \
         ABCC_HAL_ParallelWrite16( iMemOffset, pbData )
+#endif
 #endif
 
 /*------------------------------------------------------------------------------
