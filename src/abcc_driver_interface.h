@@ -50,7 +50,7 @@
 **                 16 bit char platforms : iMemOffset in 16 bit words
 **
 ** Returns:
-**    Read UINT8
+**    Read UINT16
 **------------------------------------------------------------------------------
 */
 #if ABCC_CFG_DRV_PARALLEL_ENABLED
