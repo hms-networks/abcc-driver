@@ -870,6 +870,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 ** #define ABCC_CFG_DEBUG_CMD_SEQ_ENABLED              1 - Enable / 0 - Disable
 **
 ** Enable/disable printout of command sequencer actions.
+**
+** #define ABCC_CFG_DEBUG_MEMORY_ENABLED               1 - Enable / 0 - Disable
+**
+** Enable/disable printout of memory buffer allocation and deallocation.
 **------------------------------------------------------------------------------
 */
 #ifndef ABCC_CFG_DEBUG_HEXDUMP_SPI_ENABLED
@@ -887,6 +891,10 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
 #ifndef ABCC_CFG_DEBUG_CMD_SEQ_ENABLED
     #define ABCC_CFG_DEBUG_CMD_SEQ_ENABLED 0
 #endif
+#ifndef ABCC_CFG_DEBUG_MEMORY_ENABLED
+    #define ABCC_CFG_DEBUG_MEMORY_ENABLED 0
+#endif
+
 
 /*------------------------------------------------------------------------------
 ** Enable fetching and clearing of the Fatal log.
