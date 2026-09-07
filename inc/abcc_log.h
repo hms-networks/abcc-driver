@@ -183,7 +183,7 @@ do                                                              \
 #define ABCC_LOG_DEBUG_SPI_HEXDUMP_MISO( pbData, iSizeInBytes )
 #endif
 
-#if ABCC_LOG_DEBUG_MEMORY_ENABLED && ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_DEBUG_ENABLED
+#if ABCC_CFG_DEBUG_MEMORY_ENABLED && ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_DEBUG_ENABLED
 #define ABCC_LOG_DEBUG_MEM( ... ) ABCC_LOG_DEBUG( __VA_ARGS__ )
 #else
 #define ABCC_LOG_DEBUG_MEM( ... )
