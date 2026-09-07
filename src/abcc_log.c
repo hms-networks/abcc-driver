@@ -7,10 +7,6 @@
 ********************************************************************************
 */
 
-#if ABCC_CFG_LOG_STRINGS_ENABLED
-#include <stdarg.h>
-#endif
-
 #include "abcc_config.h"
 #include "abcc.h"
 #include "abcc_port.h"
@@ -19,6 +15,11 @@
 #include "abp.h"
 #include "abcc_log.h"
 #include "abcc_handler.h"
+
+#if ABCC_CFG_LOG_STRINGS_ENABLED
+#include <stdarg.h>
+#endif
+#include <inttypes.h>
 
 /*------------------------------------------------------------------------------
 ** ANSI color codes for prettier prints
@@ -78,7 +79,7 @@ void ABCC_LogHandler(
 #endif
 )
 {
-   const char* apcSeverityToString[] =
+   static const char* const apcSeverityToString[] =
    {
       ".."ABCC_LOG_ANSI_COLOR_RED    "|FATAL| "ABCC_LOG_ANSI_COLOR_RESET,
       ".."ABCC_LOG_ANSI_COLOR_RED    "|ERROR| "ABCC_LOG_ANSI_COLOR_RESET,
@@ -95,7 +96,7 @@ void ABCC_LogHandler(
 
 #if ABCC_CFG_LOG_TIMESTAMPS_ENABLED
    UINT64 llUptime = ABCC_GetUptimeMs();
-   ABCC_PORT_printf( ABCC_LOG_ANSI_COLOR_GREEN"%02u:%02u:%02u.%03u - "ABCC_LOG_ANSI_COLOR_RESET,
+   ABCC_PORT_printf( ABCC_LOG_ANSI_COLOR_GREEN"%02" PRIu16 ":%02" PRIu8 ":%02" PRIu8 ".%03" PRIu16 " - "ABCC_LOG_ANSI_COLOR_RESET,
       (UINT16)( llUptime / 1000 / 60 / 60 % 24 ),
       (UINT8)( llUptime / 1000 / 60 % 60 ),
       (UINT8)( llUptime / 1000 % 60 ),
