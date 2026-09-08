@@ -3,8 +3,8 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** Implements message queuing and write message flow control.
-**. and response handler functionality
+** Implements message queuing, write message flow control
+** and response handler functionality.
 ********************************************************************************
 */
 
@@ -21,7 +21,7 @@
 #include "abcc_port.h"
 
 /*
-** Max number of messages in each send queue.
+** Max. number of messages in each send queue.
 */
 #define LINK_MAX_NUM_CMDS_IN_Q            ABCC_CFG_MAX_NUM_APPL_CMDS
 #define LINK_MAX_NUM_RESP_IN_Q            ABCC_CFG_MAX_NUM_ABCC_CMDS
@@ -32,10 +32,10 @@
 #define LINK_NUM_MSG_IN_POOL              ABCC_CFG_MAX_NUM_MSG_RESOURCES
 
 /*
-** Max num message handlers for responses.
-** The max number of outstanding commands counter is decremented
-** before the handler is invoked therefore we need to handle 1 extra
-** handler
+** Max. number of message handlers for responses.
+** The max. number of outstanding commands counter is decremented
+** before the handler is invoked. Therefore we need to handle 1 extra
+** handler.
 */
 #define LINK_MAX_NUM_MSG_HDL ( LINK_MAX_NUM_CMDS_IN_Q + 1 )
 
@@ -64,25 +64,25 @@ void ( *pnABCC_DrvCbfReadRemapDone )( const ABP_MsgType* const psMsg );
 static UINT16 link_iMaxMsgSize;
 
 /*
-** Command and response queues
+** Command and response queues.
 */
-static ABP_MsgType* link_psCmds[LINK_MAX_NUM_CMDS_IN_Q ];
-static ABP_MsgType* link_psResponses[LINK_MAX_NUM_RESP_IN_Q];
+static ABP_MsgType* link_psCmds[ LINK_MAX_NUM_CMDS_IN_Q ];
+static ABP_MsgType* link_psResponses[ LINK_MAX_NUM_RESP_IN_Q ];
 
 static MsgQueueType link_sCmdQueue;
 static MsgQueueType link_sRespQueue;
 
 /*
-** Response handlers
+** Response handlers.
 */
 static ABCC_MsgHandlerFuncType link_pnMsgHandler[ LINK_MAX_NUM_MSG_HDL ];
-static UINT8              link_bMsgSrcId[ LINK_MAX_NUM_MSG_HDL ];
+static UINT8 link_bMsgSrcId[ LINK_MAX_NUM_MSG_HDL ];
 
 static ABCC_LinkNotifyIndType pnMsgSentHandler;
 static ABP_MsgType* link_psNotifyMsg;
 
 /*
-** Max number of outstanding commands ( no received response yet )
+** Max. number of outstanding commands ( no received response yet ).
 */
 static UINT8 link_bNumberOfOutstandingCommands = 0;
 
@@ -98,7 +98,7 @@ static ABP_MsgType* link_DeQueue( MsgQueueType* psMsgQueue )
    ABP_MsgType* psMsg = NULL;
    if( psMsgQueue->bNumInQueue != 0 )
    {
-      psMsg = psMsgQueue->queue[ psMsgQueue->bReadIndex++];
+      psMsg = psMsgQueue->queue[ psMsgQueue->bReadIndex++ ];
       psMsgQueue->bNumInQueue--;
       psMsgQueue->bReadIndex %= psMsgQueue->bQueueSize;
    }
@@ -114,12 +114,11 @@ static ABP_MsgType* link_DeQueue( MsgQueueType* psMsgQueue )
    return( psMsg );
 }
 
-
 static BOOL link_EnQueue( MsgQueueType* psMsgQueue, ABP_MsgType* psMsg )
 {
-   if( psMsgQueue->bNumInQueue <  psMsgQueue->bQueueSize )
+   if( psMsgQueue->bNumInQueue < psMsgQueue->bQueueSize )
    {
-      psMsgQueue->queue[  ( psMsgQueue->bNumInQueue + psMsgQueue->bReadIndex ) %  psMsgQueue->bQueueSize ] = psMsg;
+      psMsgQueue->queue[ ( psMsgQueue->bNumInQueue + psMsgQueue->bReadIndex ) % psMsgQueue->bQueueSize ] = psMsg;
       psMsgQueue->bNumInQueue++;
       return( TRUE );
    }
@@ -141,7 +140,7 @@ void ABCC_LinkInit( void )
 
    link_fDrvWriteMsgLock = FALSE;
    /*
-   ** Init Queue structures.
+   ** Init queue structures.
    */
    link_sCmdQueue.bNumInQueue = 0;
    link_sCmdQueue.bQueueSize = LINK_MAX_NUM_CMDS_IN_Q;
@@ -155,10 +154,10 @@ void ABCC_LinkInit( void )
 
    ABCC_MemCreatePool();
 
-   for( iCount = 0; iCount < LINK_MAX_NUM_CMDS_IN_Q; iCount++  )
+   for( iCount = 0; iCount < LINK_MAX_NUM_CMDS_IN_Q; iCount++ )
    {
       link_pnMsgHandler[ iCount ] = 0;
-      link_bMsgSrcId[iCount ] = 0;
+      link_bMsgSrcId[ iCount ] = 0;
    }
 
    /*
@@ -181,7 +180,6 @@ void ABCC_LinkInit( void )
 
 }
 
-
 ABP_MsgType* ABCC_LinkReadMessage( void )
 {
    ABCC_MsgType psReadMessage;
@@ -194,7 +192,7 @@ ABP_MsgType* ABCC_LinkReadMessage( void )
       if( ( ABCC_GetLowAddrOct( psReadMessage.psMsg16->sHeader.iCmdReserved ) & ABP_MSG_HEADER_C_BIT ) == 0 )
       {
          /*
-         ** Decrement number of outstanding commands if a response is received
+         ** Decrement number of outstanding commands if a response is received.
          */
          ABCC_PORT_EnterCritical();
          link_bNumberOfOutstandingCommands--;
@@ -205,7 +203,6 @@ ABP_MsgType* ABCC_LinkReadMessage( void )
    }
    return( psReadMessage.psMsg );
 }
-
 
 void ABCC_LinkCheckSendMessage( void )
 {
@@ -218,7 +215,7 @@ void ABCC_LinkCheckSendMessage( void )
    ABCC_PORT_EnterCritical();
 
    /*
-   ** Check that no other context are in progress with sending a message.
+   ** Check that no other context is in progress with sending a message.
    */
    if( !link_fDrvWriteMsgLock )
    {
@@ -262,9 +259,9 @@ void ABCC_LinkCheckSendMessage( void )
    if( psWriteMessage != NULL )
    {
       /*
-      ** Only call ABCC_DrvPrepareWriteMessage if it's implemented by the
+      ** Only call ABCC_DrvPrepareWriteMessage if it is implemented by the
       ** driver. Note that this function will not deliver the message to the
-      ** ABCC just copy the message data to the memory.
+      ** ABCC, just copy the message data to the memory.
       */
       if( pnABCC_DrvPrepareWriteMessage != NULL )
       {
@@ -436,9 +433,9 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
    if( fSendMsg )
    {
       /*
-      ** Only call ABCC_DrvPrepareWriteMessage if it's implemented by the
+      ** Only call ABCC_DrvPrepareWriteMessage if it is implemented by the
       ** driver. Note that this function will not deliver the message to the
-      ** ABCC just copy the message data to the memory.
+      ** ABCC, just copy the message data to the memory.
       */
       if( pnABCC_DrvPrepareWriteMessage != NULL )
       {
@@ -515,7 +512,7 @@ void ABCC_LinkFree( ABP_MsgType** ppsBuffer )
    ABCC_MemFree( ppsBuffer );
 }
 
-ABCC_ErrorCodeType ABCC_LinkMapMsgHandler( UINT8 bSrcId, ABCC_MsgHandlerFuncType  pnMSgHandler )
+ABCC_ErrorCodeType ABCC_LinkMapMsgHandler( UINT8 bSrcId, ABCC_MsgHandlerFuncType  pnMsgHandler )
 {
    UINT16 iIndex;
    ABCC_ErrorCodeType eResult = ABCC_EC_NO_RESOURCES;
@@ -529,7 +526,7 @@ ABCC_ErrorCodeType ABCC_LinkMapMsgHandler( UINT8 bSrcId, ABCC_MsgHandlerFuncType
    {
       if( link_pnMsgHandler[ iIndex ] == 0 )
       {
-         link_pnMsgHandler[ iIndex ] = pnMSgHandler;
+         link_pnMsgHandler[ iIndex ] = pnMsgHandler;
          link_bMsgSrcId[ iIndex ] = bSrcId;
          eResult = ABCC_EC_NO_ERROR;
          break;

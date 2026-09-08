@@ -35,10 +35,10 @@ typedef void ( *ABCC_HAL_SerDataReceivedCbfType )( void );
 EXTFUNC void ABCC_HAL_SerRegDataReceived( ABCC_HAL_SerDataReceivedCbfType pnDataReceived );
 
 /*------------------------------------------------------------------------------
-** Send TX telegram and prepare for RX telegram reception. The the RX telegram
+** Send TX telegram and prepare for RX telegram reception. The RX telegram
 ** will be stored in the pbRxDataBuffer.
 ** Note the data pbRxDataBuffer is not valid upon return of this function. When
-** valid data RX data is available the callback function registered in
+** valid RX data is available the callback function registered in
 ** ABCC_HAL_SerRegDataReceived() will be called.
 **------------------------------------------------------------------------------
 ** Arguments:

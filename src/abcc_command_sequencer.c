@@ -574,7 +574,7 @@ ABCC_ErrorCodeType ABCC_CmdSeqAdd(
    }
    else
    {
-      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES, ABCC_CFG_MAX_NUM_CMD_SEQ, "Out of command sequence resources" );
+      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES, ABCC_CFG_MAX_NUM_CMD_SEQ, "Out of command sequence resources\n" );
    }
 
    return( ABCC_EC_NO_ERROR );
