@@ -352,7 +352,7 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
       ABCC_LOG_FATAL( ABCC_EC_INCORRECT_OPERATING_MODE,
                       (UINT32)bOpmode,
                       "Incorrect operating mode %" PRIu8 "\n",
-                       bOpmode );
+                      bOpmode );
    }
 
    /*
@@ -452,6 +452,11 @@ void ABCC_DrvSerRunDriverTx( void )
          if( ( drv_psWriteMessage != 0 ) && !drv_isWrMsgSendingInprogress( &sTxFragHandle ) )
          {
             ABCC_SetMsgReserved( drv_psWriteMessage, (UINT8)ABCC_GetMsgDataSize( drv_psWriteMessage ) );
+          /*
+          ** In below function call, do not replace
+          ** the &drv_psWriteMessage->sHeader.xxx arguments
+          ** by ABCC_GetMsgSourceId() macros.
+          */
 #ifdef ABCC_SYS_16_BIT_CHAR
             drv_WriteFragInit( &sTxFragHandle,
                                (UINT8*)( &drv_psWriteMessage->sHeader.iSourceIdDestObj ),
@@ -671,6 +676,12 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
 
             /*
             ** Start receiving on legacy start position which corresponds to &drv_psReadMessage->sHeader.bSourceId.
+            */
+
+            /*
+            ** In below function call, do not replace
+            ** the &drv_psReadMessage->sHeader.xxx arguments
+            ** by ABCC_GetMsgSourceId() macros.
             */
 #ifdef ABCC_SYS_16_BIT_CHAR
             drv_InitReadFrag( &sRxFragHandle,
