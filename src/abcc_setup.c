@@ -248,7 +248,7 @@ static UINT16 GetAdiIndex( UINT16 iInstance )
    return( iLow );
 }
 
-static UINT16 abcc_GetAdiMapSizeInBits( const AD_AdiEntryType* psAdiEntry, UINT8 bNumElem, UINT8 bElemStartIndex )
+static UINT16 ABCC_GetAdiMapSizeInBits( const AD_AdiEntryType* psAdiEntry, UINT8 bNumElem, UINT8 bElemStartIndex )
 {
    UINT16 iSize;
 #if ABCC_CFG_STRUCT_DATA_TYPE_ENABLED
@@ -273,15 +273,20 @@ static UINT16 abcc_GetAdiMapSizeInBits( const AD_AdiEntryType* psAdiEntry, UINT8
    return( iSize );
 }
 
-static void abcc_FillMapExtCommand( ABP_MsgType16* psMsg16, UINT16 iAdi, UINT8 bAdiTotNumElem, UINT8 bElemStartIndex, UINT8 bNumElem, UINT8 bDataType )
+static void ABCC_FillMapExtCommand( ABP_MsgType* psMsg,
+                                    UINT16 iAdi,
+                                    UINT8 bAdiTotNumElem,
+                                    UINT8 bElemStartIndex,
+                                    UINT8 bNumElem,
+                                    UINT8 bDataType )
 {
-   psMsg16->aiData[ 0 ] = iTOiLe( iAdi );                               /* ADI Instance number. */
-   ABCC_SetLowAddrOct( psMsg16->aiData[ 1 ], bAdiTotNumElem );          /* Total number of elements in ADI. */
-   ABCC_SetHighAddrOct( psMsg16->aiData[ 1 ], bElemStartIndex );
-   ABCC_SetLowAddrOct( psMsg16->aiData[ 2 ], bNumElem );
-   ABCC_SetHighAddrOct( psMsg16->aiData[ 2 ], 1 );                      /* Number of type descriptors. */
-   ABCC_SetLowAddrOct( psMsg16->aiData[ 3 ], bDataType );               /* ADI element data type. */
-   psMsg16->sHeader.iDataSize = iTOiLe( 7 );                            /* The number of used octets in aiData. (The bytes written below). */
+   ABCC_SetMsgData16( psMsg, iAdi, 0 );             /* ADI Instance number. */
+   ABCC_SetMsgData8( psMsg, bAdiTotNumElem, 2 );    /* Total number of elements in ADI. */
+   ABCC_SetMsgData8( psMsg, bElemStartIndex, 3 );   /* Element start index in ADI. */
+   ABCC_SetMsgData8( psMsg, bNumElem, 4 );          /* Number of consecutive elements to map. */
+   ABCC_SetMsgData8( psMsg, 1, 5 );                 /* Number of type descriptors. */
+   ABCC_SetMsgData8( psMsg, bDataType, 6 );         /* ADI element data type. */
+   ABCC_SetMsgDataSize( psMsg, 7 );
 }
 
 void ABCC_SetupInit( void )
@@ -686,17 +691,15 @@ static ABCC_CmdSeqCmdStatusType ReadWriteMapCmd( ABP_MsgType* psMsg, void* pxUse
 {
    UINT16 iLocalMapIndex;
    UINT16 iLocalSize;
-   ABCC_MsgType pMsgSendBuffer;
 
    (void)pxUserData;
 
-   pMsgSendBuffer.psMsg = psMsg;
    iLocalMapIndex = 0;
 
    /*
    ** Unique source id for each mapping command
    */
-   ABCC_SetLowAddrOct( pMsgSendBuffer.psMsg16->sHeader.iSourceIdDestObj, ABCC_GetNewSourceId() );
+   ABCC_SetMsgSourceId( psMsg, ABCC_GetNewSourceId() );
 
 
    if( abcc_psAdiEntry && abcc_psDefaultMap && ( abcc_psDefaultMap[ abcc_iMappingIndex ].eDir != PD_END_MAP ) )
@@ -728,18 +731,18 @@ static ABCC_CmdSeqCmdStatusType ReadWriteMapCmd( ABP_MsgType* psMsg, void* pxUse
       /*
       ** Implement mapping according to the extended command for ABCC.
       */
-      ABCC_SetHighAddrOct( pMsgSendBuffer.psMsg16->sHeader.iSourceIdDestObj, ABP_OBJ_NUM_NW );
-      pMsgSendBuffer.psMsg16->sHeader.iInstance            = iTOiLe( 1 );
+      ABCC_SetMsgDestObj( psMsg, ABP_OBJ_NUM_NW );
+      ABCC_SetMsgInstance( psMsg, 1 );
 
       /*
       ** Number of mapping items to add.
       */
-      ABCC_SetLowAddrOct( pMsgSendBuffer.psMsg16->sHeader.iCmdExt0CmdExt1, 1 );
+      ABCC_SetMsgCmdExt0( psMsg, 1 );
 
       /*
       ** Reserved
       */
-      ABCC_SetHighAddrOct( pMsgSendBuffer.psMsg16->sHeader.iCmdExt0CmdExt1, 0 );
+      ABCC_SetMsgCmdExt1( psMsg, 0 );
 
       if( abcc_psDefaultMap[ abcc_iMappingIndex ].iInstance != AD_MAP_PAD_ADI )
       {
@@ -754,39 +757,40 @@ static ABCC_CmdSeqCmdStatusType ReadWriteMapCmd( ABP_MsgType* psMsg, void* pxUse
             bElemMapStartIndex = abcc_psDefaultMap[ abcc_iMappingIndex ].bElemStartIndex;
          }
 
-         abcc_FillMapExtCommand( pMsgSendBuffer.psMsg16,
+         ABCC_FillMapExtCommand( psMsg,
                                  abcc_psAdiEntry[ iLocalMapIndex ].iInstance,      /* Adi */
                                  abcc_psAdiEntry[ iLocalMapIndex ].bNumOfElements, /* Adi total num elements */
                                  bElemMapStartIndex,                               /* Mapping  start index */
                                  bNumElemToMap,                                    /* Num elements to map */
                                  abcc_psAdiEntry[ iLocalMapIndex ].bDataType );    /* Data type */
-         iLocalSize = abcc_GetAdiMapSizeInBits( &abcc_psAdiEntry[ iLocalMapIndex ],
+         iLocalSize = ABCC_GetAdiMapSizeInBits( &abcc_psAdiEntry[ iLocalMapIndex ],
                                                 bNumElemToMap, bElemMapStartIndex );
 
 #if ABCC_CFG_STRUCT_DATA_TYPE_ENABLED
          if( abcc_psAdiEntry[ iLocalMapIndex ].psStruct != NULL )
          {
             UINT16 iDescOffset;
-            iDescOffset = 0;
-            ABCC_SetHighAddrOct( pMsgSendBuffer.psMsg16->aiData[ 2 ], bNumElemToMap );
+            /*
+            ** For structured ADIs, each mapped element carries its own type
+            ** descriptor. One descriptor per element: number of descriptors
+            ** equals the number of mapped elements, and the type specifier
+            ** array starts at MsgData octet 6.
+            */
+            ABCC_SetMsgData8( psMsg, bNumElemToMap, 5 );
 
-            while( iDescOffset < bNumElemToMap )
+            for( iDescOffset = 0; iDescOffset < bNumElemToMap; iDescOffset++ )
             {
-               ABCC_SetLowAddrOct( pMsgSendBuffer.psMsg16->aiData[ ( iDescOffset >> 1 ) + 3 ], abcc_psAdiEntry[ iLocalMapIndex ].psStruct[ iDescOffset + bElemMapStartIndex].bDataType );
-               iDescOffset++;
-               if( iDescOffset < bNumElemToMap )
-               {
-                  ABCC_SetHighAddrOct( pMsgSendBuffer.psMsg16->aiData[ ( iDescOffset >> 1 ) + 3 ], abcc_psAdiEntry[ iLocalMapIndex ].psStruct[ iDescOffset + bElemMapStartIndex].bDataType );
-                  iDescOffset++;
-               }
+               ABCC_SetMsgData8( psMsg,
+                                 abcc_psAdiEntry[ iLocalMapIndex ].psStruct[ iDescOffset + bElemMapStartIndex ].bDataType,
+                                 6 + iDescOffset );
             }
-            pMsgSendBuffer.psMsg16->sHeader.iDataSize = iTOiLe( 6 + iDescOffset );
+            ABCC_SetMsgDataSize( psMsg, 6 + bNumElemToMap );
          }
 #endif
       }
       else
       {
-          abcc_FillMapExtCommand( pMsgSendBuffer.psMsg16,
+          ABCC_FillMapExtCommand( psMsg,
                                   0,                                                /* Adi */
                                   abcc_psDefaultMap[ abcc_iMappingIndex ].bNumElem, /* Adi total num elements */
                                   0,                                                /* Mapping  start index */
@@ -798,13 +802,13 @@ static ABCC_CmdSeqCmdStatusType ReadWriteMapCmd( ABP_MsgType* psMsg, void* pxUse
 
       if( abcc_psDefaultMap[ abcc_iMappingIndex ].eDir == PD_READ )
       {
-         ABCC_SetLowAddrOct( pMsgSendBuffer.psMsg16->sHeader.iCmdReserved, ABP_MSG_HEADER_C_BIT | ABP_NW_CMD_MAP_ADI_READ_EXT_AREA );
+         ABCC_SetMsgCmdField( psMsg, ABP_MSG_HEADER_C_BIT | ABP_NW_CMD_MAP_ADI_READ_EXT_AREA );
          abcc_iPdReadBitSize += iLocalSize;
          abcc_iPdReadSize = ( abcc_iPdReadBitSize + 7 ) / 8;
       }
       else
       {
-         ABCC_SetLowAddrOct( pMsgSendBuffer.psMsg16->sHeader.iCmdReserved, ABP_MSG_HEADER_C_BIT | ABP_NW_CMD_MAP_ADI_WRITE_EXT_AREA );
+         ABCC_SetMsgCmdField( psMsg, ABP_MSG_HEADER_C_BIT | ABP_NW_CMD_MAP_ADI_WRITE_EXT_AREA );
          abcc_iPdWriteBitSize += iLocalSize;
          abcc_iPdWriteSize = ( abcc_iPdWriteBitSize + 7 ) / 8;
       }
@@ -1201,7 +1205,7 @@ void ABCC_UserInitComplete( void )
 {
    ABP_MsgType* psMsg;
    psMsg = ABCC_GetCmdMsgBuffer();
-if( !psMsg )
+   if( !psMsg )
    {
       ABCC_LOG_ERROR( ABCC_EC_NO_RESOURCES, 0, "No resources for setup\n" );
       return;
