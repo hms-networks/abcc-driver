@@ -546,11 +546,11 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
 
             if( spi_drv_sWriteFragInfo.iNumWordsLeft <= 0 )
             {
-               psWriteMsg = (ABP_MsgType*)spi_drv_sWriteFragInfo.psWriteMsg;
+               psWriteMsg = spi_drv_sWriteFragInfo.psWriteMsg;
 
                spi_drv_ResetWriteFragInfo();
 
-               if( ( ABCC_GetLowAddrOct( ((ABP_MsgType16*)psWriteMsg)->sHeader.iCmdReserved ) & ABP_MSG_HEADER_C_BIT ) == 0 )
+               if( !ABCC_IsCmdMsg( psWriteMsg ) )
                {
                   spi_drv_bNbrOfCmds++;
                }
@@ -600,7 +600,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
             ** Last fragment of the read message. Return the message.
             ** Update the application flow control.
             */
-            if( ABCC_GetLowAddrOct( ((ABP_MsgType16*)spi_drv_sReadFragInfo.psReadMsg)->sHeader.iCmdReserved ) & ABP_MSG_HEADER_C_BIT )
+            if( ABCC_IsCmdMsg( spi_drv_sReadFragInfo.psReadMsg ) )
             {
                spi_drv_bNbrOfCmds--;
             }
@@ -786,7 +786,7 @@ BOOL ABCC_DrvSpiWriteMessage( ABP_MsgType* psWriteMsg )
 #if ( __GNUC__ >= 9 )
    #pragma GCC diagnostic pop
 #endif
-   spi_drv_sWriteFragInfo.iNumWordsLeft = NUM_BYTES_2_WORDS( iLeTOi( psWriteMsg->sHeader.iDataSize ) + ABCC_MSG_HEADER_TYPE_SIZEOF );
+   spi_drv_sWriteFragInfo.iNumWordsLeft = NUM_BYTES_2_WORDS( ABCC_GetMsgDataSize( psWriteMsg ) + ABCC_MSG_HEADER_TYPE_SIZEOF );
    spi_drv_sWriteFragInfo.psWriteMsg = psWriteMsg;
    ABCC_PORT_ExitCritical();
 
