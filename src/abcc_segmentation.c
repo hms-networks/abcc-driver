@@ -394,7 +394,7 @@ BOOL ABCC_HandleSegmentAck( ABP_MsgType* psMsg )
    {
       ABCC_LOG_WARNING( ABCC_EC_ERROR_RESP_SEGMENTATION,
             ABCC_GetMsgSourceId( psMsg ),
-            "Segmentation session aborted by ABCC (source ID: %" PRIu8 "\n",
+            "Segmentation session aborted by ABCC (source ID: %" PRIu8 ")\n",
             ABCC_GetMsgSourceId( psMsg ) );
 
       /*
