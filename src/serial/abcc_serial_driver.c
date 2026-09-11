@@ -5,7 +5,31 @@
 ********************************************************************************
 ********************************************************************************
 ** File Description:
-** Implementation of serial driver ping protocol
+** Implementation of the serial driver ping pong protocol.
+**
+** The UART interface communicates using the legacy wire format defined by
+** ABP_Msg255Type. Internally, the driver utilizes the expanded ABP_MsgType
+** structure. The serial driver handles the conversion between these two
+** formats on the fly, including byte packing and unpacking required for 16-bit char
+** architectures.
+**
+** Header Structure Comparison:
+**
+** Legacy                   ABP_MsgHeaderType        ABP_MsgHeaderType16
+** ===================      ===================      ==========================
+**                          UINT16   iDataSize;      UINT16   iDataSize;
+**                          UINT16   iReserved;      UINT16   iReserved;
+** UINT8    bSourceId;      UINT8    bSourceId;      UINT16   iSourceIdDestObj;
+** UINT8    bDestObj;       UINT8    bDestObj;     
+** UINT16   iInstance;      UINT16   iInstance;      UINT16   iInstance;
+** UINT8    bCmd;           UINT8    bCmd;           UINT16   iCmdReserved;
+** UINT8    bDataSize;      UINT8    bReserved;    
+** UINT8    bCmdExt0;       UINT8    bCmdExt0;       UINT16   iCmdExt0CmdExt1;
+** UINT8    bCmdExt1;       UINT8    bCmdExt1;     
+**
+** For 16 bit char architectures, the UINT16 message header elements
+** need to be unpacked before transmission and packed upon reception.
+** This transformation is performed in drv_GetWriteFrag() and drv_AddReadFrag().
 ********************************************************************************
 */
 #include "abcc_config.h"
@@ -37,19 +61,19 @@
 #define SER_MSG_HEADER_LEN   ( 8 * ABP_UINT8_SIZEOF )
 #define SER_CRC_LEN          ( ABP_UINT16_SIZEOF )
 
-typedef struct
+typedef struct WrMsgFragType
 {
   UINT8*             pbCurrPtr;           /* Pointer to the current position in the send buffer. */
   INT16              iNumBytesLeft;       /* Number of bytes left to send. */
   UINT16             iFragLength;         /* Current fragmentation block length. */
 } WrMsgFragType;
 
-typedef struct
+typedef struct RdMsgFragType
 {
-  UINT8*             pbCurrPtr;           /* Pointer to the current position in receive buffer. */
+  UINT8*             pbCurrPtr;           /* Pointer to the current position in the receive buffer. */
   UINT16             iNumBytesReceived;   /* Number of bytes received. */
   UINT16             iFragLength;         /* Current fragmentation block length. */
-  UINT16             iMaxLength;          /* Max num bytes to receive*/
+  UINT16             iMaxLength;          /* Max number of bytes to receive. */
 } RdMsgFragType;
 
 ABCC_SYS_PACK_ON
@@ -76,7 +100,7 @@ ABCC_SYS_PACK_OFF
 ** Internal states.
 **------------------------------------------------------------------------------
 */
-typedef enum
+typedef enum drv_SerStateType
 {
    SM_SER_INIT = 0,
    SM_SER_RDY_TO_SEND_PING,
@@ -87,41 +111,42 @@ typedef enum
 ** General privates.
 **------------------------------------------------------------------------------
 */
-static drv_SerStateType  drv_eState;                 /* Serial driver state. */
-static UINT8             drv_bStatus;                /* Latest received status        */
+static drv_SerStateType     drv_eState;                 /* Serial driver state. */
+static UINT8                drv_bStatus;                /* Latest received status. */
+   
+static ABP_MsgType*         drv_psWriteMessage;         /* Pointer to active write message. */
+   
+static ABP_MsgType*         drv_psReadMessage;          /* Pointer to the read message. */
+   
+static BOOL                 drv_fNewReadMessage;        /* Indicate that new message has arrived. */
+   
+static UINT16               drv_iWritePdSize;           /* Current write PD size. */
+static UINT16               drv_iReadPdSize;            /* Current read PD size. */
+   
+static UINT16               drv_iTxFrameSize;           /* Current ping frame size. */
+static UINT16               drv_iRxFrameSize;           /* Current pong frame size. */
+   
+static UINT8                drv_bNbrOfCmds;             /* Number of commands that can be received by the application. */
+   
+static SerRxTelegramType    drv_sRxTelegram;            /* Place holder for Rx telegram. */
+static SerTxTelegramType    drv_sTxTelegram;            /* Place holder for Tx telegram. */
 
-static ABP_MsgType*      drv_psWriteMessage;         /* Pointer to active write message. */
-
-static ABP_MsgType*      drv_psReadMessage;          /* Pointer to the read message. */
-static BOOL              drv_fNewReadMessage;        /* Indicate that new message has arrived. */
-
-static UINT16            drv_iWritePdSize;           /* Current write PD size. */
-static UINT16            drv_iReadPdSize;            /* Current read PD size. */
-
-static UINT16            drv_iTxFrameSize;           /* Current ping frame size. */
-static UINT16            drv_iRxFrameSize;           /* Current ping frame size. */
-
-static UINT8             drv_bNbrOfCmds;             /* Number of commands that can be received by the application */
-
-static SerRxTelegramType drv_sRxTelegram;            /* Place holder for Rx telegram */
-static SerTxTelegramType drv_sTxTelegram;            /* Place holder for Tx telegram */
-
-static WrMsgFragType     sTxFragHandle;
-static RdMsgFragType     sRxFragHandle;
-static BOOL              fSendWriteMessageEndMark;   /* Indicate end of message */
-
-static BOOL              drv_fNewRxTelegramReceived; /* Serail driver has a complete message */
-static UINT8*            drv_bpRdPd;                 /* Pointer to valid read process data */
-
-static UINT16            drv_iCrcErrorCount;         /* CRC error counter */
+static WrMsgFragType        sTxFragHandle;
+static RdMsgFragType        sRxFragHandle;
+static BOOL                 fSendWriteMessageEndMark;   /* Indicate end of message. */
+   
+static BOOL                 drv_fNewRxTelegramReceived; /* Serial driver has a complete message. */
+static UINT8*               drv_bpRdPd;                 /* Pointer to valid read process data. */
+   
+static UINT16               drv_iCrcErrorCount;         /* CRC error counter. */
 /*
 ** Timers and watchdogs
 */
-static ABCC_TimerHandle xWdTmoHandle;
-static BOOL             fWdTmo;             /* Current wd timeout status */
-static ABCC_TimerHandle xTelegramTmoHandle;
-static BOOL             fTelegramTmo;       /* Current telegram tmo status */
-static UINT16           iTelegramTmoMs;     /* Telegram timeout  */
+static ABCC_TimerHandle     xWdTmoHandle;
+static BOOL                 fWdTmo;                     /* Current wd timeout status */
+static ABCC_TimerHandle     xTelegramTmoHandle;
+static BOOL                 fTelegramTmo;               /* Current telegram timeout status */
+static UINT16               iTelegramTmoMs;             /* Telegram timeout  */
 
 
 /*******************************************************************************
@@ -146,12 +171,13 @@ static void drv_RxTelegramReceived( void )
 }
 
 /*------------------------------------------------------------------------------
-** Init write message fragmentation
+** Init write message fragmentation.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information
-**       psMsg          Pointer t0 start of message
-**       iFragLength    Fragment length
+**       psFragHandle   Pointer to write fragmentation information.
+**       psMsg          Pointer to start of message.
+**       iMsgSize       Message length.
+**       iFragLength    Fragment length.
 **
 ** Returns:
 **       None.
@@ -165,11 +191,11 @@ static void drv_WriteFragInit( WrMsgFragType* psFragHandle, UINT8* psMsg, UINT16
 }
 
 /*------------------------------------------------------------------------------
-** Get current write message fragment
+** Get current write message fragment.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information
-**       pbBuffer       Pointer to destination buffer
+**       psFragHandle   Pointer to write fragmentation information.
+**       pbBuffer       Pointer to destination buffer.
 ** Returns:
 **       None.
 **------------------------------------------------------------------------------
@@ -177,30 +203,31 @@ static void drv_WriteFragInit( WrMsgFragType* psFragHandle, UINT8* psMsg, UINT16
 static void drv_GetWriteFrag( WrMsgFragType* const psFragHandle, UINT8* const pbBuffer )
 {
    /*
-   ** Copy the message into the MOSI frame buffer.
+   ** Copy the message into the Tx frame buffer.
    */
    if( psFragHandle->iNumBytesLeft <= 0 )
    {
       ABCC_LOG_FATAL( ABCC_EC_ASSERT_FAILED,
-         0,
-         "No data to copy (%" PRId16 ")\n",
-         psFragHandle->iNumBytesLeft );
+                      0,
+                      "No data to copy (%" PRId16 ")\n",
+                      psFragHandle->iNumBytesLeft );
       return;
    }
 
-   ABCC_PORT_MemCpy( pbBuffer,
-                     psFragHandle->pbCurrPtr,
-                     psFragHandle->iFragLength );
+   ABCC_PORT_StrCpyToNative( pbBuffer,
+                             psFragHandle->pbCurrPtr,
+                             0,
+                             psFragHandle->iFragLength );
 }
 
 /*------------------------------------------------------------------------------
-** Update to next Write fragment. Returns TRUE if if nothing to send.
+** Update to next write fragment. Returns TRUE if nothing to send.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information
-**       pbBuffer       Pointer to destination buffer
+**       psFragHandle   Pointer to write fragmentation information.
+**       pbBuffer       Pointer to destination buffer.
 ** Returns:
-**       TRUE if the whole message is sent .
+**       TRUE if the whole message is sent.
 **------------------------------------------------------------------------------
 */
 static BOOL drv_PrepareNextWriteFrag( WrMsgFragType* const psFragHandle )
@@ -222,10 +249,10 @@ static BOOL drv_PrepareNextWriteFrag( WrMsgFragType* const psFragHandle )
 }
 
 /*------------------------------------------------------------------------------
-** Check if write message sending is in progress
+** Check if write message sending is in progress.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information
+**       psFragHandle   Pointer to write fragmentation information.
 ** Returns:
 **       TRUE if sending is ongoing.
 **------------------------------------------------------------------------------
@@ -239,10 +266,10 @@ static BOOL drv_isWrMsgSendingInprogress( WrMsgFragType* const psFragHandle )
 ** Init read message fragmentation.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information
-**       psMsg          Pointer to start of message
-**       iFragLength    Fragment length
-**       iMaxMsgLength  MAximum lenth of message
+**       psFragHandle   Pointer to read fragmentation information.
+**       psMsg          Pointer to start of message.
+**       iFragLength    Fragment length.
+**       iMaxMsgLength  Maximum length of message.
 **
 ** Returns:
 **       None.
@@ -257,11 +284,11 @@ static void drv_InitReadFrag( RdMsgFragType* psFragHandle, UINT8* psMsg, UINT16 
 }
 
 /*------------------------------------------------------------------------------
-** Add read message fragment
+** Add read message fragment.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to write fragmentation information
-**       pbBuffer       Pointer to source buffer
+**       psFragHandle   Pointer to read fragmentation information.
+**       pbBuffer       Pointer to source buffer.
 ** Returns:
 **       None.
 **------------------------------------------------------------------------------
@@ -271,31 +298,32 @@ static void drv_AddReadFrag( RdMsgFragType* const psFragHandle, UINT8* const pbB
    if( ( psFragHandle->iNumBytesReceived + psFragHandle->iFragLength ) > psFragHandle->iMaxLength )
    {
       /*
-      ** Message size exceeds buffer. Don't fill up the buffer, this is handled
-      ** in higher layers.
+      ** Message size exceeds buffer. Don't fill up the buffer;
+      ** this is handled in higher layers.
       */
       return;
    }
 
    /*
-   ** Copy the message into buffer.
+   ** Copy the Rx message into fragmentation buffer.
    */
    psFragHandle->iNumBytesReceived += psFragHandle->iFragLength;
 
-   ABCC_PORT_MemCpy( psFragHandle->pbCurrPtr,
-                     pbBuffer,
-                     psFragHandle->iFragLength );
+   ABCC_PORT_StrCpyToPacked( psFragHandle->pbCurrPtr,
+                             0,
+                             pbBuffer,
+                             psFragHandle->iFragLength );
 
    psFragHandle->pbCurrPtr += psFragHandle->iFragLength;
 }
 
 /*------------------------------------------------------------------------------
-** Check if read message receiving is in progress
+** Check if read message receiving is in progress.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to read fragmentation information
+**       psFragHandle   Pointer to read fragmentation information.
 ** Returns:
-**       TRUE if the.
+**       TRUE if receiving is ongoing.
 **------------------------------------------------------------------------------
 */
 static BOOL drv_isRdMsgReceiveInprogress( RdMsgFragType* const psFragHandle )
@@ -322,9 +350,9 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
        ( bOpmode != ABP_OP_MODE_SERIAL_625 ) )
    {
       ABCC_LOG_FATAL( ABCC_EC_INCORRECT_OPERATING_MODE,
-         (UINT32)bOpmode,
-         "Incorrect operating mode %" PRIu8 "\n",
-         bOpmode );
+                      (UINT32)bOpmode,
+                      "Incorrect operating mode %" PRIu8 "\n",
+                       bOpmode );
    }
 
    /*
@@ -375,9 +403,9 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
       break;
    default:
       ABCC_LOG_FATAL( ABCC_EC_INCORRECT_OPERATING_MODE,
-         (UINT32)bOpmode,
-         "Incorrect operating mode %" PRIu8 "\n",
-         bOpmode );
+                      (UINT32)bOpmode,
+                      "Incorrect operating mode %" PRIu8 "\n",
+                      bOpmode );
       break;
    }
 
@@ -391,7 +419,7 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
 }
 
 /*------------------------------------------------------------------------------
-**  Handles preparation and sending of TX telegram
+**  Handles preparation and sending of Tx telegram.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       None.
@@ -423,8 +451,18 @@ void ABCC_DrvSerRunDriverTx( void )
 
          if( ( drv_psWriteMessage != 0 ) && !drv_isWrMsgSendingInprogress( &sTxFragHandle ) )
          {
-            drv_psWriteMessage->sHeader.bReserved = (UINT8)( iLeTOi( drv_psWriteMessage->sHeader.iDataSize ) );
-            drv_WriteFragInit( &sTxFragHandle, &drv_psWriteMessage->sHeader.bSourceId, (UINT16)drv_psWriteMessage->sHeader.bReserved + SER_MSG_HEADER_LEN, SER_MSG_FRAG_LEN );
+            ABCC_SetMsgReserved( drv_psWriteMessage, (UINT8)ABCC_GetMsgDataSize( drv_psWriteMessage ) );
+#ifdef ABCC_SYS_16_BIT_CHAR
+            drv_WriteFragInit( &sTxFragHandle,
+                               (UINT8*)( &drv_psWriteMessage->sHeader.iSourceIdDestObj ),
+                               (UINT16)ABCC_GetMsgReserved( drv_psWriteMessage ) + SER_MSG_HEADER_LEN,
+                               SER_MSG_FRAG_LEN );
+#else
+            drv_WriteFragInit( &sTxFragHandle,
+                               &drv_psWriteMessage->sHeader.bSourceId,
+                               (UINT16)ABCC_GetMsgReserved( drv_psWriteMessage ) + SER_MSG_HEADER_LEN,
+                               SER_MSG_FRAG_LEN );
+#endif            
          }
 
          ABCC_PORT_ExitCritical();
@@ -453,13 +491,12 @@ void ABCC_DrvSerRunDriverTx( void )
          else
          {
             /*
-            ** Position to update the rx frame size to match the length of
+            ** Position to update the Rx frame size to match the length of
             ** the new RdPd size after a read remap.
             ** The last fragment of the remap response has been sent
             ** and the ABCC will adjust the length in the next frame.
             */
-            if( ( drv_psWriteMessage->sHeader.bDestObj == ABP_OBJ_NUM_APPD ) &&
-                ( drv_psWriteMessage->sHeader.bCmd == ABP_APPD_REMAP_ADI_READ_AREA ) )
+            if( ( ABCC_GetMsgDestObj( drv_psWriteMessage ) == ABP_OBJ_NUM_APPD ) && ( ABCC_GetMsgCmdBits( drv_psWriteMessage ) == ABP_APPD_REMAP_ADI_READ_AREA ) )
             {
                if( pnABCC_DrvCbfReadRemapDone != NULL )
                {
@@ -485,7 +522,7 @@ void ABCC_DrvSerRunDriverTx( void )
       drv_sTxTelegram.abData[ drv_iWritePdSize  ] = (UINT8)( iCrc >> 8 );
 
       /*
-      ** Send  TX telegram and received Rx telegram.
+      ** Send TX telegram and receive Rx telegram.
       */
       ABCC_LOG_DEBUG_UART_HEXDUMP_TX( (UINT8*)&drv_sTxTelegram, drv_iTxFrameSize + SER_CRC_LEN );
       ABCC_TimerStart( xTelegramTmoHandle, iTelegramTmoMs );
@@ -494,7 +531,7 @@ void ABCC_DrvSerRunDriverTx( void )
 }
 
 /*------------------------------------------------------------------------------
-**  Handle the reception of the Rx telegram
+**  Handle the reception of the Rx telegram.
 **------------------------------------------------------------------------------
 ** Arguments:
 **       psResp:  Pointer to the response message.
@@ -527,7 +564,7 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       }
 
       /*
-      ** Telegram received
+      ** Telegram received.
       */
       drv_fNewRxTelegramReceived = FALSE;
 
@@ -536,7 +573,7 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       iReceivedCrc = CRC_Crc16( (UINT8*)&drv_sRxTelegram, drv_iRxFrameSize );
 
       /*
-      ** Read the CRC that is sent with the telegram.
+      ** Read the CRC of the Rx telegram.
       */
       iCalcCrc = (UINT16)drv_sRxTelegram.abData[ drv_iReadPdSize ] << 8;
       iCalcCrc |= (UINT16)drv_sRxTelegram.abData[ drv_iReadPdSize + 1 ];
@@ -547,9 +584,9 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       {
          drv_iCrcErrorCount++;
          ABCC_LOG_WARNING( ABCC_EC_CHECKSUM_MISMATCH,
-            drv_iCrcErrorCount,
-            "CRC check failed for received message (error count: %" PRIu16 ")\n",
-            drv_iCrcErrorCount );
+                           drv_iCrcErrorCount,
+                           "CRC check failed for received message (error count: %" PRIu16 ")\n",
+                           drv_iCrcErrorCount );
          ABCC_HAL_SerRestart();
          return( NULL );
       }
@@ -560,7 +597,7 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       }
 
       /*
-      ** Correct telgram received
+      ** Correct telegram received.
       */
       ABCC_TimerStop( xTelegramTmoHandle );
       fTelegramTmo = FALSE;
@@ -569,12 +606,12 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       fWdTmo = FALSE;
 
       /*
-      ** Restart watchdog
+      ** Restart watchdog.
       */
       ABCC_TimerStart( xWdTmoHandle, ABCC_CFG_WD_TIMEOUT_MS );
 
       /*
-      ** Save the current anybus status.
+      ** Save the current Anybus status.
       */
       drv_bStatus = drv_sRxTelegram.bStatus;
       drv_bpRdPd = drv_sRxTelegram.abData;
@@ -586,7 +623,7 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       if( drv_isWrMsgSendingInprogress( &sTxFragHandle ) )
       {
          /*
-         ** End mark is succesfully sent
+         ** End mark is successfully sent.
          */
 
          if( fSendWriteMessageEndMark )
@@ -596,9 +633,9 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
             psWriteMsg = drv_psWriteMessage;
 
             /*
-            ** Update the application flow control.
+            ** Update application flow control.
             */
-            if( ( drv_psWriteMessage->sHeader.bCmd & ABP_MSG_HEADER_C_BIT ) == 0 )
+            if( ( ABCC_GetMsgCmdField( drv_psWriteMessage ) & ABP_MSG_HEADER_C_BIT ) == 0 )
             {
                drv_bNbrOfCmds++;
             }
@@ -612,7 +649,7 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       }
 
       /*---------------------------------------------------------------------------
-      ** Read message handling
+      ** Read message handling.
       ** --------------------------------------------------------------------------
       */
       if( drv_bStatus & ABP_STAT_M_BIT  )
@@ -626,16 +663,26 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
                if( drv_psReadMessage == NULL )
                {
                   ABCC_LOG_WARNING( ABCC_EC_OUT_OF_MSG_BUFFERS,
-                     0,
-                     "Out of message buffers when attempting to read a message\n" );
+                                    0,
+                                    "Out of message buffers when attempting to read a message\n" );
                   return( NULL );
                }
             }
 
             /*
-            ** Start receiving on legacy start position which corresponds to &drv_psReadMessage->sHeader.bSourceId
+            ** Start receiving on legacy start position which corresponds to &drv_psReadMessage->sHeader.bSourceId.
             */
-            drv_InitReadFrag( &sRxFragHandle, &drv_psReadMessage->sHeader.bSourceId, SER_MSG_FRAG_LEN, ABCC_CFG_MAX_MSG_SIZE + SER_MSG_HEADER_LEN );
+#ifdef ABCC_SYS_16_BIT_CHAR
+            drv_InitReadFrag( &sRxFragHandle,
+                              (UINT8*)(&drv_psReadMessage->sHeader.iSourceIdDestObj),
+                              SER_MSG_FRAG_LEN,
+                              ABCC_CFG_MAX_MSG_SIZE + SER_MSG_HEADER_LEN );
+#else
+            drv_InitReadFrag( &sRxFragHandle,
+                              &drv_psReadMessage->sHeader.bSourceId,
+                              SER_MSG_FRAG_LEN,
+                              ABCC_CFG_MAX_MSG_SIZE + SER_MSG_HEADER_LEN );
+#endif
          }
 
          drv_AddReadFrag( &sRxFragHandle, drv_sRxTelegram.abRdMsg );
@@ -645,15 +692,17 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
          if( drv_isRdMsgReceiveInprogress( &sRxFragHandle ) )
          {
             /*
-            ** Empty message endmarker received
-            ** Copy old message format size parameter to Large message format used by the driver
+            ** Empty message endmarker received.
+            ** Copy message payload data size from legacy
+            ** ABP_Msg255HeaderType to ABP_MsgHeaderType format 
+            ** used by the driver.
             */
-            drv_psReadMessage->sHeader.iDataSize = iTOiLe( (UINT16)drv_psReadMessage->sHeader.bReserved );
+            ABCC_SetMsgDataSize( drv_psReadMessage, ABCC_GetMsgReserved( drv_psReadMessage ) );
 
             /*
-            ** Update the application flow control.
+            ** Update application flow control.
             */
-            if( drv_psReadMessage->sHeader.bCmd & ABP_MSG_HEADER_C_BIT )
+            if( ABCC_GetMsgCmdField( drv_psReadMessage ) & ABP_MSG_HEADER_C_BIT )
             {
                drv_bNbrOfCmds--;
             }
@@ -682,8 +731,8 @@ BOOL ABCC_DrvSerWriteMessage( ABP_MsgType* psWriteMsg )
    if( !psWriteMsg )
    {
       ABCC_LOG_FATAL( ABCC_EC_UNEXPECTED_NULL_PTR,
-         0,
-         "Unexpected NULL pointer\n" );
+                      0,
+                      "Unexpected NULL pointer\n" );
    }
 
    ABCC_PORT_EnterCritical();
@@ -691,9 +740,9 @@ BOOL ABCC_DrvSerWriteMessage( ABP_MsgType* psWriteMsg )
    if( drv_psWriteMessage )
    {
       ABCC_LOG_FATAL( ABCC_EC_INCORRECT_STATE,
-         (UINT32)drv_psWriteMessage,
-         "Expected drv_psWriteMessage to be NULL, was %p\n",
-         (void*)drv_psWriteMessage );
+                      (UINT32)drv_psWriteMessage,
+                      "Expected drv_psWriteMessage to be NULL, was %p\n",
+                      (void*)drv_psWriteMessage );
    }
 
    drv_psWriteMessage = psWriteMsg;
@@ -709,14 +758,14 @@ void ABCC_DrvSerWriteProcessData( void* pxProcessData )
 {
    (void)pxProcessData;
    /*
-   ** Nothing needs to be done here since the buffer is already updated by the application
+   ** Nothing needs to be done here since the buffer is already updated by the application.
    */
    if( drv_eState != SM_SER_RDY_TO_SEND_PING )
    {
       ABCC_LOG_ERROR( ABCC_EC_INCORRECT_STATE,
-         (UINT32)drv_eState,
-         "Wrong driver state (%d)\n",
-         drv_eState );
+                      (UINT32)drv_eState,
+                      "Wrong driver state (%d)\n",
+                      drv_eState );
    }
 }
 
@@ -761,26 +810,26 @@ void ABCC_DrvSerSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
    if( iReadPdSize > ABP_MAX_PROCESS_DATA )
    {
       ABCC_LOG_ERROR( ABCC_EC_RDPD_SIZE_ERR,
-         0,
-         "Read PD size too big for serial operating mode PD size error %" PRIu16 ">%d\n",
-         iReadPdSize,
-         ABP_MAX_PROCESS_DATA );
+                      0,
+                      "Read PD size is out of range for serial operating mode. PD size error %" PRIu16 ">%d\n",
+                      iReadPdSize,
+                      ABP_MAX_PROCESS_DATA );
 
       return;
    }
    else if( iWritePdSize > ABP_MAX_PROCESS_DATA )
    {
       ABCC_LOG_ERROR( ABCC_EC_WRPD_SIZE_ERR,
-         0,
-         "Read PD size too big for serial operating mode PD size error %" PRIu16 ">%d\n",
-         iWritePdSize,
-         ABP_MAX_PROCESS_DATA );
+                      0,
+                      "Write PD size is out of range for serial operating mode. PD size error %" PRIu16 ">%d\n",
+                      iWritePdSize,
+                      ABP_MAX_PROCESS_DATA );
 
       return;
    }
 
    /*
-   **  Update lengths dependent on pd sizes
+   **  Update lengths depending on PD sizes.
    */
    drv_iWritePdSize = iWritePdSize;
    drv_iReadPdSize = iReadPdSize;
@@ -799,8 +848,8 @@ static void DrvSerSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg )
 UINT16 ABCC_DrvSerGetIntStatus( void )
 {
    ABCC_LOG_WARNING( ABCC_EC_INTSTATUS_NOT_SUPPORTED_BY_DRV_IMPL,
-      0,
-      "Interrupt status not supported by serial driver\n" );
+                     0,
+                     "Interrupt status not supported by serial driver\n" );
 
    return( 0 );
 }
@@ -840,7 +889,7 @@ void ABCC_DrvSerSetIntMask( const UINT16 iIntMask )
 void* ABCC_DrvSerGetWrPdBuffer( void )
 {
    /*
-   ** Return position to WrPd position in tx telegraam
+   ** Return position to WrPd position in Tx telegram.
    */
    return( drv_sTxTelegram.abData );
 }
@@ -848,16 +897,16 @@ void* ABCC_DrvSerGetWrPdBuffer( void )
 UINT16 ABCC_DrvSerGetModCap( void )
 {
    ABCC_LOG_WARNING( ABCC_EC_MODCAP_NOT_SUPPORTED_BY_DRV_IMPL,
-      0,
-      "Module capability not supported by serial driver\n" );
+                     0,
+                     "Module capability not supported by serial driver\n" );
    return( 0 );
 }
 
 UINT16 ABCC_DrvSerGetLedStatus( void )
 {
    ABCC_LOG_WARNING( ABCC_EC_LEDSTATUS_NOT_SUPPORTED_BY_DRV_IMPL,
-      0,
-      "LED status not supported by serial driver\n" );
+                     0,
+                     "LED status not supported by serial driver\n" );
    return( 0 );
 }
 
@@ -879,4 +928,4 @@ UINT8 ABCC_DrvSerGetAnbStatus( void )
 {
    return( drv_bStatus & ( ABP_STAT_SUP_BIT | ABP_STAT_S_BITS ) );
 }
-#endif /* End of #if ABCC_CFG_DRV_SERIAL_ENABLED */
+#endif /* End of #if ABCC_CFG_DRV_SERIAL_ENABLED. */
