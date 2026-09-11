@@ -1071,7 +1071,6 @@ void ABCC_SetMsgHeader( ABP_MsgType* psMsg,
 
 ABCC_ErrorCodeType ABCC_VerifyMessage( const ABP_MsgType* psMsg )
 {
-   const ABP_MsgType16* psMsg16 = (const ABP_MsgType16*)psMsg;
    if( ABCC_GetMsgCmdField( psMsg ) & ABP_MSG_HEADER_E_BIT )
    {
       return( ABCC_EC_RESP_MSG_E_BIT_SET );
