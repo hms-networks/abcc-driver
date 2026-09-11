@@ -83,14 +83,17 @@ static const UINT16 iSpiStatusNewPd =     ABP_SPI_STATUS_NEW_PD << 8;
 
 /*------------------------------------------------------------------------------
 ** Help defines.
-** Note: They are in words and not bytes.
+** Note: Explicit value definitions are in 16 bit words and not 8 bit bytes.
 **------------------------------------------------------------------------------
 */
 #define NUM_BYTES_2_WORDS(x) ( ( (x) + 1 ) >> 1 )
+#define NUM_WORDS_2_BYTES( x ) ( ( (x) << 1 ) )
 
 #define SPI_DEFAULT_PD_LEN 0
 #define CRC_WORD_LEN_IN_WORDS 2
-#define SPI_FRAME_SIZE_EXCLUDING_DATA (7)
+#define SPI_MOSI_TRAILING_BYTES ( ( NUM_WORDS_2_BYTES( CRC_WORD_LEN_IN_WORDS ) ) + 2 ) /* CRC (4 bytes) + padding (2 bytes) */
+#define SPI_MISO_TRAILING_BYTES ( NUM_WORDS_2_BYTES( CRC_WORD_LEN_IN_WORDS ) )         /* CRC (4 bytes) */
+#define SPI_FRAME_SIZE_EXCLUDING_DATA 7
 
 #if !(ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN)
    #if ABCC_CFG_SPI_MSG_FRAG_LEN > ( ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF )
@@ -103,7 +106,6 @@ static const UINT16 iSpiStatusNewPd =     ABP_SPI_STATUS_NEW_PD << 8;
 
 #define INSERT_SPI_CTRL_CMDCNT( ctrl, cmdcnt ) ctrl = ( ( ctrl ) & ~iSpiCtrlCmdCnt ) | ( ( cmdcnt ) << iSpiCtrlCmdCntShift )
 #define EXTRACT_SPI_STATUS_CMDCNT( status ) ( ( ( status ) & iSpiStatusCmdCnt ) >> iSpiStatusCmdCntShift )
-#define SPI_BASE_FRAME_WORD_LEN  5 /* Frame length excluding MSG and PD data */
 
 /*------------------------------------------------------------------------------
 ** SPI MOSI structure.
@@ -394,7 +396,7 @@ void ABCC_DrvSpiRunDriverTx( void )
          */
          ABCC_PORT_MemCpy( (void*)spi_drv_sMosiFrame.iData,
                            (void*)spi_drv_sWriteFragInfo.puCurrPtr,
-                           spi_drv_sWriteFragInfo.iCurrFragLength << 1 );
+                           NUM_WORDS_2_BYTES( spi_drv_sWriteFragInfo.iCurrFragLength ) );
       }
       else
       {
@@ -423,7 +425,8 @@ void ABCC_DrvSpiRunDriverTx( void )
       /*
       ** Apply the CRC checksum.
       */
-      lCrc = CRC_Crc32( (UINT8*)&spi_drv_sMosiFrame, spi_drv_iSpiFrameSize*2 - 6 );
+      lCrc = CRC_Crc32( (UINT8*)&spi_drv_sMosiFrame, NUM_WORDS_2_BYTES( spi_drv_iSpiFrameSize ) - SPI_MOSI_TRAILING_BYTES );
+
       lCrc = lTOlBe( lCrc );
 
       ABCC_PORT_MemCpy( &spi_drv_sMosiFrame.iData[ spi_drv_iCrcOffset ],
@@ -434,7 +437,7 @@ void ABCC_DrvSpiRunDriverTx( void )
       ** Send the MOSI frame.
       */
       ABCC_LOG_DEBUG_SPI_HEXDUMP_MOSI( (UINT16*)&spi_drv_sMosiFrame, spi_drv_iSpiFrameSize );
-      ABCC_HAL_SpiSendReceive( &spi_drv_sMosiFrame, &spi_drv_sMisoFrame, spi_drv_iSpiFrameSize << 1 );
+      ABCC_HAL_SpiSendReceive( &spi_drv_sMosiFrame, &spi_drv_sMisoFrame, NUM_WORDS_2_BYTES( spi_drv_iSpiFrameSize ) );
    }
    else if( spi_drv_eState == SM_SPI_INIT )
    {
@@ -475,7 +478,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
 
       ABCC_LOG_DEBUG_SPI_HEXDUMP_MISO( (UINT16*)&spi_drv_sMisoFrame, spi_drv_iSpiFrameSize );
 
-      lCalculatedCrc = CRC_Crc32( (UINT8*)&spi_drv_sMisoFrame, spi_drv_iSpiFrameSize*2 - 4 );
+      lCalculatedCrc = CRC_Crc32( (UINT8*)&spi_drv_sMisoFrame, NUM_WORDS_2_BYTES( spi_drv_iSpiFrameSize ) - SPI_MISO_TRAILING_BYTES );
       lCalculatedCrc = lTOlBe( lCalculatedCrc );
 
       ABCC_PORT_MemCpy( &lReceivedCrc,
@@ -580,7 +583,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
             }
          }
 
-         if( ( ( spi_drv_sReadFragInfo.iNumWordsReceived + spi_drv_iMsgLen ) << 1 ) <=
+         if( ( NUM_WORDS_2_BYTES( spi_drv_sReadFragInfo.iNumWordsReceived + spi_drv_iMsgLen ) ) <=
              ( ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF ) )
          {
             /*
@@ -588,7 +591,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
             */
             ABCC_PORT_MemCpy( spi_drv_sReadFragInfo.puCurrPtr,
                               spi_drv_sMisoFrame.iData,
-                              spi_drv_iMsgLen << 1 );
+                              NUM_WORDS_2_BYTES( spi_drv_iMsgLen ) );
 
             spi_drv_sReadFragInfo.puCurrPtr += spi_drv_iMsgLen;
             spi_drv_sReadFragInfo.iNumWordsReceived += spi_drv_iMsgLen;
