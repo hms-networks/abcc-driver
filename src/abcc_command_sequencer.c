@@ -491,7 +491,7 @@ static BOOL ExecCmdSequence( CmdSeqEntryType* psEntry, ABP_MsgType* psMsg )
          {
             ABCC_LOG_ERROR( ABCC_EC_PARAMETER_NOT_VALID,
                (UINT32)eStatus,
-               "Bad return parameter from response handler (%d)\n",
+               "Bad return parameter from command handler (%d)\n",
                eStatus );
          }
       }
@@ -574,7 +574,7 @@ ABCC_ErrorCodeType ABCC_CmdSeqAdd(
    }
    else
    {
-      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES, ABCC_CFG_MAX_NUM_CMD_SEQ, "Out of command sequence resources\n" );
+      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES, (UINT32)ABCC_CFG_MAX_NUM_CMD_SEQ, "Out of command sequence resources\n" );
    }
 
    return( ABCC_EC_NO_ERROR );
