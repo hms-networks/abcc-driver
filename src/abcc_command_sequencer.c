@@ -129,7 +129,7 @@ static void ResetCmdSeqEntry( CmdSeqEntryType* psEntry, BOOL fInitial )
       else
       {
          /*
-         ** This call may affect file global abcc_iNeedReTriggerCount
+         ** This call may affect file global abcc_iNeedReTriggerCount.
          */
          if( !CheckAndSetState( psEntry, CMD_SEQ_STATE_ANY, CMD_SEQ_STATE_NOT_STARTED ) )
          {
@@ -152,7 +152,7 @@ static void ResetCmdSeqEntry( CmdSeqEntryType* psEntry, BOOL fInitial )
 ** command sequence.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    bSourceId - Source id
+**    bSourceId - Source id.
 **
 ** Returns:
 **    CmdSeqEntryType* - Mapped handler. NULL if not found.
@@ -179,11 +179,11 @@ static CmdSeqEntryType* FindCmdSeqEntryFromSourceId( UINT8 bSourceId )
 ** Check if the given handle corresponds to an active command sequence.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    xHandle - Handle to validate
+**    xHandle - Handle to validate.
 **
 ** Returns:
-**    TRUE  - Handle was valid
-**    FALSE - Handle was invalid
+**    TRUE  - Handle was valid.
+**    FALSE - Handle was invalid.
 **------------------------------------------------------------------------------
 */
 static BOOL ValidateHandle( const ABCC_CmdSeqHandle xHandle )
@@ -213,14 +213,14 @@ static BOOL ValidateHandle( const ABCC_CmdSeqHandle xHandle )
 ** CMD_SEQ_STATE_RETRIGGER state (see ABCC_CmdSequencerExec()).
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psCmdSeqHandler - Pointer to entry
+**    psCmdSeqHandler - Pointer to entry.
 **    eCheckState     - State will only be updated if current state is this or
-**                      if this is CMD_SEQ_STATE_ANY
-**    eNewState       - New state
+**                      if this is CMD_SEQ_STATE_ANY.
+**    eNewState       - New state.
 **
 ** Returns:
-**    TRUE: New state set
-**    FALSE: Old state kept
+**    TRUE  - New state set.
+**    FALSE - Old state kept.
 **------------------------------------------------------------------------------
 */
 static BOOL CheckAndSetState( CmdSeqEntryType* psCmdSeqHandler,
@@ -261,10 +261,10 @@ static BOOL CheckAndSetState( CmdSeqEntryType* psCmdSeqHandler,
 ** Performs abort on handler if it is active.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psEntry - Pointer to handler
+**    psEntry - Pointer to handler.
 **
 ** Returns:
-**    None
+**    None.
 **------------------------------------------------------------------------------
 */
 static void DoAbort( CmdSeqEntryType* psEntry )
@@ -282,7 +282,7 @@ static void DoAbort( CmdSeqEntryType* psEntry )
    {
       /*
       ** State not allowed. See header file documentation for
-      ** ABCC_CmdSeqAbort()
+      ** ABCC_CmdSeqAbort().
       */
       ABCC_LOG_FATAL( ABCC_EC_INCORRECT_STATE, psEntry->eState, "Incorrect state (%d)\n", psEntry->eState );
    }
@@ -317,8 +317,10 @@ static void DoAbort( CmdSeqEntryType* psEntry )
    ABCC_PORT_ExitCritical();
 
    /*
-   ** Free of sourceId is done outside critical section to avoid nested
-   ** critical sections. Result can be ignored
+   ** Unmap and free the source ID. This is done outside the critical
+   ** section since ABCC_LinkGetMsgHandler() takes its own critical
+   ** section, and nested critical sections must be avoided. The return
+   ** value is not needed, therefore ignored.
    */
    if( fFreeSourceId )
    {
@@ -328,13 +330,17 @@ static void DoAbort( CmdSeqEntryType* psEntry )
 
 /*------------------------------------------------------------------------------
 ** Common response handler for all response messages routed to the command
-** sequencer. Implements ABCC_MsgHandlerFuncType function callback (abcc.h)
+** sequencer.
+**
+** Conforms to the ABCC_MsgHandlerFuncType callback interface declared in
+** abcc.h, allowing it to be registered as a message handler with
+** ABCC_SendCmdMsg().
 **------------------------------------------------------------------------------
 ** Arguments:
 **    psMsg - Pointer to response message.
 **
 ** Returns:
-**    None
+**    None.
 **------------------------------------------------------------------------------
 */
 static void HandleResponse( ABP_MsgType* psMsg )
@@ -350,7 +356,7 @@ static void HandleResponse( ABP_MsgType* psMsg )
    if( psEntry != NULL )
    {
       /*
-      ** The corresponding command sequence found
+      ** The corresponding command sequence is found.
       */
       if( CheckAndSetState( psEntry, CMD_SEQ_STATE_WAIT_RESP, CMD_SEQ_STATE_BUSY ) )
       {
@@ -368,7 +374,7 @@ static void HandleResponse( ABP_MsgType* psMsg )
             if( eStatus == ABCC_CMDSEQ_RESP_EXEC_NEXT )
             {
                /*
-               ** Move to next command in sequence
+               ** Move to next command in sequence.
                */
                psEntry->bCurrSeqIndex++;
             }
@@ -416,7 +422,7 @@ static void HandleResponse( ABP_MsgType* psMsg )
          /*
          ** Execute next command. The return value is ignored
          ** since the message deallocation will be handled after return of this
-         ** function
+         ** function.
          */
          (void)ExecCmdSequence( psEntry, psMsg );
       }
@@ -424,10 +430,10 @@ static void HandleResponse( ABP_MsgType* psMsg )
 }
 
 /*------------------------------------------------------------------------------
-** Execute the command sequence
+** Execute the command sequence.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psEntry - Pointer to handler
+**    psEntry - Pointer to handler.
 **    psMsg   - Pointer to allocated command message buffer.
 **
 ** Returns:
@@ -482,7 +488,7 @@ static BOOL ExecCmdSequence( CmdSeqEntryType* psEntry, ABP_MsgType* psMsg )
             ABCC_LOG_DEBUG_CMD_SEQ( "CmdSeq(%p)->Aborted\n",
                   (void*)psEntry->pasCmdSeq );
             /*
-            ** Abort move to end of sequence
+            ** Abort move to end of sequence.
             */
             while( (++psCmdSeq)->pnCmdHandler != NULL );
             psEntry->eSeqResult = ABCC_CMDSEQ_RESULT_ABORT_INT;
@@ -491,13 +497,13 @@ static BOOL ExecCmdSequence( CmdSeqEntryType* psEntry, ABP_MsgType* psMsg )
          {
             ABCC_LOG_ERROR( ABCC_EC_PARAMETER_NOT_VALID,
                (UINT32)eStatus,
-               "Bad return parameter from response handler (%d)\n",
+               "Bad return parameter from command handler (%d)\n",
                eStatus );
          }
       }
 
       /*
-      ** Check end of sequence
+      ** Check end of sequence.
       */
       if( psCmdSeq->pnCmdHandler == NULL )
       {
@@ -506,7 +512,7 @@ static BOOL ExecCmdSequence( CmdSeqEntryType* psEntry, ABP_MsgType* psMsg )
          ABCC_CmdSeqResultType eSeqResult;
 
          /*
-         ** Free resource before calling done callback
+         ** Free resource before calling done callback.
          */
          ABCC_ReturnMsgBuffer( &psMsg );
          fCmdBufferConsumed = TRUE;
@@ -574,7 +580,7 @@ ABCC_ErrorCodeType ABCC_CmdSeqAdd(
    }
    else
    {
-      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES, ABCC_CFG_MAX_NUM_CMD_SEQ, "Out of command sequence resources" );
+      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES, (UINT32)ABCC_CFG_MAX_NUM_CMD_SEQ, "Out of command sequence resources\n" );
    }
 
    return( ABCC_EC_NO_ERROR );
@@ -646,7 +652,7 @@ void ABCC_CmdSequencerExec( void )
             if( ExecCmdSequence( &abcc_asCmdSeq[ i ], psMsg ) == TRUE )
             {
                /*
-               ** Message buffer consumed
+               ** Message buffer consumed.
                */
                psMsg = NULL;
             }
