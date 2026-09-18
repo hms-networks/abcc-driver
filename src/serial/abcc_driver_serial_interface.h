@@ -55,7 +55,8 @@ EXTFUNC void ABCC_DrvSerInit( UINT8 bOpmode );
 ** Call in the interrupt context to acknowledge received interrupts.
 **
 ** Remarks:
-**    The ISR routine will clear all pending interrupts.
+**    Filler function since interrupt operation is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
@@ -171,12 +172,13 @@ EXTFUNC BOOL ABCC_DrvSerIsReadyForWriteMessage( void );
 EXTFUNC BOOL ABCC_DrvSerIsReadyForCmd( void );
 
 /*------------------------------------------------------------------------------
-** Set the number of simultaneous commands
-** that is supported by the application.
+** Sets the number of simultaneous commands that is supported by the
+** application.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    bNbrOfCmds:    Number of commands that the application is ready to
-**                   receive. 
+**                   receive.
+**
 ** Returns:
 **    None.
 **------------------------------------------------------------------------------
@@ -210,14 +212,17 @@ EXTFUNC void ABCC_DrvSerSetAppStatus( ABP_AppStatusType eAppStatus );
 EXTFUNC void ABCC_DrvSerSetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize );
 
 /*------------------------------------------------------------------------------
-** Set the receiver buffer, to be used for the next read message.
+** Sets the receiver buffer, to be used for the next read message.
+**
+** Remarks:
+**    Not implemented, the serial driver uses the static function
+**    DrvSerSetMsgReceiverBuffer() instead.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psReadMsg:     Pointer where next read message will be put.
-**                   psReadMsg is not allowed to contain a NULL value.
+**    -
 **
 ** Returns:
-**    None.
+**    -
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_DrvSerSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
@@ -236,7 +241,7 @@ EXTFUNC void ABCC_DrvSerSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
 EXTFUNC void ABCC_DrvSerSetIntMask( const UINT16 iIntMask );
 
 /*------------------------------------------------------------------------------
-** Get WrpdBuffer for the user to update.
+** Get WrPdBuffer for the user to update.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
@@ -248,8 +253,11 @@ EXTFUNC void ABCC_DrvSerSetIntMask( const UINT16 iIntMask );
 EXTFUNC void* ABCC_DrvSerGetWrPdBuffer( void );
 
 /*------------------------------------------------------------------------------
-** Get module capability.
-** Note! This is not supported by serial protocol.
+** Read module capability.
+**
+** Remarks:
+**    Filler function since module capability is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
@@ -261,8 +269,11 @@ EXTFUNC void* ABCC_DrvSerGetWrPdBuffer( void );
 EXTFUNC UINT16 ABCC_DrvSerGetModCap( void );
 
 /*------------------------------------------------------------------------------
-** Get LED status.
-** Note! This is not supported by serial protocol.
+** Read LED status.
+**
+** Remarks:
+**    Filler function since LED status is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
@@ -274,8 +285,11 @@ EXTFUNC UINT16 ABCC_DrvSerGetModCap( void );
 EXTFUNC UINT16 ABCC_DrvSerGetLedStatus( void );
 
 /*------------------------------------------------------------------------------
-** Get the Anybus interrupt status.
-** Note! This is not supported by serial protocol.
+** Gets the Anybus interrupt status.
+**
+** Remarks:
+**    Filler function since interrupt status is not supported by
+**    the serial driver.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
@@ -305,7 +319,7 @@ EXTFUNC UINT8 ABCC_DrvSerGetAnybusState( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read process data; or NULL if no process data to read
+**    A pointer to the read process data or NULL if no process data to read
 **    was available.
 **------------------------------------------------------------------------------
 */
@@ -318,9 +332,9 @@ EXTFUNC void* ABCC_DrvSerReadProcessData( void );
 **    None.
 **
 ** Returns:
-**    A pointer to the read message; or NULL if no message is available.
-**    The pointer, if not NULL, will point to the buffer previously set by
-**    calling ABCC_DrvSetMsgReceiverBuffer().
+**    A pointer to the read message or NULL if no message is available.
+**    The pointer, if not NULL, will point to the driver's internally
+**    allocated read-message buffer.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABP_MsgType* ABCC_DrvSerReadMessage( void );
