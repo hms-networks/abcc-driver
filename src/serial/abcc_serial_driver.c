@@ -201,7 +201,6 @@ static void drv_GetWriteFrag( WrMsgFragType* const psFragHandle, UINT8* const pb
 **------------------------------------------------------------------------------
 ** Arguments:
 **    psFragHandle   Pointer to write fragmentation information.
-**    pbBuffer       Pointer to destination buffer.
 **
 ** Returns:
 **    TRUE if the whole message is sent.
@@ -504,10 +503,10 @@ void ABCC_DrvSerRunDriverTx( void )
 **  Handle the reception of the Rx telegram.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    psResp:  Pointer to the response message.
+**    None.
 **
 ** Returns:
-**    None.
+**    psResp:  Pointer to the response message.
 **------------------------------------------------------------------------------
 */
 ABP_MsgType* ABCC_DrvSerRunDriverRx( void )

@@ -284,11 +284,11 @@ while( 0 )
 **    iNumChar - Number of chars in the string.
 **    iOctetOffset - Offset to where the string shall be written.
 **
-** ABCC_GetMsgString( pxSrc, pcString, iNumChar, iOctetOffset )
+** ABCC_GetMsgString( psMsg, pcString, iNumChar, iOctetOffset )
 **    psMsg - Pointer to message.
-** ABCC_GetString( psMsg, pcString, iNumChar, iOctetOffset )
+** ABCC_GetString( pxSrc, pcString, iNumChar, iOctetOffset )
 **    pxSrc - Pointer to message payload.
-**    pcString - String to be written.
+**    pcString - Buffer where string is written to.
 **    iNumChar - Number of chars in the string.
 **    iOctetOffset - Offset to where the string shall be read.
 **
@@ -302,7 +302,7 @@ while( 0 )
 ** ABCC_GetMsgDataX( psMsg, Data, iOctetOffset )
 **    psMsg - Pointer to message.
 ** ABCC_GetDataX( pxSrc, Data, iOctetOffset )
-**    pxSrc - Pointer to message.
+**    pxSrc - Pointer to message payload.
 **    Data  - Read data variable.
 **    iOctetOffset - Offset to where data shall be read.
 **------------------------------------------------------------------------------
