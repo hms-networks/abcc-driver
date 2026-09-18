@@ -5,7 +5,7 @@
 ********************************************************************************
 ********************************************************************************
 ** File Description:
-** Implementation of serial driver ping protocol
+** Implementation of the serial driver ping/pong protocol
 ********************************************************************************
 */
 #include "abcc_config.h"
@@ -132,7 +132,7 @@ static UINT16               iTelegramTmoMs;             /* Telegram timeout  */
 static void DrvSerSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
 
 /*------------------------------------------------------------------------------
-** Callback from the physical layer to indicate that a RX telegran was received.
+** Callback from the physical layer to indicate that a Rx telegram was received.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
@@ -299,9 +299,10 @@ static void drv_AddReadFrag( RdMsgFragType* const psFragHandle, UINT8* const pbB
 ** Check if read message receiving is in progress
 **------------------------------------------------------------------------------
 ** Arguments:
-**       psFragHandle   Pointer to read fragmentation information
+**    psFragHandle   Pointer to read fragmentation information.
+**
 ** Returns:
-**       TRUE if the.
+**    TRUE if receiving is ongoing.
 **------------------------------------------------------------------------------
 */
 static BOOL drv_isRdMsgReceiveInprogress( RdMsgFragType* const psFragHandle )
@@ -459,7 +460,7 @@ void ABCC_DrvSerRunDriverTx( void )
          else
          {
             /*
-            ** Position to update the rx frame size to match the length of
+            ** Position to update the Rx frame size to match the length of
             ** the new RdPd size after a read remap.
             ** The last fragment of the remap response has been sent
             ** and the ABCC will adjust the length in the next frame.
@@ -491,7 +492,7 @@ void ABCC_DrvSerRunDriverTx( void )
       drv_sTxTelegram.abData[ drv_iWritePdSize  ] = (UINT8)( iCrc >> 8 );
 
       /*
-      ** Send TX telegram and receive Rx telegram.
+      ** Send Tx telegram and receive Rx telegram.
       */
       ABCC_LOG_DEBUG_UART_HEXDUMP_TX( (UINT8*)&drv_sTxTelegram, drv_iTxFrameSize + SER_CRC_LEN );
       ABCC_TimerStart( xTelegramTmoHandle, iTelegramTmoMs );
@@ -651,8 +652,8 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
          if( drv_isRdMsgReceiveInprogress( &sRxFragHandle ) )
          {
             /*
-            ** Empty message endmarker received
-            ** Copy old message format size parameter to Large message format used by the driver
+            ** Empty message endmarker received.
+            ** Copy old message format size parameter to large message format used by the driver.
             */
             drv_psReadMessage->sHeader.iDataSize = iTOiLe( (UINT16)drv_psReadMessage->sHeader.bReserved );
 
