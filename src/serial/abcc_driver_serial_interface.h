@@ -187,7 +187,7 @@ EXTFUNC void ABCC_DrvSerSetNbrOfCmds( UINT8 bNbrOfCmds );
 
 /*------------------------------------------------------------------------------
 ** Set the current application status.
-** Note! This is not supported by serial protocol.
+** Note! This is not supported by the UART serial protocol.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    eAppStatus:    Current application status.
@@ -229,7 +229,7 @@ EXTFUNC void ABCC_DrvSerSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg );
 
 /*------------------------------------------------------------------------------
 ** Set interrupt mask.
-** Note! This is not supported by serial protocol.
+** Note! This is not supported by UART serial protocol.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    iIntMask:      Interrupt mask.
