@@ -191,10 +191,9 @@ static void drv_GetWriteFrag( WrMsgFragType* const psFragHandle, UINT8* const pb
       return;
    }
 
-   ABCC_PORT_StrCpyToNative( pbBuffer,
-                             psFragHandle->pbCurrPtr,
-                             0,
-                             psFragHandle->iFragLength );
+   ABCC_PORT_MemCpy( pbBuffer,
+                     psFragHandle->pbCurrPtr,
+                     psFragHandle->iFragLength );
 }
 
 /*------------------------------------------------------------------------------
