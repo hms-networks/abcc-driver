@@ -945,6 +945,18 @@ void* ABCC_DrvSerReadProcessData( void )
    ** packed (two octets per 16-bit word), so contract it into a
    ** packed buffer before returning it.
    */
+
+   /*
+   ** drv_bpRdPd is reset to NULL before every ping and only set
+   ** again when a CRC-valid telegram arrives. While it is NULL, we
+   ** must return NULL. Converting from an empty source would read
+   ** invalid memory and falsely signal fresh PD data.
+   */
+   if ( drv_bpRdPd == NULL )
+   {
+      return( NULL );
+   }
+
    ABCC_PORT_StrCpyToPacked( drv_abRdPdConv, 0,
                              drv_bpRdPd,
                              drv_iReadPdSize );
