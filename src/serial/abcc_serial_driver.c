@@ -27,7 +27,7 @@
 ** UINT8    bCmdExt0;       UINT8    bCmdExt0;       UINT16   iCmdExt0CmdExt1;
 ** UINT8    bCmdExt1;       UINT8    bCmdExt1;
 **
-** For 16 bit char architectures, the UINT16 message header elements
+** For 16-bit char architectures, the UINT16 message header elements
 ** need to be unpacked before transmission and packed upon reception.
 ** This transformation is performed in drv_GetWriteFrag() and drv_AddReadFrag().
 ********************************************************************************
