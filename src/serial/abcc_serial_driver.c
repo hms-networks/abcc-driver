@@ -5,7 +5,31 @@
 ********************************************************************************
 ********************************************************************************
 ** File Description:
-** Implementation of the serial driver ping/pong protocol
+** Implementation of the serial driver ping pong protocol.
+**
+** The UART interface communicates using the legacy wire format defined by
+** ABP_Msg255Type. Internally, the driver utilizes the expanded ABP_MsgType
+** structure. The serial driver handles the conversion between these two
+** formats on the fly, including byte packing and unpacking required for
+** 16-bit char architectures.
+**
+** Header Structure Comparison:
+**
+** Legacy                   ABP_MsgHeaderType        ABP_MsgHeaderType16
+** ===================      ===================      ==========================
+**                          UINT16   iDataSize;      UINT16   iDataSize;
+**                          UINT16   iReserved;      UINT16   iReserved;
+** UINT8    bSourceId;      UINT8    bSourceId;      UINT16   iSourceIdDestObj;
+** UINT8    bDestObj;       UINT8    bDestObj;
+** UINT16   iInstance;      UINT16   iInstance;      UINT16   iInstance;
+** UINT8    bCmd;           UINT8    bCmd;           UINT16   iCmdReserved;
+** UINT8    bDataSize;      UINT8    bReserved;
+** UINT8    bCmdExt0;       UINT8    bCmdExt0;       UINT16   iCmdExt0CmdExt1;
+** UINT8    bCmdExt1;       UINT8    bCmdExt1;
+**
+** For 16 bit char architectures, the UINT16 message header elements
+** need to be unpacked before transmission and packed upon reception.
+** This transformation is performed in drv_GetWriteFrag() and drv_AddReadFrag().
 ********************************************************************************
 */
 #include "abcc_config.h"
@@ -27,6 +51,14 @@
 
 #if ( ABCC_CFG_MAX_MSG_SIZE < 16 )
 #error "ABCC_CFG_MAX_MSG_SIZE must be at least a 16 bytes"
+#endif
+
+#ifdef ABCC_SYS_16_BIT_CHAR
+/*
+** Convert a number of message octets to the corresponding number of
+** UINT8 storage units (two octets packed per 16-bit word).
+*/
+#define ABCC_OCTETS_TO_NATIVE_UNITS( x ) ( ( (UINT16)(x) + 1 ) >> 1 )
 #endif
 
 /*
@@ -124,6 +156,19 @@ static ABCC_TimerHandle     xTelegramTmoHandle;
 static BOOL                 fTelegramTmo;               /* Current telegram timeout status */
 static UINT16               iTelegramTmoMs;             /* Telegram timeout  */
 
+#ifdef ABCC_SYS_16_BIT_CHAR
+/*
+** PD geometry conversion buffers.
+**
+** The telegram transports each octet in its own 16-bit container
+** (matching the message field and the HAL byte interface), while the
+** AD layer provides/consumes process data packed two octets per word
+** (native ADI storage on 16-bit char architectures). Conversion happens
+** only at the PD <-> telegram boundary below.
+*/
+static UINT8 drv_abRdPdConv[ABCC_CFG_MAX_PROCESS_DATA_SIZE];
+static UINT8 drv_abWrPdConv[ABCC_CFG_MAX_PROCESS_DATA_SIZE];
+#endif
 
 /*******************************************************************************
 ** Private forward declarations.
@@ -191,9 +236,10 @@ static void drv_GetWriteFrag( WrMsgFragType* const psFragHandle, UINT8* const pb
       return;
    }
 
-   ABCC_PORT_MemCpy( pbBuffer,
-                     psFragHandle->pbCurrPtr,
-                     psFragHandle->iFragLength );
+   ABCC_PORT_StrCpyToNative( pbBuffer,
+                             psFragHandle->pbCurrPtr,
+                             0,
+                             psFragHandle->iFragLength );
 }
 
 /*------------------------------------------------------------------------------
@@ -212,8 +258,17 @@ static BOOL drv_PrepareNextWriteFrag( WrMsgFragType* const psFragHandle )
 
    if( psFragHandle->iNumBytesLeft > 0 )
    {
-      psFragHandle->pbCurrPtr         += psFragHandle->iFragLength;
-      psFragHandle->iNumBytesLeft     -= psFragHandle->iFragLength;
+#ifdef ABCC_SYS_16_BIT_CHAR
+      /*
+      ** A fragment of N octets consumes N/2 UINT8 elements
+      ** on 16-bit-char targets, so advance the pointer
+      ** in element (not octet) steps.
+      */
+      psFragHandle->pbCurrPtr += ABCC_OCTETS_TO_NATIVE_UNITS( psFragHandle->iFragLength );
+#else
+      psFragHandle->pbCurrPtr += psFragHandle->iFragLength;
+#endif
+      psFragHandle->iNumBytesLeft -= psFragHandle->iFragLength;
    }
 
    if( psFragHandle->iNumBytesLeft <= 0 )
@@ -276,26 +331,36 @@ static void drv_AddReadFrag( RdMsgFragType* const psFragHandle, UINT8* const pbB
    if( ( psFragHandle->iNumBytesReceived + psFragHandle->iFragLength ) > psFragHandle->iMaxLength )
    {
       /*
-      ** Message size exceeds buffer. Don't fill up the buffer, this is handled
-      ** in higher layers.
+      ** Message size exceeds buffer. Don't fill up the buffer;
+      ** this is handled in higher layers.
       */
       return;
    }
 
    /*
-   ** Copy the message into buffer.
+   ** Copy the Rx message into fragmentation buffer.
    */
    psFragHandle->iNumBytesReceived += psFragHandle->iFragLength;
 
-   ABCC_PORT_MemCpy( psFragHandle->pbCurrPtr,
-                     pbBuffer,
-                     psFragHandle->iFragLength );
+   ABCC_PORT_StrCpyToPacked( psFragHandle->pbCurrPtr,
+                             0,
+                             pbBuffer,
+                             psFragHandle->iFragLength );
 
+#ifdef ABCC_SYS_16_BIT_CHAR
+   /*
+   ** A fragment of N octets consumes N/2 UINT8 elements
+   ** on 16-bit-char targets, so advance the pointer
+   ** in element (not octet) steps.
+   */
+   psFragHandle->pbCurrPtr += ABCC_OCTETS_TO_NATIVE_UNITS( psFragHandle->iFragLength );
+#else
    psFragHandle->pbCurrPtr += psFragHandle->iFragLength;
+#endif
 }
 
 /*------------------------------------------------------------------------------
-** Check if read message receiving is in progress
+** Check if read message receiving is in progress.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    psFragHandle   Pointer to read fragmentation information.
@@ -429,8 +494,23 @@ void ABCC_DrvSerRunDriverTx( void )
 
          if( ( drv_psWriteMessage != 0 ) && !drv_isWrMsgSendingInprogress( &sTxFragHandle ) )
          {
-            drv_psWriteMessage->sHeader.bReserved = (UINT8)( iLeTOi( drv_psWriteMessage->sHeader.iDataSize ) );
-            drv_WriteFragInit( &sTxFragHandle, &drv_psWriteMessage->sHeader.bSourceId, (UINT16)drv_psWriteMessage->sHeader.bReserved + SER_MSG_HEADER_LEN, SER_MSG_FRAG_LEN );
+            ABCC_SetMsgReserved( drv_psWriteMessage, (UINT8)ABCC_GetMsgDataSize( drv_psWriteMessage ) );
+          /*
+          ** In below function call, do not replace
+          ** the &drv_psWriteMessage->sHeader.xxx arguments
+          ** by ABCC_GetMsgSourceId() macros.
+          */
+#ifdef ABCC_SYS_16_BIT_CHAR
+            drv_WriteFragInit( &sTxFragHandle,
+                               (UINT8*)( &drv_psWriteMessage->sHeader.iSourceIdDestObj ),
+                               (UINT16)ABCC_GetMsgReserved( drv_psWriteMessage ) + SER_MSG_HEADER_LEN,
+                               SER_MSG_FRAG_LEN );
+#else
+            drv_WriteFragInit( &sTxFragHandle,
+                               &drv_psWriteMessage->sHeader.bSourceId,
+                               (UINT16)ABCC_GetMsgReserved( drv_psWriteMessage ) + SER_MSG_HEADER_LEN,
+                               SER_MSG_FRAG_LEN );
+#endif
          }
 
          ABCC_PORT_ExitCritical();
@@ -464,8 +544,7 @@ void ABCC_DrvSerRunDriverTx( void )
             ** The last fragment of the remap response has been sent
             ** and the ABCC will adjust the length in the next frame.
             */
-            if( ( drv_psWriteMessage->sHeader.bDestObj == ABP_OBJ_NUM_APPD ) &&
-                ( drv_psWriteMessage->sHeader.bCmd == ABP_APPD_REMAP_ADI_READ_AREA ) )
+            if( ( ABCC_GetMsgDestObj( drv_psWriteMessage ) == ABP_OBJ_NUM_APPD ) && ( ABCC_GetMsgCmdBits( drv_psWriteMessage ) == ABP_APPD_REMAP_ADI_READ_AREA ) )
             {
                if( pnABCC_DrvCbfReadRemapDone != NULL )
                {
@@ -574,13 +653,35 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       ABCC_TimerStop( xWdTmoHandle );
       fWdTmo = FALSE;
 
+#ifdef ABCC_SYS_16_BIT_CHAR
+      /*
+      ** The AD layer assembles the packed write PD into this memory
+      ** later in the cycle, skipping pad octets. Clearing here
+      ** ensures those octets are zero rather than leftover data
+      ** from the previous wire-side (octet-per-word) expansion.
+      **
+      ** Now that a valid Rx telegram has been received, it is
+      ** safe to clear the WrPd buffer now. Do NOT move this clear
+      ** into the Tx path: it would either overwrite a telegram
+      ** still being transmitted or destroy the buffer contents
+      ** needed for a timeout retransmission.
+      */
+      {
+         UINT16 iOctet;
+         for ( iOctet = 0; iOctet < drv_iWritePdSize; iOctet++ )
+         {
+            drv_sTxTelegram.abData[ iOctet ] = 0;
+         }
+      }
+#endif
+
       /*
       ** Restart watchdog.
       */
       ABCC_TimerStart( xWdTmoHandle, ABCC_CFG_WD_TIMEOUT_MS );
 
       /*
-      ** Save the current Anybus status.
+      ** Save the current Anybus status and RdPd.
       */
       drv_bStatus = drv_sRxTelegram.bStatus;
       drv_bpRdPd = drv_sRxTelegram.abData;
@@ -602,9 +703,9 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
             psWriteMsg = drv_psWriteMessage;
 
             /*
-            ** Update the application flow control.
+            ** Update application flow control.
             */
-            if( ( drv_psWriteMessage->sHeader.bCmd & ABP_MSG_HEADER_C_BIT ) == 0 )
+            if( ( ABCC_GetMsgCmdField( drv_psWriteMessage ) & ABP_MSG_HEADER_C_BIT ) == 0 )
             {
                drv_bNbrOfCmds++;
             }
@@ -632,16 +733,32 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
                if( drv_psReadMessage == NULL )
                {
                   ABCC_LOG_WARNING( ABCC_EC_OUT_OF_MSG_BUFFERS,
-                     0,
-                     "Out of message buffers when attempting to read a message\n" );
+                                    0,
+                                    "Out of message buffers when attempting to read a message\n" );
                   return( NULL );
                }
             }
 
             /*
-            ** Start receiving on legacy start position which corresponds to &drv_psReadMessage->sHeader.bSourceId
+            ** Start receiving on legacy start position which corresponds to &drv_psReadMessage->sHeader.bSourceId.
             */
-            drv_InitReadFrag( &sRxFragHandle, &drv_psReadMessage->sHeader.bSourceId, SER_MSG_FRAG_LEN, ABCC_CFG_MAX_MSG_SIZE + SER_MSG_HEADER_LEN );
+
+            /*
+            ** In below function call, do not replace
+            ** the &drv_psReadMessage->sHeader.xxx arguments
+            ** by ABCC_GetMsgSourceId() macros.
+            */
+#ifdef ABCC_SYS_16_BIT_CHAR
+            drv_InitReadFrag( &sRxFragHandle,
+                              (UINT8*)(&drv_psReadMessage->sHeader.iSourceIdDestObj),
+                              SER_MSG_FRAG_LEN,
+                              ABCC_CFG_MAX_MSG_SIZE + SER_MSG_HEADER_LEN );
+#else
+            drv_InitReadFrag( &sRxFragHandle,
+                              &drv_psReadMessage->sHeader.bSourceId,
+                              SER_MSG_FRAG_LEN,
+                              ABCC_CFG_MAX_MSG_SIZE + SER_MSG_HEADER_LEN );
+#endif
          }
 
          drv_AddReadFrag( &sRxFragHandle, drv_sRxTelegram.abRdMsg );
@@ -652,14 +769,16 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
          {
             /*
             ** Empty message endmarker received.
-            ** Copy old message format size parameter to large message format used by the driver.
+            ** Copy message payload data size from legacy
+            ** ABP_Msg255HeaderType to ABP_MsgHeaderType format
+            ** used by the driver.
             */
-            drv_psReadMessage->sHeader.iDataSize = iTOiLe( (UINT16)drv_psReadMessage->sHeader.bReserved );
+            ABCC_SetMsgDataSize( drv_psReadMessage, ABCC_GetMsgReserved( drv_psReadMessage ) );
 
             /*
-            ** Update the application flow control.
+            ** Update application flow control.
             */
-            if( drv_psReadMessage->sHeader.bCmd & ABP_MSG_HEADER_C_BIT )
+            if( ABCC_GetMsgCmdField( drv_psReadMessage ) & ABP_MSG_HEADER_C_BIT )
             {
                drv_bNbrOfCmds--;
             }
@@ -713,10 +832,6 @@ BOOL ABCC_DrvSerWriteMessage( ABP_MsgType* psWriteMsg )
 
 void ABCC_DrvSerWriteProcessData( void* pxProcessData )
 {
-   (void)pxProcessData;
-   /*
-   ** Nothing needs to be done here since the buffer is already updated by the application.
-   */
    if( drv_eState != SM_SER_RDY_TO_SEND_PING )
    {
       ABCC_LOG_ERROR( ABCC_EC_INCORRECT_STATE,
@@ -724,6 +839,31 @@ void ABCC_DrvSerWriteProcessData( void* pxProcessData )
                       "Wrong driver state (%d)\n",
                       drv_eState );
    }
+#ifdef ABCC_SYS_16_BIT_CHAR
+   /*
+   ** The AD layer provides the write process data packed (two octets
+   ** per 16-bit word). The UART telegram transports each octet in its
+   ** own 16-bit container, so expand it into the telegram PD field.
+   **
+   ** The snapshot into a conversion buffer is required since source
+   ** and destination may refer to the same memory; expanding in place
+   ** would overwrite packed octets not yet read.
+   */
+   ABCC_PORT_CopyOctets( drv_abWrPdConv, 0,
+                         pxProcessData, 0,
+                         drv_iWritePdSize );
+
+   ABCC_PORT_StrCpyToNative( drv_sTxTelegram.abData,
+                             drv_abWrPdConv,
+                             0,
+                             drv_iWritePdSize );
+#else
+   (void)pxProcessData;
+   /*
+   ** Nothing needs to be done here since the buffer is already
+   ** updated by the application.
+   */
+#endif
 }
 
 /*
@@ -818,7 +958,20 @@ UINT8 ABCC_DrvSerGetAnybusState( void )
 
 void* ABCC_DrvSerReadProcessData( void )
 {
+#ifdef ABCC_SYS_16_BIT_CHAR
+   /*
+   ** The UART telegram delivers each received octet in its own
+   ** 16-bit container. The AD layer expects the read process data
+   ** packed (two octets per 16-bit word), so contract it into a
+   ** packed buffer before returning it.
+   */
+   ABCC_PORT_StrCpyToPacked( drv_abRdPdConv, 0,
+                             drv_bpRdPd,
+                             drv_iReadPdSize );
+   return( drv_abRdPdConv );
+#else
    return( drv_bpRdPd );
+#endif
 }
 
 ABP_MsgType* ABCC_DrvSerReadMessage( void )
