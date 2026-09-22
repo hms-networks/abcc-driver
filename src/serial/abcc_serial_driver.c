@@ -654,25 +654,6 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       ABCC_TimerStop( xWdTmoHandle );
       fWdTmo = FALSE;
 
-#ifdef ABCC_SYS_16_BIT_CHAR
-      /*
-      ** The AD layer assembles the packed write PD into this memory
-      ** later in the cycle, skipping pad octets. Clearing here
-      ** ensures those octets are zero rather than leftover data
-      ** from the previous wire-side (octet-per-word) expansion.
-      **
-      ** Now that a valid Rx telegram has been received, it is
-      ** safe to clear the WrPd buffer now. Do NOT move this clear
-      ** into the Tx path: it would either overwrite a telegram
-      ** still being transmitted or destroy the buffer contents
-      ** needed for a timeout retransmission.
-      */
-         for ( UINT16 iOctet = 0; iOctet < drv_iWritePdSize; iOctet++ )
-         {
-            drv_sTxTelegram.abData[ iOctet ] = 0;
-         }
-#endif
-
       /*
       ** Restart watchdog.
       */
