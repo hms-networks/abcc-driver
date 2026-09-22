@@ -495,11 +495,11 @@ void ABCC_DrvSerRunDriverTx( void )
          if( ( drv_psWriteMessage != 0 ) && !drv_isWrMsgSendingInprogress( &sTxFragHandle ) )
          {
             ABCC_SetMsgReserved( drv_psWriteMessage, (UINT8)ABCC_GetMsgDataSize( drv_psWriteMessage ) );
-          /*
-          ** In below function call, do not replace
-          ** the &drv_psWriteMessage->sHeader.xxx arguments
-          ** by ABCC_GetMsgSourceId() macros.
-          */
+            /*
+            ** In below function call, do not replace
+            ** the &drv_psWriteMessage->sHeader.xxx arguments
+            ** by ABCC_GetMsgSourceId() macros.
+            */
 #ifdef ABCC_SYS_16_BIT_CHAR
             drv_WriteFragInit( &sTxFragHandle,
                                (UINT8*)( &drv_psWriteMessage->sHeader.iSourceIdDestObj ),
@@ -544,7 +544,8 @@ void ABCC_DrvSerRunDriverTx( void )
             ** The last fragment of the remap response has been sent
             ** and the ABCC will adjust the length in the next frame.
             */
-            if( ( ABCC_GetMsgDestObj( drv_psWriteMessage ) == ABP_OBJ_NUM_APPD ) && ( ABCC_GetMsgCmdBits( drv_psWriteMessage ) == ABP_APPD_REMAP_ADI_READ_AREA ) )
+            if( ( ABCC_GetMsgDestObj( drv_psWriteMessage ) == ABP_OBJ_NUM_APPD ) &&
+                ( ABCC_GetMsgCmdBits( drv_psWriteMessage ) == ABP_APPD_REMAP_ADI_READ_AREA ) )
             {
                if( pnABCC_DrvCbfReadRemapDone != NULL )
                {
@@ -666,13 +667,10 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
       ** still being transmitted or destroy the buffer contents
       ** needed for a timeout retransmission.
       */
-      {
-         UINT16 iOctet;
-         for ( iOctet = 0; iOctet < drv_iWritePdSize; iOctet++ )
+         for ( UINT16 iOctet = 0; iOctet < drv_iWritePdSize; iOctet++ )
          {
             drv_sTxTelegram.abData[ iOctet ] = 0;
          }
-      }
 #endif
 
       /*
@@ -740,7 +738,8 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
             }
 
             /*
-            ** Start receiving on legacy start position which corresponds to &drv_psReadMessage->sHeader.bSourceId.
+            ** Start receiving on legacy start position which corresponds
+            ** to &drv_psReadMessage->sHeader.bSourceId.
             */
 
             /*
