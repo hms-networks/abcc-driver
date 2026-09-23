@@ -936,7 +936,7 @@ static ABCC_CmdSeqRespStatusType RdPdSizeResp( ABP_MsgType* psMsg, void* pxUserD
       UINT16 iSize;
 
       /*
-      ** Verify that ABCC and driver has the same view
+      ** Verify that ABCC and driver have the same view
       */
       ABCC_GetMsgData16( psMsg, &iSize, 0 );
 
@@ -944,9 +944,9 @@ static ABCC_CmdSeqRespStatusType RdPdSizeResp( ABP_MsgType* psMsg, void* pxUserD
       {
          ABCC_LOG_ERROR( ABCC_EC_PD_SIZE_MISMATCH,
             iSize,
-            "Read PD size mismatch, ABCC: %d Driver: %d\n",
-            abcc_iPdReadSize,
-            iSize );
+            "Read PD size mismatch, ABCC: %" PRIu16 " Driver: %" PRIu16 "\n",
+            iSize,                /* ABCC's reported size */
+            abcc_iPdReadSize );   /* Driver's calculated size */
 
          return( ABCC_CMDSEQ_RESP_ABORT );
       }
@@ -1002,16 +1002,16 @@ static ABCC_CmdSeqRespStatusType WrPdSizeResp( ABP_MsgType* psMsg, void* pxUserD
       UINT16 iSize;
 
       /*
-      ** Verify that ABCC and driver has the same view
+      ** Verify that ABCC and driver have the same view
       */
       ABCC_GetMsgData16( psMsg, &iSize, 0 );
       if( abcc_iPdWriteSize != iSize )
       {
          ABCC_LOG_ERROR( ABCC_EC_PD_SIZE_MISMATCH,
             iSize,
-            "Write PD size mismatch, ABCC: %d Driver: %d\n",
-            abcc_iPdWriteSize,
-            iSize );
+            "Write PD size mismatch, ABCC: %" PRIu16 " Driver: %" PRIu16 "\n",
+            iSize,                /* ABCC's reported size */
+            abcc_iPdWriteSize );   /* Driver's calculated size */
 
          return( ABCC_CMDSEQ_RESP_ABORT );
       }
