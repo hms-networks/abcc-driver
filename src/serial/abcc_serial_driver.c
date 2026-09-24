@@ -89,7 +89,7 @@ typedef struct SerTxTelegramType
 {
    UINT8 bControl;
    UINT8 abWrMsg[ SER_MSG_FRAG_LEN ];
-   UINT8 abData[ ABCC_CFG_MAX_PROCESS_DATA_SIZE + SER_CRC_LEN ];
+   UINT8 abData[ ABP_MAX_PROCESS_DATA + SER_CRC_LEN ];
 }
 PACKED_STRUCT SerTxTelegramType;
 ABCC_SYS_PACK_OFF
@@ -99,7 +99,7 @@ typedef struct SerRxTelegramType
 {
    UINT8 bStatus;
    UINT8 abRdMsg[ SER_MSG_FRAG_LEN ];
-   UINT8 abData[ ABCC_CFG_MAX_PROCESS_DATA_SIZE + SER_CRC_LEN ];
+   UINT8 abData[ ABP_MAX_PROCESS_DATA + SER_CRC_LEN ];
 }
 PACKED_STRUCT SerRxTelegramType;
 ABCC_SYS_PACK_OFF
@@ -158,16 +158,22 @@ static UINT16               iTelegramTmoMs;             /* Telegram timeout  */
 
 #ifdef ABCC_SYS_16_BIT_CHAR
 /*
-** PD geometry conversion buffers.
+** RdPd geometry conversion buffer.
 **
-** The telegram transports each octet in its own 16-bit container
-** (matching the message field and the HAL byte interface), while the
-** AD layer provides/consumes process data packed two octets per word
-** (native ADI storage on 16-bit char architectures). Conversion happens
-** only at the PD <-> telegram boundary below.
+** The Rx telegram transports each octet in its own 16-bit container,
+** while the AD layer consumes process data packed two octets per word
+** (native ADI storage on 16-bit char architectures). Therefore,
+** RdPd gets packed into this buffer.
 */
-static UINT8 drv_abRdPdConv[ABCC_CFG_MAX_PROCESS_DATA_SIZE];
-static UINT8 drv_abWrPdConv[ABCC_CFG_MAX_PROCESS_DATA_SIZE];
+static UINT8 drv_abRdPdConv[ ABP_MAX_PROCESS_DATA ];
+
+/*
+** Packed WrPd buffer owned by the AD layer.
+**
+** The AD map ( WriteBufferFromPdMap() ) writes here. It is used
+** to unpack WrPd to the Tx telegram.
+*/
+static UINT8 drv_abWrPd[ ABP_MAX_PROCESS_DATA ];
 #endif
 
 /*******************************************************************************
@@ -459,6 +465,16 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
    ** Register the PONG indicator for the physical serial driver.
    */
    ABCC_HAL_SerRegDataReceived( drv_RxTelegramReceived );
+
+#ifdef ABCC_SYS_16_BIT_CHAR
+   /*
+   ** Initialize the WrPd buffer.
+   */
+   for ( UINT16 iOctet = 0; iOctet < ABP_MAX_PROCESS_DATA; iOctet++ )
+   {
+      drv_abWrPd[ iOctet ] = 0;
+   }
+#endif
 }
 
 /*------------------------------------------------------------------------------
@@ -819,30 +835,18 @@ void ABCC_DrvSerWriteProcessData( void* pxProcessData )
                       "Wrong driver state (%d)\n",
                       drv_eState );
    }
+   (void)pxProcessData;
 #ifdef ABCC_SYS_16_BIT_CHAR
    /*
    ** The AD layer provides the write process data packed (two octets
-   ** per 16-bit word). The UART telegram transports each octet in its
-   ** own 16-bit container, so expand it into the telegram PD field.
-   **
-   ** The snapshot into a conversion buffer is required since source
-   ** and destination may refer to the same memory; expanding in place
-   ** would overwrite packed octets not yet read.
+   ** per 16-bit word) in drv_abWrPd. The UART telegram transports
+   ** each octet in its own 16-bit container, so expand it into the
+   ** telegram PD field.
    */
-   ABCC_PORT_CopyOctets( drv_abWrPdConv, 0,
-                         pxProcessData, 0,
-                         drv_iWritePdSize );
-
    ABCC_PORT_StrCpyToNative( drv_sTxTelegram.abData,
-                             drv_abWrPdConv,
+                             drv_abWrPd,
                              0,
                              drv_iWritePdSize );
-#else
-   (void)pxProcessData;
-   /*
-   ** Nothing needs to be done here since the buffer is already
-   ** updated by the application.
-   */
 #endif
 }
 
@@ -945,13 +949,6 @@ void* ABCC_DrvSerReadProcessData( void )
    ** packed (two octets per 16-bit word), so contract it into a
    ** packed buffer before returning it.
    */
-
-   /*
-   ** drv_bpRdPd is reset to NULL before every ping and only set
-   ** again when a CRC-valid telegram arrives. While it is NULL, we
-   ** must return NULL. Converting from an empty source would read
-   ** invalid memory and falsely signal fresh PD data.
-   */
    if ( drv_bpRdPd == NULL )
    {
       return( NULL );
@@ -991,9 +988,13 @@ void ABCC_DrvSerSetIntMask( const UINT16 iIntMask )
 void* ABCC_DrvSerGetWrPdBuffer( void )
 {
    /*
-   ** Return position to WrPd position in Tx telegram.
+   ** Return position of WrPd in Tx telegram.
    */
+#ifdef ABCC_SYS_16_BIT_CHAR
+   return( drv_abWrPd );
+#else
    return( drv_sTxTelegram.abData );
+#endif
 }
 
 UINT16 ABCC_DrvSerGetModCap( void )
