@@ -46,7 +46,7 @@ EXTFUNC void ABCC_TimerInit( void );
 **
 ** Returns:
 **    ABCC_TimerHandle - ( Used as identifier when using timer functions. )
-**                       TIMER_NO_HANDLE is returned if no timer was available.
+**                       ABCC_TIMER_NO_HANDLE if no timer is available.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_TimerHandle ABCC_TimerCreate( ABCC_TimerTimeoutCallbackType pnHandleTimeout );
@@ -76,18 +76,20 @@ EXTFUNC BOOL ABCC_TimerStart( ABCC_TimerHandle xHandle,
 **    xHandle - Identifier of the timer to be stopped.
 **
 ** Returns:
-**    TRUE  - Timer stopped OK.
-**    FALSE - Timeout is already reached.
+**    TRUE  - Timeout has already occurred.
+**    FALSE - Timer stopped OK before timeout.
 **------------------------------------------------------------------------------
 */
 EXTFUNC BOOL ABCC_TimerStop( ABCC_TimerHandle xHandle );
 
 /*------------------------------------------------------------------------------
-** Provides delta time since last timer tick call.
-** Typically called from timer interrupt.
+** Advances all active timers by the elapsed time in ms and calls the
+** registered timeout callback function when a timer expires.
+**
+** Typically called from a peripheral timer interrupt.
 **------------------------------------------------------------------------------
 ** Arguments:
-**    iDeltaTimeMs - Time in ms since last timerTick call.
+**    iDeltaTimeMs - Elapsed time in ms since the last call.
 **
 ** Returns:
 **    None.
