@@ -27,7 +27,7 @@ typedef void (*ABCC_TimerTimeoutCallbackType)( void );
 typedef UINT8 ABCC_TimerHandle;
 
 /*------------------------------------------------------------------------------
-** Need to be called before the timer can be used.
+** Must be called before the timer can be used.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    None.
