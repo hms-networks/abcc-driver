@@ -502,11 +502,20 @@ ABCC_ErrorCodeType ABCC_LinkWrMsgWithNotification( ABP_MsgType* psWriteMsg,
 
 void ABCC_LinkFree( ABP_MsgType** ppsBuffer )
 {
-   if( !*ppsBuffer )
+   if ( ppsBuffer == NULL )
    {
       ABCC_LOG_WARNING( ABCC_EC_TRYING_TO_FREE_NULL_POINTER,
-         0,
-         "ABCC_LinkFree called with NULL pointer\n" );
+                        0,
+                        "ABCC_LinkFree called with NULL pointer\n" );
+      return;
+   }
+
+   if ( *ppsBuffer == NULL )
+   {
+      ABCC_LOG_WARNING( ABCC_EC_TRYING_TO_FREE_NULL_POINTER,
+                        0,
+                        "ABCC_LinkFree called with NULL pointer\n" );
+      return;
    }
 
    ABCC_MemFree( ppsBuffer );
