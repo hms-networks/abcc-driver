@@ -2,7 +2,8 @@
 ** Copyright 2013-present HMS Industrial Networks AB.
 ** Licensed under the MIT License.
 ********************************************************************************
-** file_description
+** File Description:
+** Interface of the ABCC setup handler.
 ********************************************************************************
 */
 
@@ -14,13 +15,13 @@
 #include "abp.h"
 
 /*------------------------------------------------------------------------------
-** Inititsiate internal varaibles used by the setup state machine
+** Initialize internal variables used by the setup state machine.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_SetupInit( void );
@@ -29,10 +30,10 @@ EXTFUNC void ABCC_SetupInit( void );
 ** Start command sequence to be run during ABCC setup state.
 **------------------------------------------------------------------------------
 ** Arguments:
-**       None.
+**    None.
 **
 ** Returns:
-**       None.
+**    None.
 **------------------------------------------------------------------------------
 */
 EXTFUNC void ABCC_StartSetup( void );
