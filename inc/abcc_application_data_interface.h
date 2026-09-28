@@ -147,16 +147,16 @@ AD_FLOAT64Type;
 
 typedef struct AD_ENUMStr
 {
-   UINT8  eValue;
-   char*  acEnumStr;
+   UINT8 bValue;
+   char* acEnumStr;
 }
 AD_ENUMStrType;
 
 typedef struct AD_ENUM
 {
-   UINT8 eMinMaxDefault[ 3 ];
-   UINT8             bNumOfEnumStrings;
-   AD_ENUMStrType*   pasEnumStrings;
+   UINT8           bMinMaxDefault[ 3 ];
+   UINT16          iNumOfEnumStrings;
+   AD_ENUMStrType* pasEnumStrings;
 }
 AD_ENUMType;
 
