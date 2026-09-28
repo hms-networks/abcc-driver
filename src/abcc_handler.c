@@ -158,6 +158,13 @@ static volatile ABP_AppStatusType abcc_eAppStatus = ABP_APPSTAT_NO_ERROR;
 */
 static UINT16 abcc_iMessageChannelSize = 0;
 
+#if ABCC_DRV_CFG_MSG_LOOPBACK
+/*
+** Storage for the pointer to the looback message.
+*/
+static ABP_MsgType* abcc_psLoopbackMessage = NULL;
+#endif
+
 static void TriggerWrPdUpdateNow( void )
 {
    if( ABCC_GetMainState() == ABCC_DRV_RUNNING )
@@ -834,6 +841,21 @@ ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType*  psCmdMsg, ABCC_MsgHandlerFuncT
    return( eResult );
 }
 
+#if ABCC_DRV_CFG_MSG_LOOPBACK
+ABCC_ErrorCodeType ABCC_SendLoopbackCmdMsg( ABP_MsgType* psMsg )
+{
+   if( abcc_psLoopbackMessage != NULL )
+   {
+      return( ABCC_EC_INCORRECT_STATE );
+   }
+
+   abcc_psLoopbackMessage = psMsg;
+   ABCC_CbfHandleCommandMessage( psMsg );
+
+   return( ABCC_EC_NO_ERROR );
+}
+#endif
+
 UINT16 ABCC_GetCmdQueueSize( void )
 {
    return( ABCC_LinkGetNumCmdQueueEntries() );
@@ -842,6 +864,18 @@ UINT16 ABCC_GetCmdQueueSize( void )
 
 ABCC_ErrorCodeType ABCC_SendRespMsg( ABP_MsgType* psMsgResp )
 {
+#if ABCC_DRV_CFG_MSG_LOOPBACK
+   /*
+   ** If "psMsgResp" matches "abcc_psLoopbackMessage" this is about a response
+   ** to a loopback message, it should not be passed on to the driver.
+   */
+   if( psMsgResp == abcc_psLoopbackMessage )
+   {
+      abcc_psLoopbackMessage = NULL;
+      return( ABCC_EC_NO_ERROR );
+   }
+#endif
+
    return( ABCC_LinkWriteMessage( psMsgResp ) );
 }
 

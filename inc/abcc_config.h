@@ -1107,4 +1107,33 @@ ABCC_CFG_DRV_PARALLEL_ENABLED and ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED are enab
     #define ABCC_CFG_CMD_SEQ_MAX_NUM_RETRIES ( 0 )
 #endif
 
+/*------------------------------------------------------------------------------
+** #define ABCC_DRV_CFG_MSG_LOOPBACK   1 - Enable / 0 - Disable
+**
+** Defined in abcc_driver_config.h.
+**
+** If TRUE a separate driver API call, "ABCC_SendLoopbackCmdMsg()", will be
+** available that will allow the host application to send command messages to
+** its own objects. A call to "ABCC_SendLoopbackCmdMsg()" will pass the
+** command message on to the application via the
+** "ABCC_CbfHandleCommandMessage()" call, and return once it has been
+** processed.
+**
+** NOTE:
+**  - This is only intended for test, validation and similar, and should NOT
+**    be left enabled in production code.
+**  - This call can only be used to send 'non-blocking' command messages, i.e.
+**    commands which the subsequent call to "ABCC_CbfHandleCommandMessage()"
+**    will respond to immediately and in-line with the call.
+**  - The message passing is made outside of the existing message buffer system
+**    in the driver, so operations like "ABCC_TakeMsgBufferOwnership()" are not
+**    supported. It is the command initiators responsibility to not target
+**    anything that requires such operations.
+**  - Only one command message can be in processing at a time.
+**------------------------------------------------------------------------------
+*/
+#ifndef ABCC_DRV_CFG_MSG_LOOPBACK
+   #define ABCC_DRV_CFG_MSG_LOOPBACK 0
+#endif
+
 #endif  /* inclusion lock */
