@@ -182,14 +182,14 @@ void ABCC_LinkInit( void )
 
 ABP_MsgType* ABCC_LinkReadMessage( void )
 {
-   ABCC_MsgType psReadMessage;
+   ABP_MsgType* psReadMessage;
    ABCC_PORT_UseCritical();
 
-   psReadMessage.psMsg = pnABCC_DrvReadMessage();
+   psReadMessage = pnABCC_DrvReadMessage();
 
-   if( psReadMessage.psMsg != NULL )
+   if( psReadMessage != NULL )
    {
-      if( ( ABCC_GetLowAddrOct( psReadMessage.psMsg16->sHeader.iCmdReserved ) & ABP_MSG_HEADER_C_BIT ) == 0 )
+      if( !ABCC_IsCmdMsg( psReadMessage ) )
       {
          /*
          ** Decrement number of outstanding commands if a response is received.
@@ -201,7 +201,7 @@ ABP_MsgType* ABCC_LinkReadMessage( void )
                                      link_bNumberOfOutstandingCommands );
       }
    }
-   return( psReadMessage.psMsg );
+   return( psReadMessage );
 }
 
 void ABCC_LinkCheckSendMessage( void )
@@ -335,12 +335,14 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
 #endif
    fSendMsg = FALSE;
 
-   if( ABCC_GetMsgDataSize( psWriteMsg ) > link_iMaxMsgSize )
+   UINT16 iMsgSize = ABCC_GetMsgDataSize( psWriteMsg );
+
+   if( iMsgSize > link_iMaxMsgSize )
    {
       eErrorCode = ABCC_EC_WRMSG_SIZE_ERR;
-      ABCC_LOG_WARNING( eErrorCode, iLeTOi( psWriteMsg->sHeader.iDataSize ),
+      ABCC_LOG_WARNING( eErrorCode, (UINT32)iMsgSize,
                         "Message size exceeds max size: %" PRIu16 "\n",
-                        iLeTOi( psWriteMsg->sHeader.iDataSize ) );
+                        iMsgSize );
       return( eErrorCode );
    }
 
