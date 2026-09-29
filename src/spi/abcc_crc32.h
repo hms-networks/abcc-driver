@@ -3,7 +3,7 @@
 ** Licensed under the MIT License.
 ********************************************************************************
 ** File Description:
-** This is the public header file for the CRC calculation routines.
+** This is the public header file for the CRC calculation routine.
 ********************************************************************************
 */
 
@@ -16,10 +16,13 @@
 /*------------------------------------------------------------------------------
 ** CRC_Crc32()
 **
-** Calculates a CRC32 checksum on the indicated octets for SPI use.
+** Calculates CRC32 checksum for ABCC40 SPI frames.
+**
+** Expects input sizes divisible by two (16-bit words). Odd-sized buffers
+** are incompatible with this optimized algorithm.
 **------------------------------------------------------------------------------
 ** Inputs:
-**    pbBufferStart            - Where to start the calculation.
+**    pbBuffer                 - Where to start the calculation.
 **    xLength                  - The amount of octets to include.
 **
 ** Outputs:
