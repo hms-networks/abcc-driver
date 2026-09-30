@@ -728,7 +728,7 @@ void ABCC_TriggerReceiveMessage ( void )
    /*
    ** A new message is available.
    */
-   if( ABCC_GetLowAddrOct( sRdMsg.psMsg16->sHeader.iCmdReserved ) & ABP_MSG_HEADER_C_BIT )
+   if( ABCC_IsCmdMsg( sRdMsg.psMsg ) )
    {
       /*
       ** Check so that messages exceeding ABCC_CFG_MAX_MSG_SIZE are handled. The
@@ -765,7 +765,7 @@ void ABCC_TriggerReceiveMessage ( void )
       */
       if( ABCC_GetMsgDataSize( sRdMsg.psMsg ) > ABCC_CFG_MAX_MSG_SIZE )
       {
-         (void)ABCC_LinkGetMsgHandler( ABCC_GetLowAddrOct( sRdMsg.psMsg16->sHeader.iSourceIdDestObj ) );
+         (void)ABCC_LinkGetMsgHandler( ABCC_GetMsgSourceId( sRdMsg.psMsg ) );
          ABCC_LOG_WARNING( ABCC_EC_RCV_RESP_SIZE_EXCEEDS_BUFFER,
             (UINT32)ABCC_GetMsgDataSize( sRdMsg.psMsg ),
             "Received response size exceeds buffer size: %" PRIu16 "\n",
@@ -774,7 +774,7 @@ void ABCC_TriggerReceiveMessage ( void )
       else
       {
          ABCC_MsgHandlerFuncType pnMsgHandler = 0;
-         pnMsgHandler = ABCC_LinkGetMsgHandler( ABCC_GetLowAddrOct( sRdMsg.psMsg16->sHeader.iSourceIdDestObj ) );
+         pnMsgHandler = ABCC_LinkGetMsgHandler( ABCC_GetMsgSourceId( sRdMsg.psMsg ) );
 
          if( pnMsgHandler )
          {
@@ -809,8 +809,7 @@ ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType*  psCmdMsg, ABCC_MsgHandlerFuncT
    ** Register function to handle response.
    ** Must be done before sending the message to avoid race condition.
    */
-   if( ABCC_LinkMapMsgHandler( ABCC_GetLowAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj ),
-                               pnMsgHandler ) == ABCC_EC_NO_ERROR )
+   if( ABCC_LinkMapMsgHandler( ABCC_GetMsgSourceId( sMsg.psMsg ), pnMsgHandler ) == ABCC_EC_NO_ERROR )
    {
       eResult = ABCC_LinkWriteMessage( sMsg.psMsg );
       if( eResult != ABCC_EC_NO_ERROR )
@@ -818,7 +817,7 @@ ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType*  psCmdMsg, ABCC_MsgHandlerFuncT
          /*
          ** Free message handler resource.
          */
-         (void)ABCC_LinkGetMsgHandler( ABCC_GetLowAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj ) );
+         (void)ABCC_LinkGetMsgHandler( ABCC_GetMsgSourceId( sMsg.psMsg ) );
       }
    }
    else
@@ -1027,18 +1026,13 @@ void ABCC_GetAttribute( ABP_MsgType* psMsg,
                         UINT8 bAttribute,
                         UINT8 bSourceId )
 {
-   ABCC_MsgType sMsg;
-   sMsg.psMsg = psMsg;
-
-   ABCC_SetLowAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj, bSourceId ); /* SourceId */
-   ABCC_SetHighAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj, bObject );  /* bObject */
-   psMsg->sHeader.iInstance = iTOiLe( iInstance );                          /* Instance */
-   ABCC_SetLowAddrOct(  sMsg.psMsg16->sHeader.iCmdReserved,
-                  ABP_MSG_HEADER_C_BIT | ABP_CMD_GET_ATTR );                /* Command */
-
-   sMsg.psMsg16->sHeader.iDataSize = 0;                                     /* Data size           */
-   ABCC_SetLowAddrOct( sMsg.psMsg16->sHeader.iCmdExt0CmdExt1, bAttribute ); /* CmdExt0 (Attribute) */
-   ABCC_SetHighAddrOct( sMsg.psMsg16->sHeader.iCmdExt0CmdExt1, 0 );         /* CmdExt1 (reserved)  */
+   ABCC_SetMsgSourceId( psMsg, bSourceId );
+   ABCC_SetMsgDestObj(  psMsg, bObject );
+   ABCC_SetMsgInstance( psMsg, iInstance );
+   ABCC_SetMsgCmdField( psMsg, ABP_MSG_HEADER_C_BIT | ABP_CMD_GET_ATTR );
+   ABCC_SetMsgDataSize( psMsg, 0 );
+   ABCC_SetMsgCmdExt0(  psMsg, bAttribute );
+   ABCC_SetMsgCmdExt1(  psMsg, 0 );
 }
 
 void ABCC_SetByteAttribute(ABP_MsgType* psMsg,
@@ -1048,19 +1042,14 @@ void ABCC_SetByteAttribute(ABP_MsgType* psMsg,
                            UINT8 bVal,
                            UINT8 bSourceId )
 {
-   ABCC_MsgType sMsg;
-   sMsg.psMsg = psMsg;
-
-   ABCC_SetLowAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj, bSourceId );  /* SourceId */
-   ABCC_SetHighAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj, bObject );   /* bObject */
-   psMsg->sHeader.iInstance = iTOiLe( iInstance );                           /* Instance */
-   ABCC_SetLowAddrOct(  sMsg.psMsg16->sHeader.iCmdReserved,
-                  ABP_MSG_HEADER_C_BIT | ABP_CMD_SET_ATTR );                 /* Command */
-
-   sMsg.psMsg16->sHeader.iDataSize = iTOiLe( 1 );                            /* Data size           */
-   ABCC_SetLowAddrOct( sMsg.psMsg16->sHeader.iCmdExt0CmdExt1, bAttribute );  /* CmdExt0 (Attribute) */
-   ABCC_SetHighAddrOct( sMsg.psMsg16->sHeader.iCmdExt0CmdExt1, 0 );          /* CmdExt1 (reserved)  */
-   ABCC_SetLowAddrOct( sMsg.psMsg16->aiData[ 0 ], bVal );                    /* Data                */
+   ABCC_SetMsgSourceId( psMsg, bSourceId );
+   ABCC_SetMsgDestObj(  psMsg, bObject );
+   ABCC_SetMsgInstance( psMsg, iInstance );
+   ABCC_SetMsgCmdField( psMsg, ABP_MSG_HEADER_C_BIT | ABP_CMD_SET_ATTR );
+   ABCC_SetMsgDataSize( psMsg, 1 );
+   ABCC_SetMsgCmdExt0(  psMsg, bAttribute );
+   ABCC_SetMsgCmdExt1(  psMsg, 0 );
+   ABCC_SetMsgData8(    psMsg, bVal, 0 );
 }
 
 void ABCC_SetMsgHeader( ABP_MsgType* psMsg,
@@ -1071,24 +1060,18 @@ void ABCC_SetMsgHeader( ABP_MsgType* psMsg,
                         UINT16 iDataSize,
                         UINT8 bSourceId )
 {
-   ABCC_MsgType sMsg;
-   sMsg.psMsg = psMsg;
-
-   ABCC_SetLowAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj, bSourceId );  /* SourceId */
-   ABCC_SetHighAddrOct( sMsg.psMsg16->sHeader.iSourceIdDestObj, bObject );   /* bObject */
-   psMsg->sHeader.iInstance = iTOiLe( iInstance );                           /* Instance */
-   ABCC_SetLowAddrOct(  sMsg.psMsg16->sHeader.iCmdReserved,
-                        ABP_MSG_HEADER_C_BIT | eService );                   /* Command */
-
-   sMsg.psMsg16->sHeader.iDataSize = iTOiLe( iDataSize );                    /* Data size           */
-   ABCC_SetLowAddrOct( sMsg.psMsg16->sHeader.iCmdExt0CmdExt1, bAttribute );  /* CmdExt0 (Attribute) */
-   ABCC_SetHighAddrOct( sMsg.psMsg16->sHeader.iCmdExt0CmdExt1, 0 );          /* CmdExt1 (reserved)  */
+   ABCC_SetMsgSourceId( psMsg, bSourceId );
+   ABCC_SetMsgDestObj( psMsg, bObject );
+   ABCC_SetMsgInstance( psMsg, iInstance );
+   ABCC_SetMsgCmdField( psMsg, ABP_MSG_HEADER_C_BIT | eService );
+   ABCC_SetMsgDataSize( psMsg, iDataSize );
+   ABCC_SetMsgCmdExt0( psMsg, bAttribute );
+   ABCC_SetMsgCmdExt1( psMsg, 0 );
 }
 
 ABCC_ErrorCodeType ABCC_VerifyMessage( const ABP_MsgType* psMsg )
 {
-   const ABP_MsgType16* psMsg16 = (const ABP_MsgType16*)psMsg;
-   if( ABCC_GetLowAddrOct( psMsg16->sHeader.iCmdReserved ) & ABP_MSG_HEADER_E_BIT )
+   if( ABCC_GetMsgCmdField( psMsg ) & ABP_MSG_HEADER_E_BIT )
    {
       return( ABCC_EC_RESP_MSG_E_BIT_SET );
    }
