@@ -49,7 +49,6 @@
    #endif
 #endif
 
-static ABCC_MsgType par_drv_uReadMessageData;
 static void* par_drv_pbRdPdBuffer;
 
 static UINT16   par_drv_iSizeOfReadPd;
@@ -165,21 +164,19 @@ void ABCC_DrvParPrepareWriteMessage( ABP_MsgType* psWriteMsg )
 
 BOOL ABCC_DrvParWriteMessage( ABP_MsgType* psWriteMsg )
 {
-   UINT16 iBufControlWriteFlags;
-   ABCC_MsgType uMsg;
-   iBufControlWriteFlags = 0;
+   UINT16 iBufControlWriteFlags = 0;
+
    if( !psWriteMsg )
    {
       ABCC_LOG_FATAL( ABCC_EC_UNEXPECTED_NULL_PTR, 0, "Unexpected NULL pointer\n" );
    }
-   uMsg.psMsg = psWriteMsg;
 
    iBufControlWriteFlags |= iWRMSGFlag;
 
    /*
    ** Determine if command messages (instead of response messages) can be sent.
    */
-   if( !( ABCC_GetLowAddrOct( uMsg.psMsg16->sHeader.iCmdReserved ) & ABP_MSG_HEADER_C_BIT ) )
+   if( !ABCC_IsCmdMsg( psWriteMsg ) )
    {
       /*
       ** A command message has been received by the host application and a
@@ -276,12 +273,6 @@ void ABCC_DrvParSetPdSize( const UINT16 iReadPdSize, const UINT16 iWritePdSize )
 }
 
 
-static void DrvParSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg )
-{
-   par_drv_uReadMessageData.psMsg = psReadMsg;
-}
-
-
 UINT16 ABCC_DrvParGetIntStatus( void )
 {
    UINT16 iIntStatus;
@@ -347,14 +338,15 @@ ABP_MsgType* ABCC_DrvParReadMessage( void )
 {
    UINT16 iBufctrl;
    UINT16 iMsgSize;
+   ABP_MsgType* psReadMsg;
 
    iBufctrl = ABCC_DrvRead16( iBufCtrlAdrOffset );
 
    if( iLeExtBusTOi( iBufctrl ) & iRDMSGFlag  )
    {
-      DrvParSetMsgReceiverBuffer( ABCC_MemAlloc() );
+      psReadMsg = ABCC_MemAlloc();
 
-      if( par_drv_uReadMessageData.psMsg == NULL )
+      if( psReadMsg == NULL )
       {
          ABCC_LOG_WARNING( ABCC_EC_OUT_OF_MSG_BUFFERS,
             0,
@@ -367,26 +359,25 @@ ABP_MsgType* ABCC_DrvParReadMessage( void )
       ** of data area.
       */
       ABCC_DrvParallelRead( iRdMsgAdrOffset,
-                            par_drv_uReadMessageData.psMsg16,
+                            (void*)psReadMsg,
                             ABCC_MSG_HEADER_TYPE_SIZEOF );
 
-      iMsgSize = iLeTOi( par_drv_uReadMessageData.psMsg16->sHeader.iDataSize );
+      iMsgSize = ABCC_GetMsgDataSize( psReadMsg );
 
-      if( ( iMsgSize <= ABCC_CFG_MAX_MSG_SIZE ) &&
-          ( iMsgSize != 0 ) )
+      if( ( iMsgSize <= ABCC_CFG_MAX_MSG_SIZE ) && ( iMsgSize != 0 ) )
       {
          /*
          ** There is data and it fits in buffer size, so the message is read.
          */
          ABCC_DrvParallelRead( iRdMsgAdrOffset + iMsgHdrEndAdrOffset,
-                               par_drv_uReadMessageData.psMsg16->aiData,
+                               ABCC_GetMsgDataPtr( psReadMsg ),
                                iMsgSize );
       }
 
       /*
       ** Determine if command messages (instead of response messages) can be read.
       */
-      if( ABCC_GetLowAddrOct( par_drv_uReadMessageData.psMsg16->sHeader.iCmdReserved ) & ABP_MSG_HEADER_C_BIT )
+      if( ABCC_IsCmdMsg( psReadMsg ) )
       {
          /*
          ** A command messages has been sent by the Anybus and it has been read
@@ -412,7 +403,7 @@ ABP_MsgType* ABCC_DrvParReadMessage( void )
 
       ABCC_DrvWrite16( iBufCtrlAdrOffset, iTOiLeExtBus( iRDMSGFlag ) );
 
-      return( par_drv_uReadMessageData.psMsg );
+      return( psReadMsg );
    }
    else
    {
