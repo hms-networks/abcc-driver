@@ -200,8 +200,7 @@ EXTFUNC void ABCC_DrvParSetPdSize( const UINT16 iReadPdSize, const UINT16 iWrite
 ** Sets the receiver buffer, to be used for the next read message.
 **
 ** Remarks:
-**    Not implemented, the parallel driver uses the static function
-**    DrvParSetMsgReceiverBuffer() instead.
+**    Not implemented.
 **------------------------------------------------------------------------------
 ** Arguments:
 **    -
