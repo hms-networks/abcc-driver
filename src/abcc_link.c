@@ -378,7 +378,7 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
                link_sRespQueue.bQueueSize );
          eErrorCode = ABCC_EC_LINK_RESP_QUEUE_FULL;
 #if ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_WARNING_ENABLED
-         lAddErrorInfo = (UINT32)psWriteMsg;
+         lAddErrorInfo = (UINT32)link_sRespQueue.bQueueSize;
 #endif
       }
    }
@@ -415,6 +415,9 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
             link_sCmdQueue.bNumInQueue,
             link_sCmdQueue.bQueueSize );
          eErrorCode = ABCC_EC_LINK_CMD_QUEUE_FULL;
+#if ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_WARNING_ENABLED
+         lAddErrorInfo = (UINT32)link_sCmdQueue.bQueueSize;
+#endif
       }
    }
    ABCC_PORT_ExitCritical();
@@ -489,9 +492,9 @@ ABCC_ErrorCodeType ABCC_LinkWrMsgWithNotification( ABP_MsgType* psWriteMsg,
    if( pnMsgSentHandler != NULL )
    {
       ABCC_LOG_FATAL( ABCC_EC_ASSERT_FAILED,
-         (UINT32)pnMsgSentHandler,
-         "Message sent handler not NULL (%" PRIx32 ")\n",
-         (UINT32)pnMsgSentHandler );
+         0,
+         "Message sent handler not NULL (0x%" PRIxPTR ")\n",
+         (uintptr_t)pnMsgSentHandler );
    }
 
    pnMsgSentHandler = pnHandler;

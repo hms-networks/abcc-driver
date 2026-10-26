@@ -79,6 +79,27 @@ static UINT16 abcc_iNumFreeMsg;
 static ABCC_MemAllocUnion abcc_uFreeMsgStack[ ABCC_CFG_MAX_NUM_MSG_RESOURCES ];
 static ABCC_MemAllocType  abcc_asMsgPool[ ABCC_CFG_MAX_NUM_MSG_RESOURCES ];
 
+/*------------------------------------------------------------------------------
+** Returns the index of a buffer in the message pool, used as lAdditionalInfo
+** in log calls. Returns 0xFFFFFFFF if the pointer is not inside the pool.
+** Addresses are compared as uintptr_t, since comparing pointers to different
+** objects is undefined behavior in C.
+**------------------------------------------------------------------------------
+*/
+static UINT32 mem_GetPoolIndex( const ABCC_MemAllocType* psBuf )
+{
+   const uintptr_t xStart = (uintptr_t)&abcc_asMsgPool[ 0 ];
+   const uintptr_t xEnd = (uintptr_t)&abcc_asMsgPool[ ABCC_CFG_MAX_NUM_MSG_RESOURCES ];
+   const uintptr_t xAddr = (uintptr_t)psBuf;
+
+   if( ( xAddr < xStart ) || ( xAddr >= xEnd ) )
+   {
+      return( 0xFFFFFFFF );
+   }
+
+   return( (UINT32)( ( xAddr - xStart ) / sizeof( ABCC_MemAllocType ) ) );
+}
+
 void ABCC_MemCreatePool( void )
 {
    UINT16 i;
@@ -107,32 +128,43 @@ ABP_MsgType* ABCC_MemAlloc( void )
 
    ABCC_PORT_ExitCritical();
 
-   ABCC_LOG_DEBUG_MEM( "Mem: Buffer allocated: 0x%p\n", (void*)pxItem );
+   ABCC_LOG_DEBUG_MEM( "Mem: Buffer allocated: 0x%" PRIxPTR "\n", (uintptr_t)pxItem );
 
    return( pxItem );
 }
 
 void ABCC_MemFree( ABP_MsgType** pxItem )
 {
-   ABCC_MemAllocType* const psBuf = (ABCC_MemAllocType*)(*pxItem);
+   ABCC_MemAllocType* const psBuf = (ABCC_MemAllocType*)( *pxItem );
    ABCC_PORT_UseCritical();
 
-   ABCC_LOG_DEBUG_MEM( "Mem: Buffer returned:  0x%p\n", (void*)*pxItem );
+   ABCC_LOG_DEBUG_MEM( "Mem: Buffer returned:  0x%" PRIxPTR "\n", (uintptr_t)*pxItem );
 
    if( psBuf->iMagicCookie != ABCC_MEM_MAGIC_COOKIE )
    {
+      /*
+      ** lAdditionalInfo: index of the buffer in the message pool
+      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_CORRUPTED,
-         (UINT32)psBuf,
-         "Message buffer corrupted: 0x%p\n",
-         (void*)psBuf );
+         mem_GetPoolIndex( psBuf ),
+         "Message buffer corrupted: 0x%" PRIxPTR " (pool index: %" PRIu32 ", cookie: 0x%04" PRIx16 ")\n",
+         (uintptr_t)psBuf,
+         mem_GetPoolIndex( psBuf ),
+         psBuf->iMagicCookie );
    }
 
    if( psBuf->iBufferStatus == ABCC_MEM_BUFSTAT_FREE )
    {
+      /*
+      ** lAdditionalInfo: index of the buffer in the message pool
+      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_ALREADY_FREED,
-         (UINT32)psBuf,
-         "Message buffer already freed: 0x%p\n",
-         (void*)psBuf );
+         mem_GetPoolIndex( psBuf ),
+         "Message buffer already freed: 0x%" PRIxPTR " (pool index: %" PRIu32 ")\n",
+         (uintptr_t)psBuf,
+         mem_GetPoolIndex( psBuf ) );
    }
 
    ABCC_PORT_EnterCritical();
@@ -151,10 +183,16 @@ ABCC_MemBufferStatusType ABCC_MemGetBufferStatus( ABP_MsgType* psMsg )
 
    if( psBuf->iMagicCookie != ABCC_MEM_MAGIC_COOKIE )
    {
+      /*
+      ** lAdditionalInfo: index of the buffer in the message pool
+      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_CORRUPTED,
-         (UINT32)psBuf,
-         "Message buffer corrupted: 0x%p\n",
-         (void*)psBuf );
+         mem_GetPoolIndex( psBuf ),
+         "Message buffer corrupted: 0x%" PRIxPTR " (pool index: %" PRIu32 ", cookie: 0x%04" PRIx16 ")\n",
+         (uintptr_t)psBuf,
+         mem_GetPoolIndex( psBuf ),
+         psBuf->iMagicCookie );
    }
 
    return( (ABCC_MemBufferStatusType)psBuf->iBufferStatus );
@@ -167,10 +205,16 @@ void ABCC_MemSetBufferStatus( ABP_MsgType* psMsg,
 
    if( psBuf->iMagicCookie != ABCC_MEM_MAGIC_COOKIE )
    {
+      /*
+      ** lAdditionalInfo: index of the buffer in the message pool
+      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_CORRUPTED,
-         (UINT32)psBuf,
-         "Message buffer corrupted: 0x%p\n",
-         (void*)psBuf );
+         mem_GetPoolIndex( psBuf ),
+         "Message buffer corrupted: 0x%" PRIxPTR " (pool index: %" PRIu32 ", cookie: 0x%04" PRIx16 ")\n",
+         (uintptr_t)psBuf,
+         mem_GetPoolIndex( psBuf ),
+         psBuf->iMagicCookie );
    }
 
    psBuf->iBufferStatus = eStatus;

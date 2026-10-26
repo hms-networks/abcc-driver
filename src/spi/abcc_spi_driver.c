@@ -367,9 +367,14 @@ void ABCC_DrvSpiRunDriverTx( void )
       {
          if( !spi_drv_sWriteFragInfo.puCurrPtr )
          {
+            /*
+            ** lAdditionalInfo: number of words left to send in the current
+            ** write message (INT16, sign-extended if negative).
+            */
             ABCC_LOG_FATAL( ABCC_EC_UNEXPECTED_NULL_PTR,
-               (UINT32)spi_drv_sWriteFragInfo.puCurrPtr,
-               "Unexpected NULL pointer\n" );
+               (UINT32)spi_drv_sWriteFragInfo.iNumWordsLeft,
+               "Unexpected NULL pointer (words left: %" PRId16 ")\n",
+               spi_drv_sWriteFragInfo.iNumWordsLeft );
          }
 
          /*
@@ -924,10 +929,14 @@ static void DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg )
    }
    else
    {
+      /*
+      ** lAdditionalInfo: number of words received in the ongoing read transaction.
+      */
       ABCC_LOG_WARNING( ABCC_EC_SPI_OP_NOT_ALLOWED_DURING_SPI_TRANSACTION,
-         (UINT32)spi_drv_sReadFragInfo.puCurrPtr,
-         "Set message receiver buffer operation not allowed in this state (state: %d)\n",
-         spi_drv_eState );
+         (UINT32)spi_drv_sReadFragInfo.iNumWordsReceived,
+         "Set message receiver buffer operation not allowed in this state (state: %d, words received: %" PRIu16 ")\n",
+         spi_drv_eState,
+         spi_drv_sReadFragInfo.iNumWordsReceived );
    }
 }
 
