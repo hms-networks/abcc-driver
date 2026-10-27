@@ -696,10 +696,15 @@ BOOL ABCC_DrvSerWriteMessage( ABP_MsgType* psWriteMsg )
 
    if( drv_psWriteMessage )
    {
+      /*
+      ** lAdditionalInfo: source ID of the pending (unsent) message. It
+      ** identifies which earlier request is still waiting to be sent.
+      */
       ABCC_LOG_FATAL( ABCC_EC_INCORRECT_STATE,
-                      (UINT32)drv_psWriteMessage,
-                      "Expected drv_psWriteMessage to be NULL, was %p\n",
-                      (void*)drv_psWriteMessage );
+                      (UINT32)ABCC_GetMsgSourceId( drv_psWriteMessage ),
+                      "Expected drv_psWriteMessage to be NULL, was 0x%" PRIxPTR " (SourceID: %" PRIu16 ")\n",
+                      (uintptr_t)drv_psWriteMessage,
+                      (UINT16)ABCC_GetMsgSourceId( drv_psWriteMessage ) );
    }
 
    drv_psWriteMessage = psWriteMsg;

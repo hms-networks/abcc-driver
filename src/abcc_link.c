@@ -493,7 +493,7 @@ ABCC_ErrorCodeType ABCC_LinkWrMsgWithNotification( ABP_MsgType* psWriteMsg,
    {
       ABCC_LOG_FATAL( ABCC_EC_ASSERT_FAILED,
          0,
-         "Message sent handler not NULL (0x%" PRIxPTR ")\n",
+         "Message-sent handler already registered (0x%" PRIxPTR ")\n",
          (uintptr_t)pnMsgSentHandler );
    }
 
