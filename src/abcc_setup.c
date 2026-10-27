@@ -15,6 +15,7 @@
 #include "abcc_handler.h"
 #include "abcc_driver_interface.h"
 #include "abcc_log.h"
+#include "abcc_setup.h"
 
 /*
 ** Invalid ADI index.
