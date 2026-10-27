@@ -934,8 +934,8 @@ static void DrvSpiSetMsgReceiverBuffer( ABP_MsgType* const psReadMsg )
       */
       ABCC_LOG_WARNING( ABCC_EC_SPI_OP_NOT_ALLOWED_DURING_SPI_TRANSACTION,
          (UINT32)spi_drv_sReadFragInfo.iNumWordsReceived,
-         "Set message receiver buffer operation not allowed in this state (state: %d, words received: %" PRIu16 ")\n",
-         spi_drv_eState,
+         "Set message receiver buffer operation not allowed in this state (state: %" PRIu16 ", words received: %" PRIu16 ")\n",
+         (UINT16)spi_drv_eState,
          spi_drv_sReadFragInfo.iNumWordsReceived );
    }
 }

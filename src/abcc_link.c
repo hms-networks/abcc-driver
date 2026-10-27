@@ -471,10 +471,15 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
 
    if( eErrorCode != ABCC_EC_NO_ERROR )
    {
+      /*
+      ** lAddErrorInfo: size of the full queue for
+      ** ABCC_EC_LINK_RESP_QUEUE_FULL / ABCC_EC_LINK_CMD_QUEUE_FULL,
+      ** otherwise 0.
+      */
       ABCC_LOG_WARNING( eErrorCode,
          lAddErrorInfo,
-         "Failed to send message (Error code: %d, additional info: %" PRIu32 ")\n",
-         eErrorCode,
+         "Failed to send message (Error code: %" PRIu16 ", queue size: %" PRIu32 ")\n",
+         (UINT16)eErrorCode,
          lAddErrorInfo );
    }
 
@@ -491,6 +496,10 @@ ABCC_ErrorCodeType ABCC_LinkWrMsgWithNotification( ABP_MsgType* psWriteMsg,
    */
    if( pnMsgSentHandler != NULL )
    {
+      /*
+      ** A message-sent handler from a previous call is still registered.
+      ** lAdditionalInfo: not used (0).
+      */
       ABCC_LOG_FATAL( ABCC_EC_ASSERT_FAILED,
          0,
          "Message-sent handler already registered (0x%" PRIxPTR ")\n",
