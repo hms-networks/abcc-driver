@@ -473,8 +473,7 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
    {
       /*
       ** lAddErrorInfo: size of the full queue for
-      ** ABCC_EC_LINK_RESP_QUEUE_FULL / ABCC_EC_LINK_CMD_QUEUE_FULL,
-      ** otherwise 0.
+      ** ABCC_EC_LINK_RESP_QUEUE_FULL / ABCC_EC_LINK_CMD_QUEUE_FULL.
       */
       ABCC_LOG_WARNING( eErrorCode,
          lAddErrorInfo,

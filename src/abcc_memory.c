@@ -81,7 +81,8 @@ static ABCC_MemAllocType  abcc_asMsgPool[ ABCC_CFG_MAX_NUM_MSG_RESOURCES ];
 
 /*------------------------------------------------------------------------------
 ** Returns the index of a buffer in the message pool, used as lAdditionalInfo
-** in log calls. Returns 0xFFFFFFFF if the pointer is not inside the pool.
+** in log calls. Returns 0xFFFFFFFF if the pointer is not the start of a pool
+** element (outside the pool or misaligned within it).
 ** Addresses are compared as uintptr_t, since comparing pointers to different
 ** objects is undefined behavior in C.
 **------------------------------------------------------------------------------
@@ -92,7 +93,9 @@ static UINT32 mem_GetPoolIndex( const ABCC_MemAllocType* psBuf )
    const uintptr_t xEnd = (uintptr_t)&abcc_asMsgPool[ ABCC_CFG_MAX_NUM_MSG_RESOURCES ];
    const uintptr_t xAddr = (uintptr_t)psBuf;
 
-   if( ( xAddr < xStart ) || ( xAddr >= xEnd ) )
+   if( ( xAddr < xStart ) ||
+       ( xAddr >= xEnd ) ||
+       ( ( ( xAddr - xStart ) % sizeof( ABCC_MemAllocType ) ) != 0 ) )
    {
       return( 0xFFFFFFFF );
    }
@@ -144,7 +147,7 @@ void ABCC_MemFree( ABP_MsgType** pxItem )
    {
       /*
       ** lAdditionalInfo: index of the buffer in the message pool
-      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      ** (0xFFFFFFFF if the pointer is not the start of a pool element).
       */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_CORRUPTED,
          mem_GetPoolIndex( psBuf ),
@@ -158,7 +161,7 @@ void ABCC_MemFree( ABP_MsgType** pxItem )
    {
       /*
       ** lAdditionalInfo: index of the buffer in the message pool
-      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      ** (0xFFFFFFFF if the pointer is not the start of a pool element).
       */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_ALREADY_FREED,
          mem_GetPoolIndex( psBuf ),
@@ -185,7 +188,7 @@ ABCC_MemBufferStatusType ABCC_MemGetBufferStatus( ABP_MsgType* psMsg )
    {
       /*
       ** lAdditionalInfo: index of the buffer in the message pool
-      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      ** (0xFFFFFFFF if the pointer is not the start of a pool element).
       */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_CORRUPTED,
          mem_GetPoolIndex( psBuf ),
@@ -207,7 +210,7 @@ void ABCC_MemSetBufferStatus( ABP_MsgType* psMsg,
    {
       /*
       ** lAdditionalInfo: index of the buffer in the message pool
-      ** (0xFFFFFFFF if the pointer is not inside the pool).
+      ** (0xFFFFFFFF if the pointer is not the start of a pool element).
       */
       ABCC_LOG_FATAL( ABCC_EC_MSG_BUFFER_CORRUPTED,
          mem_GetPoolIndex( psBuf ),

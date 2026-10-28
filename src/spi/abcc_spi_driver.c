@@ -279,7 +279,7 @@ void ABCC_DrvSpiRunDriverTx( void )
             iMsgFragSizeReqBuffer = spi_drv_sSpiMsgFragSizeInfo.iMsgFragSizeReq;
             ABCC_PORT_ExitCritical();
             /*
-            ** The message fragment size has been updated since last 
+            ** The message fragment size has been updated since last
             ** transmission, update the frame layout accordingly.
             */
             if( spi_drv_iPdSize > 0 )
