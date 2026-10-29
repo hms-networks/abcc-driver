@@ -133,7 +133,10 @@ void ABCC_TimerTick(const INT16 iDeltaTimeMs)
        }
    }
 
-   llTotalTicks += iDeltaTimeMs;
+   /*
+   ** Callers must pass a non-negative delta; cast is safe.
+   */
+   llTotalTicks += (UINT64)iDeltaTimeMs;
 
    ABCC_PORT_TIMER_ExitCritical();
 }

@@ -105,7 +105,7 @@ static const UINT16 iSpiStatusNewPd =     ABP_SPI_STATUS_NEW_PD << 8;
    #define MAX_PAYLOAD_WORD_LEN ( ( NUM_BYTES_2_WORDS( ABCC_CFG_SPI_MAX_MSG_FRAG_LEN ) ) + ( NUM_BYTES_2_WORDS( ABCC_CFG_MAX_PROCESS_DATA_SIZE ) ) + ( CRC_WORD_LEN_IN_WORDS ) )   
 #endif
 
-#define INSERT_SPI_CTRL_CMDCNT( ctrl, cmdcnt ) ctrl = ( ( ctrl ) & ~iSpiCtrlCmdCnt ) | ( ( cmdcnt ) << iSpiCtrlCmdCntShift )
+#define INSERT_SPI_CTRL_CMDCNT( ctrl, cmdcnt ) ( ctrl ) = (UINT16)( ( ( ctrl ) & ~iSpiCtrlCmdCnt ) | ( ( cmdcnt ) << iSpiCtrlCmdCntShift ) )
 #define EXTRACT_SPI_STATUS_CMDCNT( status ) ( ( ( status ) & iSpiStatusCmdCnt ) >> iSpiStatusCmdCntShift )
 
 /*------------------------------------------------------------------------------
@@ -381,14 +381,14 @@ void ABCC_DrvSpiRunDriverTx( void )
          if( spi_drv_sWriteFragInfo.iNumWordsLeft <= spi_drv_iMsgLen )
          {
             spi_drv_sMosiFrame.iSpiControl |= iSpiCtrlLastFrag;
-            spi_drv_sWriteFragInfo.iCurrFragLength = spi_drv_sWriteFragInfo.iNumWordsLeft;
+            spi_drv_sWriteFragInfo.iCurrFragLength = (UINT16)spi_drv_sWriteFragInfo.iNumWordsLeft;
          }
          else
          {
             /*
             ** This is not the last fragment.
             */
-            spi_drv_sMosiFrame.iSpiControl &= ~iSpiCtrlLastFrag;
+            spi_drv_sMosiFrame.iSpiControl &= (UINT16)~iSpiCtrlLastFrag;
             spi_drv_sWriteFragInfo.iCurrFragLength = spi_drv_iMsgLen;
          }
 
@@ -404,8 +404,8 @@ void ABCC_DrvSpiRunDriverTx( void )
          /*
          ** There is no message fragment to be sent.
          */
-         spi_drv_sMosiFrame.iSpiControl &= ~iSpiCtrl_M;
-         spi_drv_sMosiFrame.iSpiControl &= ~iSpiCtrlLastFrag;
+         spi_drv_sMosiFrame.iSpiControl &= (UINT16)~iSpiCtrl_M;
+         spi_drv_sMosiFrame.iSpiControl &= (UINT16)~iSpiCtrlLastFrag;
       }
 
       iRdyForCmd = 0;
@@ -426,7 +426,7 @@ void ABCC_DrvSpiRunDriverTx( void )
       /*
       ** Apply the CRC checksum.
       */
-      lCrc = CRC_Crc32( (UINT8*)&spi_drv_sMosiFrame, NUM_WORDS_2_BYTES( spi_drv_iSpiFrameSize ) - SPI_MOSI_TRAILING_BYTES );
+      lCrc = CRC_Crc32( (UINT8*)&spi_drv_sMosiFrame, (size_t)( NUM_WORDS_2_BYTES( spi_drv_iSpiFrameSize ) - SPI_MOSI_TRAILING_BYTES ) );
 
       lCrc = lTOlBe( lCrc );
 
@@ -479,7 +479,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
 
       ABCC_LOG_DEBUG_SPI_HEXDUMP_MISO( (UINT16*)&spi_drv_sMisoFrame, spi_drv_iSpiFrameSize );
 
-      lCalculatedCrc = CRC_Crc32( (UINT8*)&spi_drv_sMisoFrame, NUM_WORDS_2_BYTES( spi_drv_iSpiFrameSize ) - SPI_MISO_TRAILING_BYTES );
+      lCalculatedCrc = CRC_Crc32( (UINT8*)&spi_drv_sMisoFrame, (size_t)( NUM_WORDS_2_BYTES( spi_drv_iSpiFrameSize ) - SPI_MISO_TRAILING_BYTES ) );
       lCalculatedCrc = lTOlBe( lCalculatedCrc );
 
       ABCC_PORT_MemCpy( &lReceivedCrc,
@@ -617,7 +617,7 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       /*
       ** Clear the valid pd for the next frame.
       */
-      spi_drv_sMosiFrame.iSpiControl &= ~iSpiCtrlWrPdValid;
+      spi_drv_sMosiFrame.iSpiControl &= (UINT16)~iSpiCtrlWrPdValid;
       spi_drv_eState = SM_SPI_RDY_TO_SEND_MOSI;
    }
    else if( spi_drv_eState == SM_SPI_INIT )
