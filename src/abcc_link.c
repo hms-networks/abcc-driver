@@ -105,8 +105,12 @@ static ABP_MsgType* link_DeQueue( MsgQueueType* psMsgQueue )
 
    if( psMsgQueue->bNumInQueue < 0 )
    {
+      /*
+      ** Queue underflow. Additional info is the negative count as UINT32,
+      ** e.g. 4294967295 (0xFFFFFFFF) = -1.
+      */
       ABCC_LOG_FATAL( ABCC_EC_ASSERT_FAILED,
-         psMsgQueue->bNumInQueue,
+         (UINT32)psMsgQueue->bNumInQueue,
          "Queue underflow (%" PRId8 ")\n",
          psMsgQueue->bNumInQueue );
    }
