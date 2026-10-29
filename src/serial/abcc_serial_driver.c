@@ -447,7 +447,7 @@ void ABCC_DrvSerRunDriverTx( void )
          fHandleWriteMsg = TRUE;
       }
 
-      drv_sTxTelegram.bControl &= ~ABP_CTRL_M_BIT;
+      drv_sTxTelegram.bControl &= (UINT8)~ABP_CTRL_M_BIT;
 
       if( fHandleWriteMsg )
       {
