@@ -378,7 +378,7 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
                link_sRespQueue.bQueueSize );
          eErrorCode = ABCC_EC_LINK_RESP_QUEUE_FULL;
 #if ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_WARNING_ENABLED
-         lAddErrorInfo = (UINT32)psWriteMsg;
+         lAddErrorInfo = (UINT32)link_sRespQueue.bQueueSize;
 #endif
       }
    }
@@ -415,6 +415,9 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
             link_sCmdQueue.bNumInQueue,
             link_sCmdQueue.bQueueSize );
          eErrorCode = ABCC_EC_LINK_CMD_QUEUE_FULL;
+#if ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_WARNING_ENABLED
+         lAddErrorInfo = (UINT32)link_sCmdQueue.bQueueSize;
+#endif
       }
    }
    ABCC_PORT_ExitCritical();
@@ -468,10 +471,14 @@ ABCC_ErrorCodeType ABCC_LinkWriteMessage( ABP_MsgType* psWriteMsg )
 
    if( eErrorCode != ABCC_EC_NO_ERROR )
    {
+      /*
+      ** lAddErrorInfo: size of the full queue for
+      ** ABCC_EC_LINK_RESP_QUEUE_FULL / ABCC_EC_LINK_CMD_QUEUE_FULL.
+      */
       ABCC_LOG_WARNING( eErrorCode,
          lAddErrorInfo,
-         "Failed to send message (Error code: %d, additional info: %" PRIu32 ")\n",
-         eErrorCode,
+         "Failed to send message (Error code: %" PRIu16 ", queue size: %" PRIu32 ")\n",
+         (UINT16)eErrorCode,
          lAddErrorInfo );
    }
 
@@ -488,10 +495,14 @@ ABCC_ErrorCodeType ABCC_LinkWrMsgWithNotification( ABP_MsgType* psWriteMsg,
    */
    if( pnMsgSentHandler != NULL )
    {
+      /*
+      ** A message-sent handler from a previous call is still registered.
+      ** lAdditionalInfo: not used (0).
+      */
       ABCC_LOG_FATAL( ABCC_EC_ASSERT_FAILED,
-         (UINT32)pnMsgSentHandler,
-         "Message sent handler not NULL (%" PRIx32 ")\n",
-         (UINT32)pnMsgSentHandler );
+         0,
+         "Message-sent handler already registered (0x%" PRIxPTR ")\n",
+         (uintptr_t)pnMsgSentHandler );
    }
 
    pnMsgSentHandler = pnHandler;
