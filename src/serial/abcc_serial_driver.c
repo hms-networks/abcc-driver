@@ -274,7 +274,11 @@ static BOOL drv_PrepareNextWriteFrag( WrMsgFragType* const psFragHandle )
 #else
       psFragHandle->pbCurrPtr += psFragHandle->iFragLength;
 #endif
-      psFragHandle->iNumBytesLeft -= psFragHandle->iFragLength;
+      /*
+      ** Explicit casts for -Wconversion / 16-bit int targets.
+      ** May go negative on the last fragment; checked below.
+      */
+      psFragHandle->iNumBytesLeft = (INT16)( psFragHandle->iNumBytesLeft - (INT16)psFragHandle->iFragLength );
    }
 
    if( psFragHandle->iNumBytesLeft <= 0 )
