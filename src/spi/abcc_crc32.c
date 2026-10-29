@@ -24,6 +24,7 @@
 #include "abcc_types.h"
 #include "abcc.h"
 #include "abcc_hardware_abstraction.h"
+#include "abcc_crc32.h"
 
 #if ABCC_SPI_CRC_REDUCED_TABLE_ENABLED
 static const UINT32 crc_table32[ 16 ] =
