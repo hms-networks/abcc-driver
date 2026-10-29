@@ -350,18 +350,27 @@ void ABCC_DrvSpiRunDriverTx( void )
          #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
       }
 
-      spi_drv_fRetransmit = FALSE;
-
       /*---------------------------------------------------------------------------
       ** Write message handling.
+      **
+      ** A retransmission keeps the M and LAST FRAG bits and the message field of
+      ** the original frame (chapter 6.5 - SPI Error Handling, Anybus CompactCom
+      ** 40 Software Design Guide, HMSI-216-125). It carries a fragment only if
+      ** the original frame did, and then the same one: a fragment that went out
+      ** is unconfirmed while iCurrFragLength is non-zero. A module that received
+      ** the original frame ignores the message field of a retransmission, so a
+      ** message written since waits for the next frame, which toggles the T bit.
       **---------------------------------------------------------------------------
       */
       ABCC_PORT_EnterCritical();
-      if( spi_drv_sWriteFragInfo.psWriteMsg != NULL )
+      if( ( spi_drv_sWriteFragInfo.psWriteMsg != NULL ) &&
+          ( !spi_drv_fRetransmit || ( spi_drv_sWriteFragInfo.iCurrFragLength != 0 ) ) )
       {
          fHandleWriteMsg = TRUE;
       }
       ABCC_PORT_ExitCritical();
+
+      spi_drv_fRetransmit = FALSE;
 
       if( fHandleWriteMsg )
       {
