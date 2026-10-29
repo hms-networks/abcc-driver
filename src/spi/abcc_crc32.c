@@ -109,8 +109,8 @@ UINT32 CRC_Crc32( UINT8* pbBuffer, size_t xLength )
          ( (UINT32)( pbBuffer[0] >> 8 )   << 16 );
 #else
       lData =
-         pbBuffer[0] << 24 |
-         pbBuffer[1] << 16;
+         (UINT32)pbBuffer[0] << 24 |
+         (UINT32)pbBuffer[1] << 16;
 #endif
       lCrc = lCrc ^ lData;
 #if ABCC_SPI_CRC_REDUCED_TABLE_ENABLED
