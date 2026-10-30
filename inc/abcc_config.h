@@ -280,6 +280,12 @@
     #if ABCC_CFG_DRV_PARALLEL_ENABLED
         #error "ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED must be defined to 1 or \
 0 if ABCC_CFG_DRV_PARALLEL_ENABLED is enabled."
+    #else
+        /*
+        ** Must be defined in abcc_driver_config.h if the
+        ** parallel driver is enabled; defaults to 0 otherwise.
+        */
+        #define ABCC_CFG_MEMORY_MAPPED_ACCESS_ENABLED 0
     #endif
 #endif
 
