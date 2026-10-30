@@ -230,6 +230,7 @@ static drv_SpiMsgFragSizeInfoType   spi_drv_sSpiMsgFragSizeInfo =
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
 
 static UINT16                       drv_iCrcErrorCount;           /* CRC error counter. */
+static BOOL                         spi_drv_fNoReadBuffer;        /* A read message waits for a free buffer. */
 
 static void spi_drv_DataReceived( void );
 static void spi_drv_ResetReadFragInfo( void );
@@ -506,6 +507,35 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       }
 
       /*
+      ** A read message fragment needs a buffer before anything in the frame is
+      ** taken. Without one, the frame is handled as after a CRC error: it is
+      ** retransmitted and the module sends the read message fragment again. As
+      ** after a CRC error, the frame's process data is not taken. While no
+      ** buffer is free this repeats in every frame, and the watchdog is not
+      ** restarted, so it reports a lasting shortage. The driver frees no buffer
+      ** meanwhile: the application has to return one, or restart the driver.
+      */
+      if( ( spi_drv_sMisoFrame.iSpiStatusAnbStatus & iSpiStatus_M ) &&
+          ( spi_drv_sReadFragInfo.puCurrPtr == NULL ) )
+      {
+         DrvSpiSetMsgReceiverBuffer( ABCC_MemAlloc() );
+
+         if( spi_drv_sReadFragInfo.puCurrPtr == NULL )
+         {
+            if( !spi_drv_fNoReadBuffer )
+            {
+               ABCC_LOG_WARNING( ABCC_EC_OUT_OF_MSG_BUFFERS, 0, "Out of message buffers when attempting to read a message\n" );
+               spi_drv_fNoReadBuffer = TRUE;
+            }
+            spi_drv_fRetransmit = TRUE;
+            spi_drv_eState = SM_SPI_RDY_TO_SEND_MOSI;
+            return( NULL );
+         }
+
+         spi_drv_fNoReadBuffer = FALSE;
+      }
+
+      /*
       ** Restart watchdog.
       */
       if( fWdTmo )
@@ -574,20 +604,9 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
       {
          /*
          ** Read message was received.
-         ** Update the read fragmentation information.
+         ** Update the read fragmentation information. The buffer was taken
+         ** after the CRC check.
          */
-
-         if( spi_drv_sReadFragInfo.puCurrPtr == 0 )
-         {
-            DrvSpiSetMsgReceiverBuffer( ABCC_MemAlloc() );
-
-            if( spi_drv_sReadFragInfo.puCurrPtr == 0 )
-            {
-               ABCC_LOG_WARNING( ABCC_EC_OUT_OF_MSG_BUFFERS, 0, "Out of message buffers when attempting to read a message\n" );
-               return( NULL );
-            }
-         }
-
          if( ( NUM_WORDS_2_BYTES( spi_drv_sReadFragInfo.iNumWordsReceived + spi_drv_iMsgLen ) ) <=
              ( ABCC_CFG_MAX_MSG_SIZE + ABCC_MSG_HEADER_TYPE_SIZEOF ) )
          {
@@ -735,6 +754,7 @@ void ABCC_DrvSpiInit( UINT8 bOpmode )
 #endif // ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
    spi_drv_iSpiFrameSize = SPI_FRAME_SIZE_EXCLUDING_DATA + spi_drv_iCrcOffset;
    spi_drv_fRetransmit = FALSE;
+   spi_drv_fNoReadBuffer = FALSE;
    spi_drv_iMsgLen = 0;
 
 #if ABCC_CFG_SPI_DYNAMIC_MSG_FRAG_LEN
