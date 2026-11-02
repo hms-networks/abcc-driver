@@ -663,7 +663,7 @@ ABCC_CommunicationStateType ABCC_isReadyForCommunication( void )
    {
       pnABCC_DrvSetIntMask( ABCC_iInterruptEnableMask );
       SetMainState( ABCC_DRV_RUNNING );
-      pnABCC_DrvSetNbrOfCmds( ABCC_CFG_MAX_NUM_APPL_CMDS );
+      pnABCC_DrvSetNbrOfCmds( ABCC_CFG_MAX_NUM_ABCC_CMDS );
 
       ABCC_StartSetup();
       return( ABCC_READY_FOR_COMMUNICATION );
