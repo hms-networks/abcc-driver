@@ -165,7 +165,7 @@ static UINT16               iTelegramTmoMs;             /* Telegram timeout  */
 ** (native ADI storage on 16-bit char architectures). Therefore,
 ** RdPd gets packed into this buffer.
 */
-static UINT8 drv_abRdPdConv[ ABP_MAX_PROCESS_DATA ];
+static UINT8 drv_abRdPdConv[ ABCC_OCTETS_TO_NATIVE_UNITS( ABP_MAX_PROCESS_DATA ) ];
 
 /*
 ** Packed WrPd buffer owned by the AD layer.
@@ -173,7 +173,7 @@ static UINT8 drv_abRdPdConv[ ABP_MAX_PROCESS_DATA ];
 ** The AD map ( WriteBufferFromPdMap() ) writes here. It is used
 ** to unpack WrPd to the Tx telegram.
 */
-static UINT8 drv_abWrPd[ ABP_MAX_PROCESS_DATA ];
+static UINT8 drv_abWrPd[ ABCC_OCTETS_TO_NATIVE_UNITS( ABP_MAX_PROCESS_DATA ) ];
 #endif
 
 /*******************************************************************************
@@ -474,7 +474,7 @@ void ABCC_DrvSerInit( UINT8 bOpmode )
    /*
    ** Initialize the WrPd buffer.
    */
-   for ( UINT16 iOctet = 0; iOctet < ABP_MAX_PROCESS_DATA; iOctet++ )
+   for ( UINT16 iOctet = 0; iOctet < ABCC_OCTETS_TO_NATIVE_UNITS( ABP_MAX_PROCESS_DATA ); iOctet++ )
    {
       drv_abWrPd[ iOctet ] = 0;
    }
