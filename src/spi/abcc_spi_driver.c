@@ -21,6 +21,7 @@
 #include "../abcc_handler.h"
 #include "abcc_crc32.h"
 #include "abcc_hardware_abstraction_spi.h"
+#include "abcc_driver_spi_interface.h"
 
 #if ( ABCC_CFG_MAX_MSG_SIZE < 16 )
 #error "ABCC_CFG_MAX_MSG_SIZE must be at least a 16 bytes"

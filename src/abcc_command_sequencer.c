@@ -10,6 +10,7 @@
 #include "abcc_types.h"
 #include "abp.h"
 #include "abcc.h"
+#include "abcc_command_sequencer.h"
 #include "abcc_command_sequencer_interface.h"
 #include "abcc_software_port.h"
 #include "abcc_log.h"

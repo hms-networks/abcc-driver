@@ -51,18 +51,6 @@
 /*
 ** Registered handler functions.
 */
-EXTFUNC void ABCC_SpiRunDriver( void );
-EXTFUNC void ABCC_SpiISR( void );
-
-EXTFUNC void ABCC_ParRunDriver( void );
-EXTFUNC void ABCC_ParISR( void );
-
-EXTFUNC void ABCC_SerRunDriver( void );
-EXTFUNC void ABCC_SerISR( void );
-
-/*
-** Registered handler functions.
-*/
 void ( *ABCC_ISR )( void );
 void ( *ABCC_TriggerWrPdUpdate )( void );
 
@@ -190,7 +178,7 @@ static void TriggerWrPdUpdateNow( void )
 
 static void SetMainState( ABCC_MainStateType eState )
 {
-#if ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_INFO_ENABLED
+#if ABCC_CFG_LOG_STRINGS_ENABLED && ( ABCC_CFG_LOG_SEVERITY >= ABCC_LOG_SEVERITY_INFO_ENABLED )
    static const char* pacMainStateToText[] =
    {
       "ABCC_DRV_INIT",
@@ -930,10 +918,12 @@ BOOL ABCC_ModuleDetect( void )
 #endif
 }
 
+#if ABCC_CFG_DRV_PARALLEL_ENABLED
 UINT16 ABCC_ModCap( void )
 {
    return( pnABCC_DrvGetModCap() );
 }
+#endif
 
 UINT16 ABCC_LedStatus( void )
 {

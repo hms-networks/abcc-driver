@@ -116,4 +116,23 @@ EXTFUNC ABCC_MainStateType ABCC_GetMainState( void );
 */
 EXTFUNC void ABCC_CheckWrPdUpdate( void );
 
+/*------------------------------------------------------------------------------
+** Operating mode specific handler functions, registered by abcc_handler.c.
+**------------------------------------------------------------------------------
+*/
+#if ABCC_CFG_DRV_SPI_ENABLED
+EXTFUNC void ABCC_SpiRunDriver( void );
+EXTFUNC void ABCC_SpiISR( void );
+#endif
+
+#if ABCC_CFG_DRV_PARALLEL_ENABLED
+EXTFUNC void ABCC_ParRunDriver( void );
+EXTFUNC void ABCC_ParISR( void );
+#endif
+
+#if ABCC_CFG_DRV_SERIAL_ENABLED
+EXTFUNC void ABCC_SerRunDriver( void );
+EXTFUNC void ABCC_SerISR( void );
+#endif
+
 #endif  /* inclusion lock */
