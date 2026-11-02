@@ -639,13 +639,13 @@ ABP_MsgType* ABCC_DrvSerRunDriverRx( void )
 
       ABCC_LOG_DEBUG_UART_HEXDUMP_RX( (UINT8*)&drv_sRxTelegram, drv_iRxFrameSize + SER_CRC_LEN );
 
-      iReceivedCrc = CRC_Crc16( (UINT8*)&drv_sRxTelegram, drv_iRxFrameSize );
+      iCalcCrc = CRC_Crc16( (UINT8*)&drv_sRxTelegram, drv_iRxFrameSize );
 
       /*
       ** Read the CRC of the Rx telegram.
       */
-      iCalcCrc = (UINT16)drv_sRxTelegram.abData[ drv_iReadPdSize ] << 8;
-      iCalcCrc |= (UINT16)drv_sRxTelegram.abData[ drv_iReadPdSize + 1 ];
+      iReceivedCrc  = (UINT16)drv_sRxTelegram.abData[ drv_iReadPdSize ] << 8;
+      iReceivedCrc |= (UINT16)drv_sRxTelegram.abData[ drv_iReadPdSize + 1 ];
 
       if( ( ( drv_bStatus & ABP_CTRL_T_BIT ) ==
             ( drv_sRxTelegram.bStatus & ABP_CTRL_T_BIT ) ) ||
