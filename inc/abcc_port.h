@@ -331,7 +331,7 @@ void ABCC_StrCpyToNativeImpl( void* pxDest, const void* pxSrc,
 #else
 #define ABCC_PORT_StrCpyToNative( pxDest, pxSrc, iSrcOctetOffset, iNbrOfChars )\
         ABCC_PORT_MemCpy( (void*)(pxDest),                                     \
-                          (void*)&( (UINT8*)(pxSrc) )[ iSrcOctetOffset ],      \
+                          &( (const UINT8*)(pxSrc) )[ iSrcOctetOffset ],       \
                           iNbrOfChars )
 #endif
 #endif
@@ -372,7 +372,7 @@ void ABCC_CopyOctetsImpl( void* pxDest, UINT16 iDestOctetOffset,
 #define ABCC_PORT_CopyOctets( pxDest, iDestOctetOffset, pxSrc, iSrcOctetOffset, \
                               iNumOctets )                                      \
         ABCC_PORT_MemCpy( (void*)&( (UINT8*)(pxDest) )[ iDestOctetOffset ],     \
-                          (void*)&( (UINT8*)(pxSrc) )[ iSrcOctetOffset ],       \
+                          &( (const UINT8*)(pxSrc) )[ iSrcOctetOffset ],        \
                           iNumOctets )
 #endif
 #endif
@@ -408,7 +408,7 @@ void ABCC_CopyOctetsImpl( void* pxDest, UINT16 iDestOctetOffset,
 #else
 #define ABCC_PORT_Copy8( pxDest, iDestOctetOffset, pxSrc, iSrcOctetOffset )    \
         ( (UINT8*)(pxDest) )[ iDestOctetOffset ] =                             \
-        ( (UINT8*)(pxSrc) )[ iSrcOctetOffset ]
+        ( (const UINT8*)(pxSrc) )[ iSrcOctetOffset ]
 #endif
 #endif
 
