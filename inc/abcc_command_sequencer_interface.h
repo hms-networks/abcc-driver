@@ -172,10 +172,17 @@ ABCC_CmdSeqType;
 ** notified when the whole command sequence has finished.
 **
 ** The number of concurrent command sequences is limited by
-** ABCC_CFG_MAX_NUM_CMD_SEQ defined in abcc_driver_config.h.
+** ABCC_CFG_MAX_NUM_CMD_SEQ defined in abcc_driver_config.h. If all slots are
+** in use, the sequence is not started, pnCmdSeqDone is never called and
+** ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES is returned. The caller should check the
+** return value.
 **
 ** Example:
-** ABCC_CmdSeqAdd( ExampleSequence, CbfDone, psUserData, &ExampleHandle );
+** if( ABCC_CmdSeqAdd( ExampleSequence, CbfDone, psUserData, &ExampleHandle )
+**     != ABCC_EC_NO_ERROR )
+** {
+**    Handle error, e.g. retry later.
+** }
 **
 **------------------------------------------------------------------------------
 ** Arguments:
@@ -189,11 +196,11 @@ ABCC_CmdSeqType;
 **    pxHandle     - Pointer to handle, required if the caller needs to keep
 **                   track of different running instances of the same command
 **                   sequence. Set to NULL if this is not required.
+**                   On failure the handle is set to NULL.
 ** Returns:
-**    ABCC_EC_NO_ERROR
-**    ABCC_EC_NO_RESOURCES
-**    ABCC_EC_PARAMETER_NOT_VALID
-**    ABCC_EC_INTERNAL_ERROR
+**    ABCC_EC_NO_ERROR                 - Sequence added and started.
+**    ABCC_EC_PARAMETER_NOT_VALID      - pasCmdSeq is NULL.
+**    ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES - No free command sequence slot.
 **------------------------------------------------------------------------------
 */
 EXTFUNC ABCC_ErrorCodeType ABCC_CmdSeqAdd( const ABCC_CmdSeqType* pasCmdSeq,
