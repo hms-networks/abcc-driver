@@ -201,6 +201,8 @@ while( 0 )
 ** ABCC_GetMsgCmdBits( psMsg )                - Message command
 ** ABCC_GetMsgCmdField( psMsg )               - Entire command field
 ** ABCC_SetMsgCmdField( psMsg, bCmdVal )      - Set entire command field
+** ABCC_GetMsgReserved( psMsg )               - bReserved field
+** ABCC_SetMsgReserved( psMsg, bReservedVal ) - Set bReserved field
 ** ABCC_GetMsgCmdExt0( psMsg )                - Command extension 0
 ** ABCC_SetMsgCmdExt0( psMsg, bCmdExt0Val )   - Set command extension 0
 ** ABCC_GetMsgCmdExt1( psMsg )                - Command extension 1
@@ -216,9 +218,9 @@ while( 0 )
 
 #ifdef ABCC_SYS_16_BIT_CHAR
 #define ABCC_GetMsgDataSize( psMsg               ) ( iLeTOi(               ((ABP_MsgHeaderType16*) (psMsg))->iDataSize                                ) )
-#define ABCC_SetMsgDataSize( psMsg, iDataSizeVal ) (                       ((ABP_MsgHeaderType16*) (psMsg))->iDataSize ) = iTOiLe( iDataSizeVal )
+#define ABCC_SetMsgDataSize( psMsg, iDataSizeVal ) (                       ((ABP_MsgHeaderType16*) (psMsg))->iDataSize = iTOiLe( iDataSizeVal         ) )
 #define ABCC_GetMsgInstance( psMsg               ) ( iLeTOi(               ((ABP_MsgHeaderType16*) (psMsg))->iInstance                                ) )
-#define ABCC_SetMsgInstance( psMsg, iInstanceVal ) (                       ((ABP_MsgHeaderType16*) (psMsg))->iInstance ) = iTOiLe( iInstanceVal )
+#define ABCC_SetMsgInstance( psMsg, iInstanceVal ) (                       ((ABP_MsgHeaderType16*) (psMsg))->iInstance = iTOiLe( iInstanceVal         ) )
 #define ABCC_GetMsgSourceId( psMsg               ) ( ABCC_GetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iSourceIdDestObj                         ) )
 #define ABCC_SetMsgSourceId( psMsg, bSrcIdVal    )   ABCC_SetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iSourceIdDestObj, bSrcIdVal              )
 #define ABCC_GetMsgDestObj(  psMsg               ) ( ABCC_GetHighAddrOct(  ((ABP_MsgHeaderType16*) (psMsg))->iSourceIdDestObj                         ) )
@@ -227,6 +229,8 @@ while( 0 )
 #define ABCC_GetMsgCmdBits(  psMsg               ) ( ABCC_GetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved ) & ABP_MSG_HEADER_CMD_BITS )
 #define ABCC_GetMsgCmdField( psMsg               ) ( ABCC_GetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved                             ) )
 #define ABCC_SetMsgCmdField( psMsg, bCmdVal      )   ABCC_SetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved, bCmdVal                    )
+#define ABCC_GetMsgReserved( psMsg               ) ( ABCC_GetHighAddrOct(  ((const ABP_MsgHeaderType16*) (psMsg))->iCmdReserved                       ) )
+#define ABCC_SetMsgReserved( psMsg, bReservedVal )   ABCC_SetHighAddrOct(  ((ABP_MsgHeaderType16*) (psMsg))->iCmdReserved, bReservedVal               )
 #define ABCC_GetMsgCmdExt0(  psMsg               ) ( ABCC_GetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdExt0CmdExt1                          ) )
 #define ABCC_SetMsgCmdExt0(  psMsg, bCmdExt0Val  )   ABCC_SetLowAddrOct(   ((ABP_MsgHeaderType16*) (psMsg))->iCmdExt0CmdExt1, bCmdExt0Val             )
 #define ABCC_GetMsgCmdExt1(  psMsg               ) ( ABCC_GetHighAddrOct(  ((ABP_MsgHeaderType16*) (psMsg))->iCmdExt0CmdExt1                          ) )
@@ -237,9 +241,9 @@ while( 0 )
 #define ABCC_GetErrorCode(   psMsg               ) ( ABCC_GetLowAddrOct(                           (psMsg)->aiData[ 0 ]                               ) )
 #else
 #define ABCC_GetMsgDataSize( psMsg               ) ( iLeTOi( ((ABP_MsgHeaderType*)   (psMsg))->iDataSize                          ) )
-#define ABCC_SetMsgDataSize( psMsg, iDataSizeVal ) (         ((ABP_MsgHeaderType*)   (psMsg))->iDataSize ) = iTOiLe( iDataSizeVal )
+#define ABCC_SetMsgDataSize( psMsg, iDataSizeVal ) (         ((ABP_MsgHeaderType*)   (psMsg))->iDataSize = iTOiLe( iDataSizeVal   ) )
 #define ABCC_GetMsgInstance( psMsg               ) ( iLeTOi( ((ABP_MsgHeaderType*)   (psMsg))->iInstance                          ) )
-#define ABCC_SetMsgInstance( psMsg, iInstanceVal ) (         ((ABP_MsgHeaderType*)   (psMsg))->iInstance ) = iTOiLe( iInstanceVal )
+#define ABCC_SetMsgInstance( psMsg, iInstanceVal ) (         ((ABP_MsgHeaderType*)   (psMsg))->iInstance = iTOiLe( iInstanceVal   ) )
 #define ABCC_GetMsgSourceId( psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bSourceId                          )
 #define ABCC_SetMsgSourceId( psMsg, bSrcIdVal    ) (         ((ABP_MsgHeaderType*)   (psMsg))->bSourceId   = (bSrcIdVal)          )
 #define ABCC_GetMsgDestObj(  psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bDestObj                           )
@@ -248,6 +252,8 @@ while( 0 )
 #define ABCC_GetMsgCmdBits(  psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmd & ABP_MSG_HEADER_CMD_BITS     )
 #define ABCC_GetMsgCmdField( psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmd                               )
 #define ABCC_SetMsgCmdField( psMsg, bCmdVal      ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmd        = (bCmdVal)            )
+#define ABCC_GetMsgReserved( psMsg               ) (         ((const ABP_MsgHeaderType*)   (psMsg))->bReserved                    )
+#define ABCC_SetMsgReserved( psMsg, bReservedVal ) (         ((ABP_MsgHeaderType*)   (psMsg))->bReserved       = (bReservedVal)   )
 #define ABCC_GetMsgCmdExt0(  psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmdExt0                           )
 #define ABCC_SetMsgCmdExt0(  psMsg, bCmdExt0Val  ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmdExt0        = (bCmdExt0Val)    )
 #define ABCC_GetMsgCmdExt1(  psMsg               ) (         ((ABP_MsgHeaderType*)   (psMsg))->bCmdExt1                           )
