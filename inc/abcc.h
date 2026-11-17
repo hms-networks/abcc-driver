@@ -462,6 +462,27 @@ EXTFUNC void ABCC_UserInitComplete( void );
 EXTFUNC ABCC_ErrorCodeType ABCC_SendCmdMsg( ABP_MsgType* psCmdMsg,
                                             ABCC_MsgHandlerFuncType pnMsgHandler );
 
+#if ABCC_DRV_CFG_MSG_LOOPBACK
+/*------------------------------------------------------------------------------
+** Send a command message to the host application objects.
+**
+** A message buffer is needed, which can be allocated from the driver by the
+** "ABCC_GetCmdMsgBuffer()" command. In that case the buffer must also be
+** returned with the "ABCC_ReturnMsgBuffer()".
+**
+** NOTE:
+** Certain limitations applies to this call, check the comments for the
+** "ABCC_DRV_CFG_MSG_LOOPBACK" define in "abcc_config.h" for more information.
+**------------------------------------------------------------------------------
+** Arguments:
+**    psMsg - Pointer to the command message buffer.
+** Returns:
+**    ABCC_EC_NO_ERROR on success, ABCC_EC_INCORRECT_STATE if busy.
+**------------------------------------------------------------------------------
+*/
+EXTFUNC ABCC_ErrorCodeType ABCC_SendLoopbackCmdMsg( ABP_MsgType* psMsg );
+#endif
+
 /*------------------------------------------------------------------------------
 ** Sends a response message to the ABCC.
 **
