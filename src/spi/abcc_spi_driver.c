@@ -550,7 +550,12 @@ ABP_MsgType* ABCC_DrvSpiRunDriverRx( void )
             ** Update the write fragmentation information.
             */
             spi_drv_sWriteFragInfo.puCurrPtr         += spi_drv_sWriteFragInfo.iCurrFragLength;
-            spi_drv_sWriteFragInfo.iNumWordsLeft     -= spi_drv_sWriteFragInfo.iCurrFragLength;
+            /*
+            ** iCurrFragLength is never larger than iNumWordsLeft (see Tx),
+            ** so the result is 0 or more and fits in INT16.
+            */
+            spi_drv_sWriteFragInfo.iNumWordsLeft      = (INT16)( spi_drv_sWriteFragInfo.iNumWordsLeft -
+                                                                 (INT16)spi_drv_sWriteFragInfo.iCurrFragLength );
             spi_drv_sWriteFragInfo.iCurrFragLength    = 0;
 
             if( spi_drv_sWriteFragInfo.iNumWordsLeft <= 0 )
@@ -795,7 +800,7 @@ BOOL ABCC_DrvSpiWriteMessage( ABP_MsgType* psWriteMsg )
 #if ( __GNUC__ >= 9 )
    #pragma GCC diagnostic pop
 #endif
-   spi_drv_sWriteFragInfo.iNumWordsLeft = NUM_BYTES_2_WORDS( ABCC_GetMsgDataSize( psWriteMsg ) + ABCC_MSG_HEADER_TYPE_SIZEOF );
+   spi_drv_sWriteFragInfo.iNumWordsLeft = (INT16)NUM_BYTES_2_WORDS( ABCC_GetMsgDataSize( psWriteMsg ) + ABCC_MSG_HEADER_TYPE_SIZEOF );
    spi_drv_sWriteFragInfo.psWriteMsg = psWriteMsg;
    ABCC_PORT_ExitCritical();
 
@@ -854,8 +859,8 @@ void ABCC_DrvSpiSetPdSize( const UINT16  iReadPdSize, const UINT16  iWritePdSize
       /*
       ** Use the largest PD data size since the PD cannot be fragmented.
       */
-      spi_drv_iWritePdSize = NUM_BYTES_2_WORDS( iWritePdSize );
-      spi_drv_iReadPdSize = NUM_BYTES_2_WORDS( iReadPdSize );
+      spi_drv_iWritePdSize = (UINT16)NUM_BYTES_2_WORDS( iWritePdSize );
+      spi_drv_iReadPdSize = (UINT16)NUM_BYTES_2_WORDS( iReadPdSize );
 
       spi_drv_iPdSize = spi_drv_iWritePdSize;
       if( spi_drv_iReadPdSize > spi_drv_iWritePdSize )

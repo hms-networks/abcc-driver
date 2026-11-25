@@ -161,7 +161,7 @@ static void drv_RxTelegramReceived( void )
 */
 static void drv_WriteFragInit( WrMsgFragType* psFragHandle, UINT8* psMsg, UINT16 iMsgSize, UINT16 iFragLength )
 {
-    psFragHandle->iNumBytesLeft = iMsgSize;
+    psFragHandle->iNumBytesLeft = (INT16)iMsgSize;
     psFragHandle->iFragLength = iFragLength;
     psFragHandle->pbCurrPtr = psMsg;
 }

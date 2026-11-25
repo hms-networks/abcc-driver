@@ -1053,7 +1053,7 @@ void ABCC_SetMsgHeader( ABP_MsgType* psMsg,
    ABCC_SetMsgSourceId( psMsg, bSourceId );
    ABCC_SetMsgDestObj( psMsg, bObject );
    ABCC_SetMsgInstance( psMsg, iInstance );
-   ABCC_SetMsgCmdField( psMsg, ABP_MSG_HEADER_C_BIT | eService );
+   ABCC_SetMsgCmdField( psMsg, (UINT8)( ABP_MSG_HEADER_C_BIT | eService ) );
    ABCC_SetMsgDataSize( psMsg, iDataSize );
    ABCC_SetMsgCmdExt0( psMsg, bAttribute );
    ABCC_SetMsgCmdExt1( psMsg, 0 );
