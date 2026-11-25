@@ -552,11 +552,19 @@ static BOOL ExecCmdSequence( CmdSeqEntryType* psEntry, ABP_MsgType* psMsg )
 ABCC_ErrorCodeType ABCC_CmdSeqAdd(
    const ABCC_CmdSeqType* pasCmdSeq,
    const ABCC_CmdSeqDoneHandler pnCmdSeqDone,
-   void *pxUserData,
+   void* pxUserData,
    ABCC_CmdSeqHandle* pxHandle )
 {
    CmdSeqEntryType* psEntry;
    ABP_MsgType* psMsg;
+
+   if( pxHandle != NULL )
+   {
+      /*
+      ** Give the caller a defined handle value, even on failure.
+      */
+      *pxHandle = NULL;
+   }
 
    if( pasCmdSeq == NULL )
    {
@@ -567,22 +575,23 @@ ABCC_ErrorCodeType ABCC_CmdSeqAdd(
    ** Allocate and init handler.
    */
    psEntry = AllocCmdSeqEntry( pasCmdSeq );
-   if( psEntry != NULL )
+   if( psEntry == NULL )
    {
-      psEntry->pnSeqDone = pnCmdSeqDone;
-      psEntry->pxUserData = pxUserData;
-      if( pxHandle != NULL )
-      {
-         *pxHandle = (ABCC_CmdSeqHandle)psEntry;
-      }
+      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES,
+                        (UINT32)ABCC_CFG_MAX_NUM_CMD_SEQ,
+                        "Out of command sequence resources\n" );
+      return( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES );
+   }
 
-      psMsg = ABCC_GetCmdMsgBuffer();
-      (void)ExecCmdSequence( psEntry, psMsg );
-   }
-   else
+   psEntry->pnSeqDone = pnCmdSeqDone;
+   psEntry->pxUserData = pxUserData;
+   if( pxHandle != NULL )
    {
-      ABCC_LOG_WARNING( ABCC_EC_OUT_OF_CMD_SEQ_RESOURCES, (UINT32)ABCC_CFG_MAX_NUM_CMD_SEQ, "Out of command sequence resources\n" );
+      *pxHandle = (ABCC_CmdSeqHandle)psEntry;
    }
+
+   psMsg = ABCC_GetCmdMsgBuffer();
+   (void)ExecCmdSequence( psEntry, psMsg );
 
    return( ABCC_EC_NO_ERROR );
 }
